@@ -9,7 +9,7 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
   - [x] `supabase init` — local `supabase/config.toml` scaffolded
   - [x] Hosted project connected via Supabase MCP (project ref `yddapkhhniecjnnzrolv`, region eu-central-1, empty — schema comes in Phase 2). `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` (gitignored) + `.env.example` template. `src/lib/supabase/client.ts` + `server.ts` browser/server helpers added, no code calls them yet.
   - [x] Add the same two env vars to the Vercel project dashboard
-  - [ ] `supabase start` (local Docker stack) + `supabase link` (needs `supabase login`, interactive) — deferred until Phase 2 needs local migrations
+  - [ ] `supabase start` (local Docker stack) + `supabase link` — still deferred; Phase 2 migrations were written and applied directly against the hosted project via the Supabase MCP tools instead (see docs/superpowers/plans/2026-08-13-phase2-data-model.md).
 - [x] Set up Tailwind + shadcn/ui
 - [x] Set up next-intl skeleton (EN default, AR toggle, RTL wiring) — locale-prefixed routing (`/en`, `/ar`), see ARCHITECTURE.md
 - [x] Basic folder structure: (storefront) route group, (admin) route group, shared components/lib
@@ -17,10 +17,11 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 - [ ] Connect custom domain (once purchased)
 
 ## Phase 2 — Data model
-- [ ] Finalize full schema per ARCHITECTURE.md core entities
-- [ ] Write Supabase migrations
-- [ ] Set up Row-Level Security policies per role
-- [ ] Seed script for categories/sizes/flavors/etc. (placeholder data)
+- [x] Finalize full schema per ARCHITECTURE.md core entities
+- [x] Write Supabase migrations
+- [x] Set up Row-Level Security policies per role
+- [x] Seed script for categories/sizes/flavors/etc. (placeholder data)
+  - Follow-up items from the Phase 2 final review (RLS TO-clause hygiene applied, order-write guardrails added, promo enumeration closed — see `.superpowers/sdd/2026-08-13-phase2-data-model/progress.md` for the full review and what was fixed vs. deferred)
 
 ## Phase 3 — Public storefront
 - [ ] Home page: hero, category sections with admin-curated featured cakes
