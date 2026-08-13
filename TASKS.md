@@ -11,7 +11,7 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 - [x] Set up Tailwind + shadcn/ui
 - [x] Set up next-intl skeleton (EN default, AR toggle, RTL wiring) — locale-prefixed routing (`/en`, `/ar`), see ARCHITECTURE.md
 - [x] Basic folder structure: (storefront) route group, (admin) route group, shared components/lib
-- [ ] Deploy empty shell to Vercel, confirm pipeline works end-to-end (needs `vercel login`, interactive — human to run, then hand back)
+- [x] Deploy empty shell to Vercel, confirm pipeline works end-to-end — repo pushed to `github.com/ycakes/ycakes`, connected to Vercel project "ycakes", production deploy live at `ycakes.vercel.app`
 - [ ] Connect custom domain (once purchased)
 
 ## Phase 2 — Data model

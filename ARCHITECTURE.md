@@ -13,6 +13,7 @@ Living document. Update whenever an architectural decision is made or changed. T
 - Cart: Zustand, client-persisted for guests, `cart_items` table for logged-in users
 - No Redis, no separate payment gateway, no SMS/WhatsApp API integration (admin-customer contact is manual, via a `wa.me` deep link with prefilled text, not automated)
 - Deploy: Vercel (app), Supabase (hosted DB/Auth)
+- Source control: GitHub (`github.com/ycakes/ycakes`), connected to the Vercel project for git-push deploys
 
 ## Roles
 
