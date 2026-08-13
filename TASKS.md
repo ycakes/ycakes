@@ -5,9 +5,11 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 ## Phase 1 — Foundation
 - [x] Init Next.js (App Router, TypeScript) project — `create-next-app`, npm, `src/` dir, Tailwind v4
 - [x] Init git repo, .gitignore
-- [ ] Connect Supabase project (local via CLI + hosted)
+- [x] Connect Supabase project (local via CLI + hosted)
   - [x] `supabase init` — local `supabase/config.toml` scaffolded
-  - [ ] `supabase start` (needs Docker running) + `supabase link` to hosted project (needs `supabase login`, interactive — human to run)
+  - [x] Hosted project connected via Supabase MCP (project ref `yddapkhhniecjnnzrolv`, region eu-central-1, empty — schema comes in Phase 2). `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` (gitignored) + `.env.example` template. `src/lib/supabase/client.ts` + `server.ts` browser/server helpers added, no code calls them yet.
+  - [ ] Add the same two env vars to the Vercel project dashboard (no MCP tool for this — human to do manually) before any deployed page uses Supabase
+  - [ ] `supabase start` (local Docker stack) + `supabase link` (needs `supabase login`, interactive) — deferred until Phase 2 needs local migrations
 - [x] Set up Tailwind + shadcn/ui
 - [x] Set up next-intl skeleton (EN default, AR toggle, RTL wiring) — locale-prefixed routing (`/en`, `/ar`), see ARCHITECTURE.md
 - [x] Basic folder structure: (storefront) route group, (admin) route group, shared components/lib
