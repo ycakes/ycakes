@@ -1,0 +1,14 @@
+{
+  "Metadata": {
+    "title": "Cakes",
+    "description": "Custom cakes, made to order in Cairo."
+  },
+  "HomePage": {
+    "title": "Welcome",
+    "description": "Our storefront is coming soon."
+  },
+  "AdminPage": {
+    "title": "Admin dashboard",
+    "description": "Coming soon."
+  }
+}
