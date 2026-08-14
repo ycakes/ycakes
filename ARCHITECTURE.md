@@ -66,8 +66,9 @@ Revenue (from completed orders' final price) by day/week/month/year and custom d
 
 ## Local development
 
-- Day to day, run against the **local** Supabase stack (Docker), not hosted — `.env.local` points at `http://127.0.0.1:54321`. Swap it back to the hosted URL/key only to debug something hosted-specific.
+- Local Docker stack (`supabase start`/`stop`) and hosted are both viable for day-to-day dev; `.env.local` currently points at hosted (`https://yddapkhhniecjnnzrolv.supabase.co`) after local was tried and reverted by choice. To switch to local: `supabase start`, then point `.env.local` at `http://127.0.0.1:54321` with the publishable key from `supabase status`.
 - Schema changes: write the migration file in `supabase/migrations/`, apply it locally (`supabase db reset` for a clean re-apply of everything + seed, or `supabase migration up` for just the new file), confirm it does what's intended, then `supabase db push` to apply the same file to the hosted project. `db push` is what keeps local and hosted migration history in lockstep — never hand-apply a migration to hosted only (that's exactly how the version-number drift fixed on 2026-08-14 happened).
+- The local CLI/Docker stack does not reliably replicate the baseline `anon`/`authenticated`/`service_role` table grants that hosted Supabase projects get automatically at provisioning — confirmed by a fresh local stack denying even `service_role` a plain `select`. `20260814090800_baseline_table_grants.sql` states those grants explicitly (matching hosted's actual grant set: `select/insert/update/delete`, not `all`) so local dev doesn't depend on that bootstrap behavior. If a brand-new local reset ever shows `permission denied for table X` for a role that should have access, this is the first thing to check — it's a grants problem, not an RLS problem, if it happens even to `service_role`.
 
 ## Open / to be decided in later phases
 
