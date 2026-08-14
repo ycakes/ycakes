@@ -10,7 +10,7 @@ import {
   getCakeById,
   getCategoryById,
   getColors,
-  getFlavors,
+  getFlavorsForCategory,
   getShapes,
   getSizesWithTiers,
   getTiers,
@@ -45,7 +45,7 @@ export default async function CakeDetailPage({
   const [sizes, tiers, flavors, colors, shapes, toppers] = await Promise.all([
     getSizesWithTiers(category.id),
     getTiers(),
-    getFlavors(),
+    getFlavorsForCategory(category.id),
     getColors(),
     getShapes(),
     showToppers ? getToppers() : Promise.resolve([]),

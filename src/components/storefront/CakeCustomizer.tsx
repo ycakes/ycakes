@@ -66,6 +66,7 @@ export function CakeCustomizer({
 
   // Shared fields
   const [colorIds, setColorIds] = useState<string[]>([]);
+  const [colorArrangementNotes, setColorArrangementNotes] = useState("");
   const [topperId, setTopperId] = useState<string | null>(null);
   const [topperColorId, setTopperColorId] = useState<string | null>(null);
   const [textOnCake, setTextOnCake] = useState("");
@@ -96,6 +97,7 @@ export function CakeCustomizer({
     setFakeShapeId(null);
     setReferenceImageUrl(null);
     setColorIds([]);
+    setColorArrangementNotes("");
     setTopperId(null);
     setTopperColorId(null);
   }
@@ -134,6 +136,7 @@ export function CakeCustomizer({
     secondFlavor:
       cakeType === "normal" && fiftyFifty && (!secondFlavorId || secondFlavorId === flavorId),
     color: colorIds.length === 0,
+    colorArrangement: colorIds.length > 1 && !colorArrangementNotes.trim(),
     shape: cakeType === "normal" && !shapeId,
     fakeSize: cakeType === "fake" && !fakeSizeValid,
     fakeShape: cakeType === "fake" && !fakeShapeId,
@@ -143,8 +146,8 @@ export function CakeCustomizer({
 
   const fieldOrder: (keyof typeof errors)[] =
     cakeType === "normal"
-      ? ["size", "tier", "flavor", "secondFlavor", "color", "shape"]
-      : ["fakeSize", "color", "fakeShape"];
+      ? ["size", "tier", "flavor", "secondFlavor", "color", "colorArrangement", "shape"]
+      : ["fakeSize", "color", "colorArrangement", "fakeShape"];
 
   function handleAddToCart() {
     if (!isValid) {
@@ -193,6 +196,7 @@ export function CakeCustomizer({
       shapeName: cakeType === "normal" ? (shapes.find((s) => s.id === shapeId)?.name[locale] ?? null) : null,
       colorIds,
       colorNames: selectedColors.map((c) => c.name[locale]),
+      colorArrangementNotes: colorIds.length > 1 ? colorArrangementNotes.trim() || null : null,
       topperId: showToppers ? topperId : null,
       topperName: showToppers ? (selectedTopper?.name[locale] ?? null) : null,
       topperColorId: showToppers ? topperColorId : null,
@@ -259,7 +263,10 @@ export function CakeCustomizer({
                     selected={sizeId === size.id}
                     onSelect={() => {
                       setSizeId(size.id);
-                      setTierId(null);
+                      const singleTier = tiers.find(
+                        (tier) => size.tierIds.includes(tier.id) && tier.tier_count === 1,
+                      );
+                      setTierId(singleTier?.id ?? null);
                     }}
                   />
                 ))}
@@ -303,36 +310,40 @@ export function CakeCustomizer({
                   />
                 ))}
               </div>
-              <label className="flex items-center gap-2 text-sm text-text-primary">
-                <input
-                  type="checkbox"
-                  checked={fiftyFifty}
-                  onChange={(e) => {
-                    setFiftyFifty(e.target.checked);
-                    if (!e.target.checked) setSecondFlavorId(null);
-                  }}
-                  className="size-[18px] accent-brand-primary"
-                />
-                {t("splitFlavor")}
-              </label>
-              {fiftyFifty && (
-                <div id="section-secondFlavor" className="flex scroll-mt-28 flex-col gap-2">
-                  <div className="flex flex-wrap gap-2.5">
-                    {flavors
-                      .filter((f) => f.id !== flavorId)
-                      .map((flavor) => (
-                        <SelectChip
-                          key={flavor.id}
-                          label={flavor.name[locale]}
-                          selected={secondFlavorId === flavor.id}
-                          onSelect={() => setSecondFlavorId(flavor.id)}
-                        />
-                      ))}
-                  </div>
-                  {submitted && errors.secondFlavor && (
-                    <p className="text-xs text-red-600">{t("errorSecondFlavorRequired")}</p>
+              {availableTiers.length > 0 && (
+                <>
+                  <label className="flex items-center gap-2 text-sm text-text-primary">
+                    <input
+                      type="checkbox"
+                      checked={fiftyFifty}
+                      onChange={(e) => {
+                        setFiftyFifty(e.target.checked);
+                        if (!e.target.checked) setSecondFlavorId(null);
+                      }}
+                      className="size-[18px] accent-brand-primary"
+                    />
+                    {t("splitFlavor")}
+                  </label>
+                  {fiftyFifty && (
+                    <div id="section-secondFlavor" className="flex scroll-mt-28 flex-col gap-2">
+                      <div className="flex flex-wrap gap-2.5">
+                        {flavors
+                          .filter((f) => f.id !== flavorId)
+                          .map((flavor) => (
+                            <SelectChip
+                              key={flavor.id}
+                              label={flavor.name[locale]}
+                              selected={secondFlavorId === flavor.id}
+                              onSelect={() => setSecondFlavorId(flavor.id)}
+                            />
+                          ))}
+                      </div>
+                      {submitted && errors.secondFlavor && (
+                        <p className="text-xs text-red-600">{t("errorSecondFlavorRequired")}</p>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           </Section>
@@ -365,7 +376,19 @@ export function CakeCustomizer({
             />
           ))}
         </div>
-        {colorIds.length > 1 && <p className="text-xs text-text-secondary">{t("multiColorHint")}</p>}
+        {colorIds.length > 1 && (
+          <div id="section-colorArrangement" className="flex scroll-mt-28 flex-col gap-2">
+            <p className="text-xs text-text-secondary">{t("multiColorHint")}</p>
+            <InputField
+              label={t("colorArrangement")}
+              placeholder={t("colorArrangementPlaceholder")}
+              value={colorArrangementNotes}
+              onChange={setColorArrangementNotes}
+              error={submitted && errors.colorArrangement ? t("errorColorArrangementRequired") : undefined}
+              multiline
+            />
+          </div>
+        )}
       </Section>
 
       <Section

@@ -62,3 +62,9 @@ export type Topper = {
   price_modifier: number;
   has_color_variants: boolean;
 };
+
+export type DeliveryArea = {
+  id: string;
+  name: Bilingual;
+  price: number;
+};

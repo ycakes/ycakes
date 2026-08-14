@@ -30,6 +30,8 @@ export type CartItem = {
   shapeName: string | null;
   colorIds: string[];
   colorNames: string[];
+  /** Only set (non-null) when more than one color was picked. */
+  colorArrangementNotes: string | null;
   topperId: string | null;
   topperName: string | null;
   topperColorId: string | null;

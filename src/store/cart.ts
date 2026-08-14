@@ -33,7 +33,13 @@ export const useCartStore = create<CartState>()(
         })),
       clear: () => set({ items: [] }),
     }),
-    { name: "ycakes-cart" },
+    {
+      name: "ycakes-cart",
+      version: 1,
+      // v0 carts predate colorIds/colorNames (were colorId/colorName) —
+      // incompatible shape, and there's no real order data yet to preserve.
+      migrate: (persisted, version) => (version < 1 ? { items: [] } : (persisted as CartState)),
+    },
   ),
 );
 

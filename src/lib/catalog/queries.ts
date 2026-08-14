@@ -1,5 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Cake, Category, Color, Flavor, Shape, Size, Tier, Topper } from "@/types/catalog";
+import type {
+  Cake,
+  Category,
+  Color,
+  DeliveryArea,
+  Flavor,
+  Shape,
+  Size,
+  Tier,
+  Topper,
+} from "@/types/catalog";
 
 const TOP_LEVEL_SLUGS = [
   "birthday",
@@ -204,6 +214,31 @@ export async function getFlavors(): Promise<Flavor[]> {
   return data;
 }
 
+/** Flavors selectable for a category. No `category_flavors` rows = unrestricted (all flavors). */
+export async function getFlavorsForCategory(categoryId: string): Promise<Flavor[]> {
+  const supabase = await createClient();
+  const { data: restricted, error: restrictedError } = await supabase
+    .from("category_flavors")
+    .select("flavor_id")
+    .eq("category_id", categoryId);
+  if (restrictedError) throw restrictedError;
+
+  if (restricted.length === 0) return getFlavors();
+
+  const { data, error } = await supabase
+    .from("flavors")
+    .select("id, name, price_modifier")
+    .in(
+      "id",
+      restricted.map((r) => r.flavor_id),
+    )
+    .eq("active", true)
+    .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getColors(): Promise<Color[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -238,4 +273,25 @@ export async function getToppers(): Promise<Topper[]> {
 
   if (error) throw error;
   return data;
+}
+
+export async function getDeliveryAreas(): Promise<DeliveryArea[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("delivery_areas")
+    .select("id, name, price")
+    .eq("active", true)
+    .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
+/** ISO ('YYYY-MM-DD') dates the admin has closed for both delivery and pickup. */
+export async function getBlockedDates(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("delivery_calendar_blocks").select("blocked_date");
+
+  if (error) throw error;
+  return data.map((row) => row.blocked_date);
 }
