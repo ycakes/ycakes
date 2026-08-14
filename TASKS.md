@@ -10,7 +10,7 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
   - [x] Hosted project connected via Supabase MCP (project ref `yddapkhhniecjnnzrolv`, region eu-central-1, empty — schema comes in Phase 2). `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` (gitignored) + `.env.example` template. `src/lib/supabase/client.ts` + `server.ts` browser/server helpers added, no code calls them yet.
   - [x] Add the same two env vars to the Vercel project dashboard
   - [x] `supabase link` — CLI linked to hosted project `yddapkhhniecjnnzrolv`
-  - [ ] `supabase start` (local Docker stack) — see Phase 2
+  - [x] `supabase start` (local Docker stack) — tried in Phase 2, worked, then deliberately dropped in favor of hosted-only dev (see ARCHITECTURE.md's Development environment section)
 - [x] Set up Tailwind + shadcn/ui
 - [x] Set up next-intl skeleton (EN default, AR toggle, RTL wiring) — locale-prefixed routing (`/en`, `/ar`), see ARCHITECTURE.md
 - [x] Basic folder structure: (storefront) route group, (admin) route group, shared components/lib
