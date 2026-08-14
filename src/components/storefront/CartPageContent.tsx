@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Store, Truck } from "lucide-react";
 import { NavBar } from "@/components/layout/NavBar";
@@ -10,7 +9,7 @@ import { CartItemRow } from "@/components/storefront/CartItemRow";
 import { DatePicker } from "@/components/storefront/DatePicker";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { useCartStore, useCartSubtotal } from "@/store/cart";
+import { CHECKOUT_ENABLED, useCartStore, useCartSubtotal, useFulfillmentComplete } from "@/store/cart";
 import { cn } from "@/lib/utils";
 import type { DeliveryArea } from "@/types/catalog";
 
@@ -32,9 +31,13 @@ export function CartPageContent({
   const subtotal = useCartSubtotal();
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const [fulfillmentType, setFulfillmentType] = useState<"delivery" | "pickup" | null>(null);
-  const [deliveryAreaId, setDeliveryAreaId] = useState<string | null>(null);
-  const [fulfillmentDate, setFulfillmentDate] = useState<string | null>(null);
+  const fulfillmentType = useCartStore((state) => state.fulfillmentMethod);
+  const setFulfillmentType = useCartStore((state) => state.setFulfillmentMethod);
+  const deliveryAreaId = useCartStore((state) => state.deliveryAreaId);
+  const setDeliveryAreaId = useCartStore((state) => state.setDeliveryAreaId);
+  const fulfillmentDate = useCartStore((state) => state.fulfillmentDate);
+  const setFulfillmentDate = useCartStore((state) => state.setFulfillmentDate);
+  const fulfillmentComplete = useFulfillmentComplete();
 
   return (
     <main className="flex flex-col bg-bg-page">
@@ -88,10 +91,7 @@ export function CartPageContent({
                 <div className="flex gap-3">
                   <button
                     type="button"
-                    onClick={() => {
-                      setFulfillmentType("pickup");
-                      setDeliveryAreaId(null);
-                    }}
+                    onClick={() => setFulfillmentType("pickup")}
                     className={cn(
                       "flex flex-1 items-center gap-2 rounded-2xl border-[1.5px] px-3 py-2.5 text-sm",
                       fulfillmentType === "pickup"
@@ -162,7 +162,12 @@ export function CartPageContent({
                 <span>{subtotal > 0 ? `${subtotal} ${tCommon("egp")}` : tCommon("priceOnRequest")}</span>
               </div>
               <p className="text-xs text-text-secondary">{t("priceDisclaimer")}</p>
-              <Button variant="brand-primary" size="xl" className="w-full justify-center" disabled>
+              <Button
+                variant="brand-primary"
+                size="xl"
+                className="w-full justify-center"
+                disabled={!CHECKOUT_ENABLED || !fulfillmentComplete}
+              >
                 {t("proceedToCheckout")}
               </Button>
               <p className="text-center text-xs text-text-secondary">{t("checkoutComingSoon")}</p>
