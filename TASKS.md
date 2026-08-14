@@ -31,13 +31,30 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 - [x] Local Supabase stack via Docker — got it working after a Docker Desktop update fixed the earlier API-version mismatch, `supabase migration list` showed all 23 migrations matching hosted exactly, then reverted by choice: `supabase stop` (containers removed, data volume kept for a fast future restart), `.env.local` back to hosted. Day-to-day dev currently runs against hosted, not local — `supabase start` + flip `.env.local` back to `http://127.0.0.1:54321` any time local dev is wanted again.
 - [x] Baseline table grants (`20260814090800_baseline_table_grants.sql`) — hosted projects get `select/insert/update/delete` on every `public` table granted to `anon`/`authenticated`/`service_role` automatically at provisioning; the local CLI/Docker stack didn't replicate that (confirmed: even `service_role` got `permission denied` on a plain select, not an RLS issue). Stated explicitly now so local dev doesn't depend on CLI/Docker bootstrap behavior. Re-granting an already-granted privilege is a no-op, so pushing it to hosted was a safe no-change confirmation, not a fix there.
 
+### Phase 2 follow-up migration — REQUIRED before Phase 3 code starts
+
+Decisions made after the original Phase 2 schema was built. These need a new migration (or a couple of small ones) before Phase 3 storefront code depends on the schema, since they change category data and add columns:
+
+- [ ] Add **Dessert Cups** as a 4th Candy Corner subcategory (seed data — alongside cupcakes/pops/popsicles)
+- [ ] Remove or deactivate the **`fake` category row** in `categories` — Fake Cakes is no longer a top-level category (see ARCHITECTURE.md "Fake Cake ordering"). Check for and reassign any FK references first.
+- [ ] Add new `order_items` columns for Fake Cake support: `is_fake` (boolean, default false), `fake_size_cm`, `fake_shape` (rectangle/circle only), `reference_image_url`. Decide exact `fake_shape` implementation (dedicated enum vs. filtered join against existing `shapes` table) when writing the migration.
+- [ ] Add `orders.source` column (enum or text: `website`, `phone`, `instagram`, `in_person`, etc. — confirm exact values with the owner) for manual/offline order entry support later; defaults to `website`.
+- [ ] Add application-level (and ideally DB check-constraint) validation: `is_fake = true` is invalid for `bento` and `candy_corner` categories.
+
 ## Phase 3 — Public storefront
 
-- [ ] Home page: hero, category sections with admin-curated featured cakes
-- [ ] Shop / category browse pages
-- [ ] Contact page (address/hours, wa.me link, social links)
-- [ ] Cake detail + customization flow (size, color, shape, flavor(s), 50/50, text, toppers for custom, notes)
-- [ ] Cart (view, quantity, remove, estimated price)
+**Design status: Figma design complete for all four pages below.** File: "YCakes — Design System", key `UR2u2vVxduNHFheGewn9CH`. Pages `Home`, `Shop`, `Cake Detail`, `Cart` in that file are full assembled mockups (not just components) — read from there for spacing, copy, states, and component structure rather than re-deriving it from scratch. Component pages (`Button`, `Product Card`, `Nav Bar`, `Footer`, `Category Card`, `Price Tag`, `Badge`, `Input Field`, `Filter Chip`, `Quantity Stepper`, `Cart Item Row`, `Color Swatch`, `Topper Card`) document variants/states/properties for each. **Code has not been written yet for any Phase 3 page** — this is 100% still ahead of Claude Code, the "done" above refers only to Figma design work.
+
+- [ ] Home page: hero, "Shop by Category" (6 categories — no Fake Cakes card, see below), "Trending Cakes" (6 category sections, 4 cakes each), footer
+  - Real category photos and real trending-cake data still pending from the owner — placeholders are in Figma, swap when available
+- [ ] Shop / category browse page: category filter chips, product grid, pagination
+- [ ] Cake Detail + customization flow
+  - [ ] Normal cake flow: size (servings), tiers (conditional, 24>30+), flavor + 50/50 split toggle, icing color, shape, toppers (Custom Cakes only), text on cake, text on board, additional notes, quantity, add to cart
+  - [ ] **Cake Type toggle** (Normal / Fake) at the top of the page, above size — shown for every category except Bento and Candy Corner
+  - [ ] Fake Cake flow (shown when Cake Type = Fake): size in cm, icing color, shape (Rectangle/Circle only), text on cake, text on board, additional notes, optional reference image upload, toppers **only** if category is Custom Cakes — see the Figma "Cake Detail Page — Fake Cake Variant" frame and its annotation note for the full conditional logic
+  - [ ] Candy Corner snap-to-valid-size input (typing 9 → "6 or 12"), across all 4 subcategories including Dessert Cups
+- [ ] Cart page: item list (view/quantity/remove), order summary (subtotal, estimated total, pricing-finalized-via-WhatsApp disclaimer), proceed-to-checkout button (leads into Phase 4, not built yet)
+- [x] ~~Contact page~~ — not needed. "Contact" in the nav is an anchor link to the footer (WhatsApp number + Instagram), not a separate route. Decided after Figma design work, correcting an earlier assumption that it would be a full page.
 
 ## Phase 4 — Checkout & orders
 
@@ -49,12 +66,13 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 ## Phase 5 — Admin: catalog
 
 - [ ] Cakes CRUD (images via Cloudinary, bilingual fields)
-- [ ] Categories CRUD + reorder (incl. Candy Corner subcategories)
+- [ ] Categories CRUD + reorder (incl. Candy Corner subcategories — now 4: cupcakes, pops, popsicles, dessert cups)
 - [ ] Sizes/Flavors/Colors/Toppers management (incl. temporary disable)
 
 ## Phase 6 — Admin: orders & operations
 
 - [ ] Orders list/detail, status changes, final pricing
+- [ ] **Manual/offline order entry** — admin can register orders placed off-platform (phone, Instagram DM, in-person) directly into the dashboard, tagged via `orders.source`, so they count toward business analytics alongside real website orders
 - [ ] Delivery areas + pricing management
 - [ ] Delivery/pickup calendar block management
 - [ ] Promo codes CRUD + redemption cap enforcement
@@ -62,7 +80,7 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 ## Phase 7 — Admin: money
 
 - [ ] Expenses entry (categorized, backdatable)
-- [ ] Business analytics dashboard (revenue, volume, AOV, popular items, area breakdown, promo usage, cancellations, net profit)
+- [ ] Business analytics dashboard (revenue, volume, AOV, popular items, area breakdown, promo usage, cancellations, net profit) — **must include manually-entered offline/Instagram orders by default**, not just website orders
 - [ ] Excel export on analytics
 
 ## Phase 8 — Roles & security
