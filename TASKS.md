@@ -9,7 +9,8 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
   - [x] `supabase init` — local `supabase/config.toml` scaffolded
   - [x] Hosted project connected via Supabase MCP (project ref `yddapkhhniecjnnzrolv`, region eu-central-1, empty — schema comes in Phase 2). `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` (gitignored) + `.env.example` template. `src/lib/supabase/client.ts` + `server.ts` browser/server helpers added, no code calls them yet.
   - [x] Add the same two env vars to the Vercel project dashboard
-  - [ ] `supabase start` (local Docker stack) + `supabase link` — still deferred; Phase 2 migrations were written and applied directly against the hosted project via the Supabase MCP tools instead (see docs/superpowers/plans/2026-08-13-phase2-data-model.md).
+  - [x] `supabase link` — CLI linked to hosted project `yddapkhhniecjnnzrolv`
+  - [ ] `supabase start` (local Docker stack) — see Phase 2
 - [x] Set up Tailwind + shadcn/ui
 - [x] Set up next-intl skeleton (EN default, AR toggle, RTL wiring) — locale-prefixed routing (`/en`, `/ar`), see ARCHITECTURE.md
 - [x] Basic folder structure: (storefront) route group, (admin) route group, shared components/lib
@@ -22,6 +23,10 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 - [x] Set up Row-Level Security policies per role
 - [x] Seed script for categories/sizes/flavors/etc. (placeholder data)
   - Follow-up items from the Phase 2 final review (RLS TO-clause hygiene applied, order-write guardrails added, promo enumeration closed — see `.superpowers/sdd/2026-08-13-phase2-data-model/progress.md` for the full review and what was fixed vs. deferred)
+- [x] `orders.customer_id` deferred decision resolved: `on delete set null` (`20260814090600_orders_customer_id_set_null.sql`)
+- [x] Accountant read-only catalog RLS (`20260814090700_accountant_catalog_read.sql`)
+- [x] Reconciled hosted `supabase_migrations.schema_migrations` version numbers to match local filenames (they'd drifted — MCP `apply_migration` timestamps recorded the moment each call ran, not the filename); going forward, migrations are pushed via `supabase db push` so they can't drift again
+- [ ] Local Supabase stack via Docker — **not actually up**. `supabase start` pulled every image and applied all 22 migrations cleanly (confirms the migration files themselves are sound), then `analytics`/`realtime`/`storage`/`pg-meta`/`studio` failed their health checks with `500 Internal Server Error ... check if the server supports the requested API version` against the Docker Desktop engine, and the CLI stopped every container it had started. Same root cause blocked `docker ps` and a direct Postgres connection from this session. Likely a Docker Desktop version/API mismatch — try updating Docker Desktop, then re-run `supabase start` from a normal terminal (not through this session). `.env.local` reverted to hosted in the meantime so `npm run dev` keeps working.
 
 ## Phase 3 — Public storefront
 - [ ] Home page: hero, category sections with admin-curated featured cakes

@@ -20,7 +20,7 @@ Living document. Update whenever an architectural decision is made or changed. T
 - **Guest** — no account, can browse and order, gets a UUID-linked order visible only to admin
 - **Customer** (optional account) — same as guest plus saved addresses/phone, order history tab
 - **Admin** (2-3 accounts) — full access: catalog, orders, promo codes, delivery config, expenses, analytics, role/user management
-- **Accountant** (1 account) — orders + business analytics + expenses only, no catalog/category control
+- **Accountant** (1 account) — orders + business analytics + expenses only, no catalog/category control. Read-only access to catalog tables (cakes, categories, sizes, tiers, flavors, colors, shapes, toppers and their join tables) so analytics can resolve order line items to human-readable names instead of bare IDs — unfiltered by `active`, so a since-disabled item still resolves for historical orders. No catalog write access.
 
 All role-gated access enforced via Supabase Row-Level Security, not just UI hiding.
 
@@ -30,7 +30,7 @@ All role-gated access enforced via Supabase Row-Level Security, not just UI hidi
 - `cakes` — belongs to category, bilingual name/description, images (Cloudinary), one primary image
 - `sizes` — per category; normal cakes sized by serving count, candy corner items by quantity. Cupcakes uniquely start at 6, then all three (cupcakes, pops, popsicles) proceed in 12-unit steps (pops/popsicles start at 12); max up to 996 (the largest multiple of 12 not exceeding 1000)
 - `flavors`, `colors`, `toppers` (custom cakes only, some toppers have color variants) — admin managed, can be disabled temporarily
-- `orders` — status: Pending → Confirmed / Cancelled → Completed / Cancelled; guest (UUID + name) or linked to customer account; delivery or pickup; delivery/pickup date checked against `delivery_calendar_blocks`
+- `orders` — status: Pending → Confirmed / Cancelled → Completed / Cancelled; guest (UUID + name) or linked to customer account; delivery or pickup; delivery/pickup date checked against `delivery_calendar_blocks`. `customer_id` is `on delete set null` — deleting a customer account never blocks on order history and never cascades it away; the order just reverts to guest-shaped (customer_id null), same as it would look if placed without an account
 - `order_items` — cake + all chosen customization (size, color, shape, flavor(s), 50/50 flag, text on cake, text on board, topper, additional notes), price starts as a base estimate and is finalized by admin
 - `promo_codes` — code, fixed/percentage discount, min order, expiry date, total redemption cap, unlimited-per-customer use while active
 - `promo_code_redemptions` — tracks usage against the cap
@@ -63,6 +63,11 @@ Revenue (from completed orders' final price) by day/week/month/year and custom d
 - `src/components/`, `src/lib/` — shared across storefront and admin (shadcn/ui components live in `src/components/ui/`)
 - `src/lib/supabase/client.ts` (browser) and `server.ts` (Server Components/Actions, via `@supabase/ssr` + `next/headers` cookies) — session-refresh logic in `src/proxy.ts` deferred until Phase 4 (auth), no auth flow exists yet
 - Hosted Supabase project ref: `yddapkhhniecjnnzrolv` (region eu-central-1). Only the anon/publishable key is used client + server side; `service_role` is never used — RLS handles authorization per [Roles](#roles)
+
+## Local development
+
+- Day to day, run against the **local** Supabase stack (Docker), not hosted — `.env.local` points at `http://127.0.0.1:54321`. Swap it back to the hosted URL/key only to debug something hosted-specific.
+- Schema changes: write the migration file in `supabase/migrations/`, apply it locally (`supabase db reset` for a clean re-apply of everything + seed, or `supabase migration up` for just the new file), confirm it does what's intended, then `supabase db push` to apply the same file to the hosted project. `db push` is what keeps local and hosted migration history in lockstep — never hand-apply a migration to hosted only (that's exactly how the version-number drift fixed on 2026-08-14 happened).
 
 ## Open / to be decided in later phases
 
