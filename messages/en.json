@@ -11,7 +11,9 @@
     "home": "Home",
     "shop": "Shop",
     "customCakes": "Custom Cakes",
-    "contact": "Contact"
+    "contact": "Contact",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "Footer": {
     "tagline": "Handmade cakes for every celebration, baked fresh in Cairo.",
