@@ -15,18 +15,19 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="flex flex-col">
+    <main className="flex flex-col bg-bg-surface-alt">
       <HeroSection />
       <Divider />
 
-      <section className="flex w-full flex-col items-center gap-12 bg-bg-surface-alt px-6 py-16 md:px-[100px]">
+      <section className="flex w-full flex-col items-center gap-12 px-6 pb-16 pt-8 md:px-[100px]">
         <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-[13px] font-semibold tracking-[1.04px] text-brand-secondary">
             {t("collectionEyebrow")}
           </p>
-          <h2 className="font-heading text-3xl font-extrabold text-text-primary md:text-[40px]">
+          <h2 className="font-heading text-3xl font-extrabold text-brand-primary md:text-[40px]">
             {t("shopByCategory")}
           </h2>
+          <div className="mt-1 h-[3px] w-16 rounded-full bg-brand-secondary" />
         </div>
         <div className="flex w-full max-w-[1240px] flex-wrap items-start justify-center gap-6">
           {categories.map((category) => (
@@ -41,17 +42,20 @@ export default async function HomePage() {
       </section>
       <Divider />
 
-      <section className="flex w-full flex-col items-center gap-12 px-6 py-16 md:px-[100px]">
-        <h2 className="font-heading text-3xl font-extrabold text-text-primary md:text-[40px]">
-          {t("trendingCakes")}
-        </h2>
+      <section className="flex w-full flex-col items-center gap-12 px-6 pb-16 pt-8 md:px-[100px]">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <h2 className="font-heading text-3xl font-extrabold text-brand-primary md:text-[40px]">
+            {t("trendingCakes")}
+          </h2>
+          <div className="h-[3px] w-16 rounded-full bg-brand-secondary" />
+        </div>
         <div className="flex w-full max-w-[1352px] flex-col gap-10">
           {categories.map((category) => {
             const cakes = trendingByCategory[category.slug] ?? [];
             if (cakes.length === 0) return null;
             return (
               <div key={category.id} className="flex flex-col gap-6">
-                <h3 className="font-heading text-2xl font-bold text-text-primary">
+                <h3 className="font-heading text-2xl font-bold text-brand-primary">
                   {category.name[locale]}
                 </h3>
                 <div className="flex gap-6 overflow-x-auto pb-2">

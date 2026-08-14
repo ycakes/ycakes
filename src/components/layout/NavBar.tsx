@@ -20,6 +20,12 @@ export function NavBar({ className }: { className?: string }) {
   const cartCount = useCartCount();
   const otherLocale = locale === "en" ? "ar" : "en";
 
+  // Most-specific href wins so /shop/custom highlights "Custom Cakes" only,
+  // while any other /shop/[category] still highlights "Shop".
+  const activeHref = [...navLinks]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find((link) => pathname === link.href || pathname.startsWith(`${link.href}/`))?.href;
+
   return (
     <div
       className={cn(
@@ -39,7 +45,7 @@ export function NavBar({ className }: { className?: string }) {
 
       <nav className="hidden items-center gap-6 text-[15px] font-normal md:flex">
         {navLinks.map((link) => {
-          const active = pathname === link.href;
+          const active = activeHref === link.href;
           return (
             <Link
               key={link.key}
@@ -59,17 +65,20 @@ export function NavBar({ className }: { className?: string }) {
         <Link
           href={pathname}
           locale={otherLocale}
-          className="rounded-full border border-border-default px-2 py-1.5 text-[13px] font-semibold text-text-primary"
+          className="rounded-full border border-border-default bg-bg-surface px-2.5 py-1.5 text-[13px] font-semibold text-text-primary shadow-sm"
         >
           {otherLocale.toUpperCase()}
         </Link>
-        <Link href="/cart" className="relative flex size-[30px] items-center justify-center">
+        <Link
+          href="/cart"
+          className="relative flex size-11 items-center justify-center rounded-full border border-border-default bg-bg-surface shadow-sm"
+        >
           {cartCount > 0 && (
             <span className="absolute -top-1 end-0 flex size-4 items-center justify-center rounded-full bg-brand-secondary text-[10px] font-semibold text-text-on-brand">
               {cartCount}
             </span>
           )}
-          <Image src="/icons/cart.svg" alt="" width={26} height={26} />
+          <Image src="/icons/cart.svg" alt="" width={22} height={22} />
         </Link>
       </div>
     </div>

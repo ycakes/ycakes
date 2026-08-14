@@ -47,10 +47,12 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 
 - [x] Home page: hero, "Shop by Category" (6 categories — no Fake Cakes card, see below), "Trending Cakes" (6 category sections, 4 cakes each), footer
   - Real category photos now in `public/images/categories/{slug}.jpeg` (owner-supplied). Trending Cakes still uses placeholder cake rows (4 per category, seeded via `20260814110000_phase3_placeholder_cakes.sql`) that reuse the category photo — swap for real per-product photos once the owner provides them.
-  - Hero's right-side photo is still a dashed placeholder box (no hero photo supplied yet, unlike the categories) — swap in `HeroSection.tsx` when available.
+  - Hero background photo (owner-supplied, `public/images/hero/hero.jpg`) renders full-bleed behind the entire Hero section, including behind the text — not a separate boxed image.
   - Design tokens (colors, Cairo/Baloo 2/Caveat fonts, pill Button variants) pulled from Figma into `globals.css` / `button.tsx`, reusable by the rest of Phase 3.
   - Cart badge in `NavBar` reads from the new Zustand store (`src/store/cart.ts`), client-persisted only — no `cart_items` DB sync in Phase 3, deferred to Phase 4 once accounts exist.
-- [ ] Shop / category browse page: category filter chips, product grid, pagination
+- [x] Shop / category browse page: category filter chips, product grid, pagination
+  - `/shop` (all cakes) and `/shop/[category]` (single top-level category, Candy Corner aggregates its 4 subcategories) share one `ShopBrowse` component. Pagination is query-param based (`?page=`), 12 cakes/page, hidden when everything fits on one page.
+  - Figma's mock "New"/"Sale" product badges were **not** implemented — there's no `is_new`/`sale_price` concept in the `cakes` schema, so nothing to drive them from real data. Flag to the owner if that's wanted; would need a schema change.
 - [ ] Cake Detail + customization flow
   - [ ] Normal cake flow: size (servings), tiers (conditional, 24>30+), flavor + 50/50 split toggle, icing color, shape, toppers (Custom Cakes only), text on cake, text on board, additional notes, quantity, add to cart
   - [ ] **Cake Type toggle** (Normal / Fake) at the top of the page, above size — shown for every category except Bento and Candy Corner

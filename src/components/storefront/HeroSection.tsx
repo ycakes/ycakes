@@ -15,8 +15,15 @@ export function HeroSection() {
 
   return (
     <section className="relative w-full overflow-hidden bg-bg-page">
+      <Image
+        src="/images/hero/hero.jpg"
+        alt=""
+        fill
+        priority
+        className="absolute inset-0 z-0 object-cover"
+      />
       <NavBar className="relative z-10" />
-      <div className="relative flex flex-col gap-10 px-6 py-16 md:flex-row md:items-center md:px-[100px] md:py-24">
+      <div className="relative z-10 flex flex-col gap-10 px-6 py-16 md:flex-row md:items-center md:px-[100px] md:py-24">
         <div className="flex max-w-[620px] flex-col items-start gap-5">
           <div className="flex items-center gap-1.5">
             <p className="font-script text-3xl font-bold text-brand-secondary">{t("eyebrow")}</p>
@@ -31,10 +38,10 @@ export function HeroSection() {
             {t("subheadline")}
           </p>
           <div className="flex flex-wrap gap-4 pt-2">
-            <Button render={<Link href="/shop" />} variant="brand-primary" size="xl">
+            <Button render={<Link href="/shop" />} nativeButton={false} variant="brand-primary" size="xl">
               {t("browseCakes")}
             </Button>
-            <Button render={<Link href="/shop/custom" />} variant="brand-ghost" size="xl">
+            <Button render={<Link href="/shop/custom" />} nativeButton={false} variant="brand-ghost" size="xl">
               {t("customCake")}
             </Button>
           </div>
@@ -53,8 +60,6 @@ export function HeroSection() {
             ))}
           </div>
         </div>
-
-        <div className="relative h-[320px] w-full shrink-0 rounded-3xl border-2 border-dashed border-border-default bg-bg-surface-alt/60 md:h-[480px] md:w-[560px]" />
       </div>
     </section>
   );

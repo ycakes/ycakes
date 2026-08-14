@@ -27,6 +27,22 @@
     "egp": "EGP",
     "priceOnRequest": "Price on request"
   },
+  "Shop": {
+    "breadcrumbHome": "Home",
+    "breadcrumbShop": "Shop",
+    "filterAll": "All",
+    "allTitle": "All Cakes",
+    "allSubtitle": "Browse our full collection of handmade cakes.",
+    "empty": "No cakes here yet — check back soon.",
+    "subtitle": {
+      "birthday": "Handmade birthday cakes, made your way.",
+      "wedding": "Elegant cakes for your special day.",
+      "graduation": "Celebrate the milestone with a custom cake.",
+      "bento": "Small, personal cakes perfect for one or two.",
+      "custom": "Fully custom cakes, built from scratch just for you.",
+      "candy-corner": "Cupcakes, cake pops, popsicles, and dessert cups."
+    }
+  },
   "Home": {
     "eyebrow": "Baked with love",
     "headlineLine1": "Made with all love,",

@@ -10,11 +10,11 @@ export function ProductCard({ cake }: { cake: Cake }) {
   return (
     <Link
       href={`/cakes/${cake.id}`}
-      className="flex w-[320px] shrink-0 flex-col items-start rounded-3xl bg-bg-surface px-3 pb-4 pt-3 drop-shadow-[0px_1px_1.5px_rgba(43,30,25,0.08)] transition-shadow hover:drop-shadow-[0px_4px_10px_rgba(43,30,25,0.14)]"
+      className="flex w-[340px] shrink-0 flex-col items-start rounded-3xl bg-bg-surface px-3 pb-4 pt-3 drop-shadow-[0px_1px_1.5px_rgba(43,30,25,0.08)] transition-shadow hover:drop-shadow-[0px_4px_10px_rgba(43,30,25,0.14)]"
     >
-      <div className="relative h-[200px] w-full overflow-hidden rounded-2xl bg-bg-surface-alt">
+      <div className="relative h-[280px] w-full overflow-hidden rounded-2xl bg-bg-surface-alt">
         {cake.primary_image_url && (
-          <Image src={cake.primary_image_url} alt={cake.name[locale]} fill className="object-cover" />
+          <Image src={cake.primary_image_url} alt={cake.name[locale]} fill className="object-contain" />
         )}
       </div>
       <div className="flex w-full flex-col gap-1 p-3">

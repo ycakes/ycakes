@@ -115,6 +115,18 @@ export async function getCakesByCategorySlug(slug: string): Promise<Cake[]> {
   return data;
 }
 
+export async function getAllCakes(): Promise<Cake[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("cakes")
+    .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+    .eq("active", true)
+    .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getCakeById(id: string): Promise<Cake | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
