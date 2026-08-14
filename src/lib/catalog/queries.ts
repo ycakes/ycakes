@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Cake, Category } from "@/types/catalog";
+import type { Cake, Category, Color, Flavor, Shape, Size, Tier, Topper } from "@/types/catalog";
 
 const TOP_LEVEL_SLUGS = [
   "birthday",
@@ -134,6 +134,107 @@ export async function getCakeById(id: string): Promise<Cake | null> {
     .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
     .eq("id", id)
     .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getCategoryById(id: string): Promise<Category | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, parent_id, name, slug, sort_order")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Sizes for a category, each enriched with the tier ids available at that size. */
+export async function getSizesWithTiers(
+  categoryId: string,
+): Promise<(Size & { tierIds: string[] })[]> {
+  const supabase = await createClient();
+  const { data: sizes, error } = await supabase
+    .from("sizes")
+    .select("id, category_id, min_qty, max_qty, unit, price_modifier, sort_order")
+    .eq("category_id", categoryId)
+    .eq("active", true)
+    .order("sort_order");
+  if (error) throw error;
+  if (sizes.length === 0) return [];
+
+  const { data: sizeTiers, error: sizeTiersError } = await supabase
+    .from("size_tiers")
+    .select("size_id, tier_id")
+    .in(
+      "size_id",
+      sizes.map((s) => s.id),
+    );
+  if (sizeTiersError) throw sizeTiersError;
+
+  return sizes.map((size) => ({
+    ...size,
+    tierIds: sizeTiers.filter((st) => st.size_id === size.id).map((st) => st.tier_id),
+  }));
+}
+
+export async function getTiers(): Promise<Tier[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tiers")
+    .select("id, tier_count, price_modifier")
+    .eq("active", true)
+    .order("tier_count");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getFlavors(): Promise<Flavor[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("flavors")
+    .select("id, name, price_modifier")
+    .eq("active", true)
+    .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getColors(): Promise<Color[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("colors")
+    .select("id, name, hex_code")
+    .eq("active", true)
+    .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getShapes(): Promise<Shape[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shapes")
+    .select("id, name, fake_eligible")
+    .eq("active", true)
+    .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getToppers(): Promise<Topper[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("toppers")
+    .select("id, name, price_modifier, has_color_variants")
+    .eq("active", true)
+    .order("sort_order");
 
   if (error) throw error;
   return data;

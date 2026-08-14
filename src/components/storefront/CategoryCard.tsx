@@ -7,10 +7,12 @@ export function CategoryCard({
   category,
   subtitle,
   imageSrc,
+  priority,
 }: {
   category: Category;
   subtitle: string;
   imageSrc: string;
+  priority?: boolean;
 }) {
   const locale = useLocale() as "en" | "ar";
 
@@ -24,6 +26,8 @@ export function CategoryCard({
           src={imageSrc}
           alt={category.name[locale]}
           fill
+          sizes="280px"
+          priority={priority}
           className="object-contain transition-transform duration-300 group-hover:scale-110"
         />
       </div>

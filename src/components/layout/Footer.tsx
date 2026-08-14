@@ -24,6 +24,7 @@ export function Footer() {
               src="/images/brand/footer-logo.png"
               alt="YCakes"
               fill
+              sizes="140px"
               className="object-contain p-2"
             />
           </div>

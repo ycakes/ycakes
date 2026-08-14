@@ -30,12 +30,13 @@ export default async function HomePage() {
           <div className="mt-1 h-[3px] w-16 rounded-full bg-brand-secondary" />
         </div>
         <div className="flex w-full max-w-[1240px] flex-wrap items-start justify-center gap-6">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <CategoryCard
               key={category.id}
               category={category}
               subtitle={t(`categorySubtitle.${category.slug}` as never)}
               imageSrc={`/images/categories/${category.slug}.jpeg`}
+              priority={index < 3}
             />
           ))}
         </div>

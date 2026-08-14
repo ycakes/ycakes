@@ -1,6 +1,6 @@
 import type { Bilingual } from "./catalog";
 
-/** Shaped to map 1:1 onto `order_items` (+ `order_item_flavors`) for Phase 4 checkout submission. */
+/** Shaped to map 1:1 onto `order_items` (+ `order_item_flavors` / `order_item_colors`) for Phase 4 checkout submission. */
 export type CartItem = {
   id: string;
   cakeId: string;
@@ -28,9 +28,8 @@ export type CartItem = {
   // Shared fields
   shapeId: string | null;
   shapeName: string | null;
-  colorId: string;
-  colorName: string;
-  colorHex: string | null;
+  colorIds: string[];
+  colorNames: string[];
   topperId: string | null;
   topperName: string | null;
   topperColorId: string | null;

@@ -38,6 +38,7 @@ export function NavBar({ className }: { className?: string }) {
           src="/images/brand/logo.png"
           alt="YCakes"
           fill
+          sizes="112px"
           className="object-contain"
           priority
         />

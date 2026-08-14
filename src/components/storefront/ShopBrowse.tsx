@@ -77,8 +77,8 @@ export function ShopBrowse({
           <p className="py-16 text-center text-text-secondary">{emptyMessage}</p>
         ) : (
           <div className="flex flex-wrap gap-6">
-            {pageCakes.map((cake) => (
-              <ProductCard key={cake.id} cake={cake} />
+            {pageCakes.map((cake, index) => (
+              <ProductCard key={cake.id} cake={cake} priority={index < 3} />
             ))}
           </div>
         )}

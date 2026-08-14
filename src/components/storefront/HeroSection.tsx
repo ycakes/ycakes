@@ -20,6 +20,7 @@ export function HeroSection() {
         alt=""
         fill
         priority
+        sizes="100vw"
         className="absolute inset-0 z-0 object-cover"
       />
       <NavBar className="relative z-10" />

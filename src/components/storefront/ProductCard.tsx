@@ -3,7 +3,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { Cake } from "@/types/catalog";
 
-export function ProductCard({ cake }: { cake: Cake }) {
+export function ProductCard({ cake, priority }: { cake: Cake; priority?: boolean }) {
   const locale = useLocale() as "en" | "ar";
   const t = useTranslations("Common");
 
@@ -14,7 +14,14 @@ export function ProductCard({ cake }: { cake: Cake }) {
     >
       <div className="relative h-[280px] w-full overflow-hidden rounded-2xl bg-bg-surface-alt">
         {cake.primary_image_url && (
-          <Image src={cake.primary_image_url} alt={cake.name[locale]} fill className="object-contain" />
+          <Image
+            src={cake.primary_image_url}
+            alt={cake.name[locale]}
+            fill
+            sizes="340px"
+            priority={priority}
+            className="object-contain"
+          />
         )}
       </div>
       <div className="flex w-full flex-col gap-1 p-3">
