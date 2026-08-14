@@ -1,14 +1,55 @@
 {
   "Metadata": {
-    "title": "Cakes",
-    "description": "Custom cakes, made to order in Cairo."
-  },
-  "HomePage": {
-    "title": "Welcome",
-    "description": "Our storefront is coming soon."
+    "title": "YCakes",
+    "description": "Handmade cakes, made to order in Cairo."
   },
   "AdminPage": {
     "title": "Admin dashboard",
     "description": "Coming soon."
+  },
+  "NavBar": {
+    "home": "Home",
+    "shop": "Shop",
+    "customCakes": "Custom Cakes",
+    "contact": "Contact"
+  },
+  "Footer": {
+    "tagline": "Handmade cakes for every celebration, baked fresh in Cairo.",
+    "quickLinks": "Quick Links",
+    "home": "Home",
+    "shop": "Shop",
+    "customCakes": "Custom Cakes",
+    "contact": "Contact",
+    "getInTouch": "Get in Touch",
+    "copyright": "© {year} YCakes. All rights reserved."
+  },
+  "Common": {
+    "egp": "EGP",
+    "priceOnRequest": "Price on request"
+  },
+  "Home": {
+    "eyebrow": "Baked with love",
+    "headlineLine1": "Made with all love,",
+    "headlineLine2": "just for you.",
+    "subheadline": "Handmade cakes for birthdays, weddings, and every celebration in between — ordered your way, made just for you.",
+    "browseCakes": "Browse Cakes →",
+    "customCake": "Custom Cake",
+    "badgeHandmadeTitle": "100% Handmade",
+    "badgeHandmadeSubtitle": "Crafted with care",
+    "badgePremiumTitle": "Premium Ingredients",
+    "badgePremiumSubtitle": "Only the finest",
+    "badgeDeliveryTitle": "On-Time Delivery",
+    "badgeDeliverySubtitle": "Happiness at your door",
+    "collectionEyebrow": "— OUR COLLECTION —",
+    "shopByCategory": "Shop by Category",
+    "trendingCakes": "Trending Cakes",
+    "categorySubtitle": {
+      "birthday": "Celebrate in style",
+      "wedding": "Your special day",
+      "graduation": "Mark the milestone",
+      "bento": "Small & sweet",
+      "custom": "Made just for you",
+      "candy-corner": "Cupcakes, pops & more"
+    }
   }
 }

@@ -1,14 +1,55 @@
 {
   "Metadata": {
-    "title": "كيكات",
-    "description": "كيكات مخصصة، تُصنع حسب الطلب في القاهرة."
-  },
-  "HomePage": {
-    "title": "أهلاً بكم",
-    "description": "المتجر قريباً."
+    "title": "واي كيكس",
+    "description": "كيكات يدوية، تُصنع حسب الطلب في القاهرة."
   },
   "AdminPage": {
     "title": "لوحة التحكم",
     "description": "قريباً."
+  },
+  "NavBar": {
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "customCakes": "كيكات مخصصة",
+    "contact": "تواصل معنا"
+  },
+  "Footer": {
+    "tagline": "كيكات يدوية لكل مناسبة، تُخبز طازجة في القاهرة.",
+    "quickLinks": "روابط سريعة",
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "customCakes": "كيكات مخصصة",
+    "contact": "تواصل معنا",
+    "getInTouch": "تواصل معنا",
+    "copyright": "© {year} واي كيكس. جميع الحقوق محفوظة."
+  },
+  "Common": {
+    "egp": "جنيه",
+    "priceOnRequest": "السعر عند الطلب"
+  },
+  "Home": {
+    "eyebrow": "بالحب نخبز",
+    "headlineLine1": "بكل حب،",
+    "headlineLine2": "خصيصاً لك.",
+    "subheadline": "كيكات يدوية لأعياد الميلاد والأفراح ولكل مناسبة بينهما — بالطريقة اللي تحبها، تُصنع خصيصاً لك.",
+    "browseCakes": "تصفح الكيكات ←",
+    "customCake": "كيكة مخصصة",
+    "badgeHandmadeTitle": "100% يدوي الصنع",
+    "badgeHandmadeSubtitle": "بعناية فائقة",
+    "badgePremiumTitle": "مكونات فاخرة",
+    "badgePremiumSubtitle": "الأجود فقط",
+    "badgeDeliveryTitle": "توصيل في الموعد",
+    "badgeDeliverySubtitle": "السعادة عند بابك",
+    "collectionEyebrow": "— مجموعتنا —",
+    "shopByCategory": "تسوق حسب الفئة",
+    "trendingCakes": "الأكثر طلباً",
+    "categorySubtitle": {
+      "birthday": "احتفل بأناقة",
+      "wedding": "يومك المميز",
+      "graduation": "احتفل بالإنجاز",
+      "bento": "صغيرة وحلوة",
+      "custom": "خصيصاً لك",
+      "candy-corner": "كب كيك وحلويات"
+    }
   }
 }

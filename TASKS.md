@@ -45,8 +45,11 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 
 **Design status: Figma design complete for all four pages below.** File: "YCakes — Design System", key `UR2u2vVxduNHFheGewn9CH`. Pages `Home`, `Shop`, `Cake Detail`, `Cart` in that file are full assembled mockups (not just components) — read from there for spacing, copy, states, and component structure rather than re-deriving it from scratch. Component pages (`Button`, `Product Card`, `Nav Bar`, `Footer`, `Category Card`, `Price Tag`, `Badge`, `Input Field`, `Filter Chip`, `Quantity Stepper`, `Cart Item Row`, `Color Swatch`, `Topper Card`) document variants/states/properties for each. **Code has not been written yet for any Phase 3 page** — this is 100% still ahead of Claude Code, the "done" above refers only to Figma design work.
 
-- [ ] Home page: hero, "Shop by Category" (6 categories — no Fake Cakes card, see below), "Trending Cakes" (6 category sections, 4 cakes each), footer
-  - Real category photos and real trending-cake data still pending from the owner — placeholders are in Figma, swap when available
+- [x] Home page: hero, "Shop by Category" (6 categories — no Fake Cakes card, see below), "Trending Cakes" (6 category sections, 4 cakes each), footer
+  - Real category photos now in `public/images/categories/{slug}.jpeg` (owner-supplied). Trending Cakes still uses placeholder cake rows (4 per category, seeded via `20260814110000_phase3_placeholder_cakes.sql`) that reuse the category photo — swap for real per-product photos once the owner provides them.
+  - Hero's right-side photo is still a dashed placeholder box (no hero photo supplied yet, unlike the categories) — swap in `HeroSection.tsx` when available.
+  - Design tokens (colors, Cairo/Baloo 2/Caveat fonts, pill Button variants) pulled from Figma into `globals.css` / `button.tsx`, reusable by the rest of Phase 3.
+  - Cart badge in `NavBar` reads from the new Zustand store (`src/store/cart.ts`), client-persisted only — no `cart_items` DB sync in Phase 3, deferred to Phase 4 once accounts exist.
 - [ ] Shop / category browse page: category filter chips, product grid, pagination
 - [ ] Cake Detail + customization flow
   - [ ] Normal cake flow: size (servings), tiers (conditional, 24>30+), flavor + 50/50 split toggle, icing color, shape, toppers (Custom Cakes only), text on cake, text on board, additional notes, quantity, add to cart
