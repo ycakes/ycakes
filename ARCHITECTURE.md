@@ -37,14 +37,14 @@ All role-gated access enforced via Supabase Row-Level Security, not just UI hidi
 
 ## Core entities (implemented in Phase 2 — see `supabase/migrations/`)
 
-- `categories` — **birthday, wedding, graduation, bento, custom, candy corner** (+ Candy Corner subcategories: **cupcakes, pops, popsicles, dessert cups** — 4 subcategories, not 3; dessert cups was added after initial Phase 2 implementation and needs a follow-up migration/seed update). Admin manages fully: create/edit/delete/reorder.
-  - **"Fake Cakes" is no longer a category.** It was removed as a top-level category and reworked as an order-item-level attribute — see "Fake Cake ordering" below. Any `fake` row in the `categories` table from the original Phase 2 seed needs to be removed or deactivated in a follow-up migration, and any FK references to it reassigned.
+- `categories` — **birthday, wedding, graduation, bento, custom, candy corner** (+ Candy Corner subcategories: **cupcakes, pops, popsicles, dessert cups** — 4 subcategories, not 3). Admin manages fully: create/edit/delete/reorder.
+  - **"Fake Cakes" is no longer a category.** It was removed as a top-level category and reworked as an order-item-level attribute — see "Fake Cake ordering" below. The original Phase 2 seed's `fake` row was deleted in the Phase 2 follow-up migration (`20260814100100_remove_fake_category.sql`).
 - `cakes` — belongs to category, bilingual name/description, images (Cloudinary), one primary image
 - `sizes` — per category; normal cakes sized by serving count, candy corner items by quantity. Cupcakes uniquely start at 6, then all four Candy Corner subcategories (cupcakes, pops, popsicles, dessert cups) proceed in 12-unit steps (pops/popsicles/dessert cups start at 12); max up to 996 (the largest multiple of 12 not exceeding 1000)
 - `flavors`, `colors`, `toppers` (custom cakes only, some toppers have color variants) — admin managed, can be disabled temporarily
 - `orders` — status: Pending → Confirmed / Cancelled → Completed / Cancelled; guest (UUID + name) or linked to customer account; delivery or pickup; delivery/pickup date checked against `delivery_calendar_blocks`. `customer_id` is `on delete set null` — deleting a customer account never blocks on order history and never cascades it away; the order just reverts to guest-shaped (customer_id null), same as it would look if placed without an account.
-  - **New field needed**: `source` (enum: `website`, `phone`, `instagram`, `in_person`, or similar) so manually-entered offline/Instagram orders are distinguishable from real website orders in reporting, while still being included in all revenue/volume/AOV analytics by default. Defaults to `website` for anything created through the customer-facing flow.
-- `order_items` — cake + all chosen customization. For a **Normal** cake: size, color, shape, flavor(s), 50/50 flag, text on cake, text on board, topper, additional notes, price starts as a base estimate and is finalized by admin. For a **Fake** cake, see "Fake Cake ordering" below — several of these fields don't apply and new ones are needed.
+  - `source` (`website`/`phone`/`instagram`/`in_person`, default `website`) distinguishes manually-entered offline/Instagram orders from real website orders in reporting, while still being included in all revenue/volume/AOV analytics by default. The `normalize_order_on_insert` trigger forces `source = 'website'` on every insert today, since the only insert path is the customer-facing flow — Phase 6 manual entry will need its own privileged insert path that can set the other values.
+- `order_items` — cake + all chosen customization. For a **Normal** cake: size, color, shape, flavor(s), 50/50 flag, text on cake, text on board, topper, additional notes, price starts as a base estimate and is finalized by admin. For a **Fake** cake, see "Fake Cake ordering" below — several of these fields don't apply and different ones are used instead; `size_id`/`shape_id` are nullable for this reason, with a `order_items_fake_cake_fields` check constraint enforcing the two field sets stay mutually exclusive.
 - `promo_codes` — code, fixed/percentage discount, min order, expiry date, total redemption cap, unlimited-per-customer use while active
 - `promo_code_redemptions` — tracks usage against the cap
 - `delivery_areas` — area name + delivery price, admin managed
@@ -68,10 +68,11 @@ Previously "Fake Cakes" was planned as its own top-level category. That's been r
   - **Additional notes** (same as real cakes)
   - **Reference image** (optional upload — a photo of what the display cake should look like)
   - **Toppers**: **only shown when the fake cake was built via the Custom Cakes category.** If it's a fake/display version of an existing design from another category, no topper section appears at all.
-- **Schema implications** (needs a Phase 2 follow-up migration, not yet built):
-  - `order_items` needs new columns: `is_fake` (boolean, default false), `fake_size_cm` (text or numeric — confirm format with the owner), `fake_shape` (constrained to rectangle/circle — either a check constraint, a small dedicated enum, or a filtered join against an existing shapes table with a `fake_eligible` flag; pick whichever fits the current `shapes` table design), `reference_image_url` (text, nullable, Cloudinary URL).
-  - Existing `shape_id` / flavor / tier / size columns on `order_items` should be nullable or conditionally required depending on `is_fake`, enforced in application logic (and ideally a check constraint) rather than assumed always-present.
-  - Application-level validation: `is_fake = true` must be rejected for `bento` and `candy_corner` categories.
+- **Schema (implemented, `20260814100200_order_items_fake_cake.sql`)**:
+  - `order_items` columns: `is_fake` (boolean, default false), `fake_size_cm` (numeric), `fake_shape_id` (uuid, FK to `shapes(id)`), `reference_image_url` (text, nullable, Cloudinary URL).
+  - `fake_shape_id` restriction implemented via a `shapes.fake_eligible` boolean flag (true for Rectangle/Circle only) rather than a dedicated enum — reuses the existing `shapes` table as the single source of truth. A trigger (`order_items_validate_fake_shape`) enforces `fake_shape_id` points to a `fake_eligible` row, since that can't be expressed as a plain single-table check constraint.
+  - `size_id` and `shape_id` on `order_items` are now nullable. The `order_items_fake_cake_fields` check constraint enforces the real-cake vs. Fake Cake field sets are mutually exclusive: real cakes require `size_id`/`shape_id` and forbid the fake fields; Fake Cake items require `fake_size_cm`/`fake_shape_id` and forbid `size_id`/`shape_id`/`tier_id`, with `is_fifty_fifty` forced false. Flavor selection (`order_item_flavors`, a separate table) isn't DB-constrained by `is_fake` — that's left to application logic when Phase 3/4 code is written.
+  - `is_fake = true` is rejected at the DB level for Bento and Candy Corner (including its subcategories) items via a trigger (`order_items_validate_fake_category`), since the check spans `order_items` → `cakes` → `categories` and can't be a plain check constraint either.
 
 ## Tiers
 
@@ -114,11 +115,10 @@ Home, Shop/category browse, Cake Detail (customization flow, Normal + Fake Cake 
 
 ## Open / to be decided in later phases
 
-- Fake cake sizes (in cm — free text vs. structured min/max) and whether any price modifier applies (owner TBD)
+- Fake cake sizes: format is numeric cm (`fake_size_cm`, decided in the Phase 2 follow-up migration); whether any price modifier applies is still owner TBD
 - Real delivery areas and prices (owner TBD)
 - Real price modifiers for sizes/flavors/toppers/tiers/cakes (owner TBD, entered via Phase 5/7 admin UI — everything seeds at 0)
-- Exact `orders.source` enum values and whether admins can edit/reassign source after creation (owner TBD, needed before the Phase 2 follow-up migration)
-- Exact schema shape for `fake_shape` (dedicated enum vs. filtered join against `shapes`) — implementation detail to settle when writing the migration, not a product decision
+- Whether admins can edit/reassign `orders.source` after creation, once Phase 6 manual entry exists (owner TBD) — the enum values themselves (`website`/`phone`/`instagram`/`in_person`) are locked in
 - Cart persistence (`cart_items` table for logged-in users, per the locked Cart stack decision) — not yet built, scheduled for Phase 3
 - Customer saved addresses — not yet built, scheduled for Phase 4 alongside account order history
-- Core Phase 2 schema implemented — see `docs/superpowers/specs/2026-08-13-phase2-data-model-design.md` and `supabase/migrations/`; cart persistence and saved-address storage still pending per Phase 3/4. **Follow-up migration needed** for: Dessert Cups subcategory seed data, removal/deactivation of the `fake` category row, new `order_items` fake-cake columns, new `orders.source` column.
+- Core Phase 2 schema implemented — see `docs/superpowers/specs/2026-08-13-phase2-data-model-design.md` and `supabase/migrations/`; cart persistence and saved-address storage still pending per Phase 3/4. Phase 2 follow-up migration (Dessert Cups, `fake` category removal, `order_items` fake-cake columns, `orders.source`) is done — see `20260814100000`–`20260814100400`.

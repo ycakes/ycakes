@@ -1,19 +1,22 @@
--- Categories: top-level + Candy Corner's three subcategories.
+-- Categories: top-level + Candy Corner's four subcategories. No "Fake"
+-- category — Fake Cake is a per-order-item toggle, not a category (see
+-- ARCHITECTURE.md "Fake Cake ordering").
 insert into public.categories (name, slug, sort_order) values
   ('{"en":"Birthday","ar":"عيد ميلاد"}', 'birthday', 1),
   ('{"en":"Wedding","ar":"زفاف"}', 'wedding', 2),
   ('{"en":"Graduation","ar":"تخرج"}', 'graduation', 3),
   ('{"en":"Bento","ar":"بينتو"}', 'bento', 4),
   ('{"en":"Custom","ar":"مخصص"}', 'custom', 5),
-  ('{"en":"Fake","ar":"وهمية"}', 'fake', 6),
-  ('{"en":"Candy Corner","ar":"ركن الحلوى"}', 'candy-corner', 7);
+  ('{"en":"Candy Corner","ar":"ركن الحلوى"}', 'candy-corner', 6);
 
 insert into public.categories (parent_id, name, slug, sort_order)
 select id, '{"en":"Cupcakes","ar":"كب كيك"}'::jsonb, 'cupcakes', 1 from public.categories where slug = 'candy-corner'
 union all
 select id, '{"en":"Cake Pops","ar":"كيك بوبس"}'::jsonb, 'pops', 2 from public.categories where slug = 'candy-corner'
 union all
-select id, '{"en":"Popsicles","ar":"بوبسيكل"}'::jsonb, 'popsicles', 3 from public.categories where slug = 'candy-corner';
+select id, '{"en":"Popsicles","ar":"بوبسيكل"}'::jsonb, 'popsicles', 3 from public.categories where slug = 'candy-corner'
+union all
+select id, '{"en":"Dessert Cups","ar":"أكواب الحلوى"}'::jsonb, 'dessert-cups', 4 from public.categories where slug = 'candy-corner';
 
 -- Sizes: birthday, graduation, custom share the same serving ranges.
 insert into public.sizes (category_id, min_qty, max_qty, unit, sort_order)
@@ -52,11 +55,11 @@ select c.id, n, n, 'quantity', (n / 12)
 from public.categories c, generate_series(12, 996, 12) as n
 where c.slug = 'cupcakes';
 
--- Candy Corner - Pops / Popsicles: 12-step increments up to 996.
+-- Candy Corner - Pops / Popsicles / Dessert Cups: 12-step increments up to 996.
 insert into public.sizes (category_id, min_qty, max_qty, unit, sort_order)
 select c.id, n, n, 'quantity', (n / 12)
 from public.categories c, generate_series(12, 996, 12) as n
-where c.slug in ('pops', 'popsicles');
+where c.slug in ('pops', 'popsicles', 'dessert-cups');
 
 -- Tiers: 2 through 6 (Fake cakes may use 5-6 once their sizes exist).
 insert into public.tiers (tier_count) values (2), (3), (4), (5), (6);
@@ -79,12 +82,13 @@ join public.tiers t on t.tier_count in (2, 3, 4)
 where c.slug in ('birthday', 'wedding', 'graduation', 'custom')
   and s.min_qty >= 34;
 
--- Shapes
-insert into public.shapes (name, sort_order) values
-  ('{"en":"Circle","ar":"دائري"}', 1),
-  ('{"en":"Heart","ar":"قلب"}', 2),
-  ('{"en":"Square","ar":"مربع"}', 3),
-  ('{"en":"Rectangle","ar":"مستطيل"}', 4);
+-- Shapes. fake_eligible marks the shapes selectable for a Fake Cake
+-- (Rectangle/Circle only, see ARCHITECTURE.md "Fake Cake ordering").
+insert into public.shapes (name, sort_order, fake_eligible) values
+  ('{"en":"Circle","ar":"دائري"}', 1, true),
+  ('{"en":"Heart","ar":"قلب"}', 2, false),
+  ('{"en":"Square","ar":"مربع"}', 3, false),
+  ('{"en":"Rectangle","ar":"مستطيل"}', 4, true);
 
 -- Flavors (Candy Corner cakes should only ever link to Vanilla + Chocolate
 -- via cake_flavors once real products are entered — enforced at the admin

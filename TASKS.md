@@ -31,15 +31,15 @@ Check items off as completed. Add sub-tasks as they get discovered mid-phase —
 - [x] Local Supabase stack via Docker — got it working after a Docker Desktop update fixed the earlier API-version mismatch, `supabase migration list` showed all 23 migrations matching hosted exactly, then reverted by choice: `supabase stop` (containers removed, data volume kept for a fast future restart), `.env.local` back to hosted. Day-to-day dev currently runs against hosted, not local — `supabase start` + flip `.env.local` back to `http://127.0.0.1:54321` any time local dev is wanted again.
 - [x] Baseline table grants (`20260814090800_baseline_table_grants.sql`) — hosted projects get `select/insert/update/delete` on every `public` table granted to `anon`/`authenticated`/`service_role` automatically at provisioning; the local CLI/Docker stack didn't replicate that (confirmed: even `service_role` got `permission denied` on a plain select, not an RLS issue). Stated explicitly now so local dev doesn't depend on CLI/Docker bootstrap behavior. Re-granting an already-granted privilege is a no-op, so pushing it to hosted was a safe no-change confirmation, not a fix there.
 
-### Phase 2 follow-up migration — REQUIRED before Phase 3 code starts
+### Phase 2 follow-up migration — done
 
-Decisions made after the original Phase 2 schema was built. These need a new migration (or a couple of small ones) before Phase 3 storefront code depends on the schema, since they change category data and add columns:
+Decisions made after the original Phase 2 schema was built, applied via `20260814100000`–`20260814100400`:
 
-- [ ] Add **Dessert Cups** as a 4th Candy Corner subcategory (seed data — alongside cupcakes/pops/popsicles)
-- [ ] Remove or deactivate the **`fake` category row** in `categories` — Fake Cakes is no longer a top-level category (see ARCHITECTURE.md "Fake Cake ordering"). Check for and reassign any FK references first.
-- [ ] Add new `order_items` columns for Fake Cake support: `is_fake` (boolean, default false), `fake_size_cm`, `fake_shape` (rectangle/circle only), `reference_image_url`. Decide exact `fake_shape` implementation (dedicated enum vs. filtered join against existing `shapes` table) when writing the migration.
-- [ ] Add `orders.source` column (enum or text: `website`, `phone`, `instagram`, `in_person`, etc. — confirm exact values with the owner) for manual/offline order entry support later; defaults to `website`.
-- [ ] Add application-level (and ideally DB check-constraint) validation: `is_fake = true` is invalid for `bento` and `candy_corner` categories.
+- [x] Add **Dessert Cups** as a 4th Candy Corner subcategory (seed data — alongside cupcakes/pops/popsicles), 12-step sizes starting at 12 like pops/popsicles
+- [x] Remove the **`fake` category row** in `categories` — Fake Cakes is no longer a top-level category (see ARCHITECTURE.md "Fake Cake ordering"). No cake rows existed yet, so nothing needed FK reassignment (defensive reassignment-to-`custom` included anyway).
+- [x] Add new `order_items` columns for Fake Cake support: `is_fake` (boolean, default false), `fake_size_cm` (numeric), `fake_shape_id` (FK to `shapes`, via a new `shapes.fake_eligible` flag rather than a dedicated enum), `reference_image_url`. `size_id`/`shape_id` are now nullable; a DB check constraint (`order_items_fake_cake_fields`) enforces real-cake vs. Fake Cake field sets are mutually exclusive.
+- [x] Add `orders.source` column (`website`/`phone`/`instagram`/`in_person`, default `website`). The only insert path today is the customer-facing flow, so `normalize_order_on_insert` now forces `source = 'website'` on every insert regardless of client input; Phase 6 manual entry will need its own privileged path.
+- [x] Add DB-level validation (trigger, since it spans `order_items`→`cakes`→`categories`): `is_fake = true` rejected for Bento and Candy Corner (including its subcategories) items. A second trigger validates `fake_shape_id` references a `fake_eligible` shape.
 
 ## Phase 3 — Public storefront
 
