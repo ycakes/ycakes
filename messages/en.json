@@ -71,7 +71,11 @@
       "subcategory": "Subcategory",
       "selectSubcategory": "Select a subcategory",
       "images": "Images",
-      "featured": "Featured"
+      "featured": "Featured",
+      "hex": "Hex",
+      "restrictedTo": "Restricted To",
+      "restrictedToList": "{categories} only",
+      "unrestricted": "Unrestricted — available everywhere"
     },
     "imageUploader": {
       "upload": "Upload",

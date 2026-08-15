@@ -71,7 +71,11 @@
       "subcategory": "الفئة الفرعية",
       "selectSubcategory": "اختر فئة فرعية",
       "images": "الصور",
-      "featured": "مميز"
+      "featured": "مميز",
+      "hex": "السداسي",
+      "restrictedTo": "مقيّد بـ",
+      "restrictedToList": "{categories} فقط",
+      "unrestricted": "غير مقيّد — متاح في كل مكان"
     },
     "imageUploader": {
       "upload": "رفع صورة",

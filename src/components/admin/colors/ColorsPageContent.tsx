@@ -81,6 +81,10 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
       ),
     },
     {
+      header: t("hex"),
+      render: (row) => <span className="text-text-secondary">{row.hex_code ?? "—"}</span>,
+    },
+    {
       header: t("active"),
       render: (row) => <Switch checked={row.active} onCheckedChange={(checked) => toggleActive(row.id, checked)} />,
     },

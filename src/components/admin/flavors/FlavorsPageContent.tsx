@@ -12,7 +12,13 @@ import type { Flavor } from "@/types/catalog";
 
 type Row = Flavor & { active: boolean; sort_order: number };
 
-export function FlavorsPageContent({ initialFlavors }: { initialFlavors: Row[] }) {
+export function FlavorsPageContent({
+  initialFlavors,
+  restrictionsByFlavor,
+}: {
+  initialFlavors: Row[];
+  restrictionsByFlavor: Record<string, string[]>;
+}) {
   const t = useTranslations("Admin.table");
   const tCommon = useTranslations("Common");
   const [flavors, setFlavors] = useState(initialFlavors);
@@ -73,6 +79,17 @@ export function FlavorsPageContent({ initialFlavors }: { initialFlavors: Row[] }
 
   const columns: AdminTableColumn<Row>[] = [
     { header: t("name"), render: (row) => `${row.name.en} / ${row.name.ar}` },
+    {
+      header: t("restrictedTo"),
+      render: (row) => {
+        const list = restrictionsByFlavor[row.id];
+        return (
+          <span className="text-text-secondary">
+            {list?.length ? t("restrictedToList", { categories: list.join(", ") }) : t("unrestricted")}
+          </span>
+        );
+      },
+    },
     { header: t("priceModifier"), render: (row) => `${row.price_modifier} ${tCommon("egp")}` },
     {
       header: t("active"),
