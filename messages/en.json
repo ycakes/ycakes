@@ -37,6 +37,10 @@
       "colors": "Colors",
       "flavors": "Flavors",
       "priceModifier": "Price Modifier",
+      "toppers": "Toppers",
+      "hasColorVariants": "Has color variants",
+      "colorVariants": "Color Variants",
+      "noColorVariants": "No color variants",
       "noResults": "No results yet.",
       "saveFailed": "Failed to save. Please try again."
     },

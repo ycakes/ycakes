@@ -37,6 +37,10 @@
       "colors": "الألوان",
       "flavors": "النكهات",
       "priceModifier": "معدّل السعر",
+      "toppers": "الإضافات",
+      "hasColorVariants": "له تدرجات لونية",
+      "colorVariants": "التدرجات اللونية",
+      "noColorVariants": "لا توجد تدرجات لونية",
       "noResults": "لا توجد نتائج بعد.",
       "saveFailed": "فشل الحفظ. حاول مرة أخرى."
     },
