@@ -90,17 +90,17 @@ export function NavBar({ className }: { className?: string }) {
                 <User className="size-4" />
               </Menu.Trigger>
               <Menu.Portal>
-                <Menu.Positioner side="bottom" align="end" sideOffset={8} className="z-30">
-                  <Menu.Popup className="min-w-[160px] rounded-2xl border border-border-default bg-bg-surface p-1.5 shadow-md">
+                <Menu.Positioner side="bottom" align="center" sideOffset={8} className="z-30">
+                  <Menu.Popup className="w-max rounded-2xl border border-border-default bg-bg-surface p-1.5 shadow-md">
                     <Menu.LinkItem
                       render={<Link href="/profile" />}
-                      className="cursor-pointer rounded-xl px-3 py-2 text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"
+                      className="block w-full cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-center text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"
                     >
                       {t("profileLink")}
                     </Menu.LinkItem>
                     <Menu.Item
                       onClick={handleLogOut}
-                      className="cursor-pointer rounded-xl px-3 py-2 text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"
+                      className="block w-full cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-center text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"
                     >
                       {t("logOut")}
                     </Menu.Item>
