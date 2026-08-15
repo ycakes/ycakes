@@ -16,6 +16,7 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
   const t = useTranslations("Admin.table");
   const [colors, setColors] = useState(initialColors);
   const [editing, setEditing] = useState<ColorFormValue | null | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
   async function refresh() {
@@ -24,23 +25,43 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
   }
 
   async function handleSave(value: ColorFormValue) {
+    setError(null);
     const payload = { name: { en: value.name_en, ar: value.name_ar }, hex_code: value.hex_code };
     if (value.id) {
-      await supabase.from("colors").update(payload).eq("id", value.id);
+      const { error: updateError } = await supabase.from("colors").update(payload).eq("id", value.id);
+      if (updateError) {
+        setError(t("saveFailed"));
+        return;
+      }
     } else {
-      await supabase.from("colors").insert({ ...payload, sort_order: colors.length });
+      const nextSort = colors.length > 0 ? Math.max(...colors.map(c => c.sort_order)) + 1 : 0;
+      const { error: insertError } = await supabase.from("colors").insert({ ...payload, sort_order: nextSort });
+      if (insertError) {
+        setError(t("saveFailed"));
+        return;
+      }
     }
     setEditing(undefined);
     await refresh();
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("colors").delete().eq("id", id);
+    setError(null);
+    const { error: deleteError } = await supabase.from("colors").delete().eq("id", id);
+    if (deleteError) {
+      setError(t("saveFailed"));
+      return;
+    }
     await refresh();
   }
 
   async function toggleActive(id: string, active: boolean) {
-    await supabase.from("colors").update({ active }).eq("id", id);
+    setError(null);
+    const { error: updateError } = await supabase.from("colors").update({ active }).eq("id", id);
+    if (updateError) {
+      setError(t("saveFailed"));
+      return;
+    }
     setColors((prev) => prev.map((c) => (c.id === id ? { ...c, active } : c)));
   }
 
@@ -80,6 +101,7 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
           {t("add")}
         </Button>
       </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <AdminTable columns={columns} rows={colors} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
       <ColorFormDialog open={editing !== undefined} initialValue={editing ?? null} onSave={handleSave} onCancel={() => setEditing(undefined)} />
     </div>

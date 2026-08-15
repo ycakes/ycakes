@@ -35,7 +35,8 @@
       "nameEn": "Name (English)",
       "nameAr": "Name (Arabic)",
       "colors": "Colors",
-      "noResults": "No results yet."
+      "noResults": "No results yet.",
+      "saveFailed": "Failed to save. Please try again."
     },
     "imageUploader": {
       "upload": "Upload",
