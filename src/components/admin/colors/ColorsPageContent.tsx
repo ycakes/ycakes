@@ -17,10 +17,15 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
   const [colors, setColors] = useState(initialColors);
   const [editing, setEditing] = useState<ColorFormValue | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [addKey, setAddKey] = useState(0);
   const supabase = createClient();
 
   async function refresh() {
-    const { data } = await supabase.from("colors").select("id, name, hex_code, active, sort_order").order("sort_order");
+    const { data, error: fetchError } = await supabase.from("colors").select("id, name, hex_code, active, sort_order").order("sort_order");
+    if (fetchError) {
+      setError(t("saveFailed"));
+      return;
+    }
     if (data) setColors(data as Row[]);
   }
 
@@ -97,13 +102,26 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("colors")}</h1>
-        <Button type="button" variant="brand-primary" onClick={() => setEditing(null)}>
+        <Button
+          type="button"
+          variant="brand-primary"
+          onClick={() => {
+            setEditing(null);
+            setAddKey((k) => k + 1);
+          }}
+        >
           {t("add")}
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <AdminTable columns={columns} rows={colors} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
-      <ColorFormDialog open={editing !== undefined} initialValue={editing ?? null} onSave={handleSave} onCancel={() => setEditing(undefined)} />
+      <ColorFormDialog
+        key={editing?.id ?? `new-${addKey}`}
+        open={editing !== undefined}
+        initialValue={editing ?? null}
+        onSave={handleSave}
+        onCancel={() => setEditing(undefined)}
+      />
     </div>
   );
 }

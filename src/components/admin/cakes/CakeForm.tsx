@@ -63,7 +63,7 @@ export function CakeForm({
         base_price: Number(basePrice) || 0,
         featured,
         active,
-        ...(cakeImages.length === 0 ? { primary_image_url: null } : {}),
+        ...(images.length > 0 && cakeImages.length === 0 ? { primary_image_url: null } : {}),
       };
 
       let cakeId = cake?.id;

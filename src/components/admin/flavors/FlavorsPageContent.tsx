@@ -18,10 +18,15 @@ export function FlavorsPageContent({ initialFlavors }: { initialFlavors: Row[] }
   const [flavors, setFlavors] = useState(initialFlavors);
   const [editing, setEditing] = useState<FlavorFormValue | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [addKey, setAddKey] = useState(0);
   const supabase = createClient();
 
   async function refresh() {
-    const { data } = await supabase.from("flavors").select("id, name, price_modifier, active, sort_order").order("sort_order");
+    const { data, error: fetchError } = await supabase.from("flavors").select("id, name, price_modifier, active, sort_order").order("sort_order");
+    if (fetchError) {
+      setError(t("saveFailed"));
+      return;
+    }
     if (data) setFlavors(data as Row[]);
   }
 
@@ -89,13 +94,26 @@ export function FlavorsPageContent({ initialFlavors }: { initialFlavors: Row[] }
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("flavors")}</h1>
-        <Button type="button" variant="brand-primary" onClick={() => setEditing(null)}>
+        <Button
+          type="button"
+          variant="brand-primary"
+          onClick={() => {
+            setEditing(null);
+            setAddKey((k) => k + 1);
+          }}
+        >
           {t("add")}
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <AdminTable columns={columns} rows={flavors} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
-      <FlavorFormDialog open={editing !== undefined} initialValue={editing ?? null} onSave={handleSave} onCancel={() => setEditing(undefined)} />
+      <FlavorFormDialog
+        key={editing?.id ?? `new-${addKey}`}
+        open={editing !== undefined}
+        initialValue={editing ?? null}
+        onSave={handleSave}
+        onCancel={() => setEditing(undefined)}
+      />
     </div>
   );
 }

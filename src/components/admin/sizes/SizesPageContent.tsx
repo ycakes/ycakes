@@ -6,6 +6,7 @@ import { AdminTable, type AdminTableColumn } from "@/components/admin/AdminTable
 import { RowActions } from "@/components/admin/RowActions";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SizeFormDialog, type SizeFormValue } from "./SizeFormDialog";
@@ -27,15 +28,20 @@ export function SizesPageContent({
   const [sizes, setSizes] = useState(initialSizes);
   const [editing, setEditing] = useState<SizeFormValue | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [addKey, setAddKey] = useState(0);
   const supabase = createClient();
 
   async function refresh() {
     if (!selectedCategoryId) return;
-    const { data } = await supabase
+    const { data, error: fetchError } = await supabase
       .from("sizes")
       .select("id, category_id, min_qty, max_qty, unit, price_modifier, active, sort_order")
       .eq("category_id", selectedCategoryId)
       .order("sort_order");
+    if (fetchError) {
+      setError(t("saveFailed"));
+      return;
+    }
     if (data) setSizes(data as Row[]);
   }
 
@@ -106,24 +112,44 @@ export function SizesPageContent({
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("sizes")}</h1>
-        <Button type="button" variant="brand-primary" disabled={!selectedCategoryId} onClick={() => setEditing(null)}>
+        <Button
+          type="button"
+          variant="brand-primary"
+          disabled={!selectedCategoryId}
+          onClick={() => {
+            setEditing(null);
+            setAddKey((k) => k + 1);
+          }}
+        >
           {t("add")}
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <select
+      <Select
         value={selectedCategoryId ?? ""}
-        onChange={(e) => router.push(`/admin/sizes?category=${e.target.value}`)}
-        className="w-fit rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm"
+        onValueChange={(value) => {
+          if (value) router.push(`/admin/sizes?category=${value}`);
+        }}
       >
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name.en} / {category.name.ar}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger className="w-fit">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map((category) => (
+            <SelectItem key={category.id} value={category.id}>
+              {category.name.en} / {category.name.ar}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <AdminTable columns={columns} rows={sizes} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
-      <SizeFormDialog open={editing !== undefined} initialValue={editing ?? null} onSave={handleSave} onCancel={() => setEditing(undefined)} />
+      <SizeFormDialog
+        key={editing?.id ?? `new-${addKey}`}
+        open={editing !== undefined}
+        initialValue={editing ?? null}
+        onSave={handleSave}
+        onCancel={() => setEditing(undefined)}
+      />
     </div>
   );
 }

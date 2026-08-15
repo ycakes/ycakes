@@ -18,6 +18,7 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
   const [candyCornerExpanded, setCandyCornerExpanded] = useState(true);
   const [dragId, setDragId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [addKey, setAddKey] = useState(0);
   const supabase = createClient();
 
   const topLevel = categories.filter((c) => c.parent_id === null);
@@ -25,7 +26,11 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
   const subcategories = candyCorner ? categories.filter((c) => c.parent_id === candyCorner.id) : [];
 
   async function refresh() {
-    const { data } = await supabase.from("categories").select("id, parent_id, name, slug, active, sort_order").order("sort_order");
+    const { data, error: fetchError } = await supabase.from("categories").select("id, parent_id, name, slug, active, sort_order").order("sort_order");
+    if (fetchError) {
+      setError(t("saveFailed"));
+      return;
+    }
     if (data) setCategories(data as Row[]);
   }
 
@@ -34,6 +39,7 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
     const results = await Promise.all(group.map((row, index) => supabase.from("categories").update({ sort_order: index }).eq("id", row.id)));
     if (results.some((result) => result.error)) {
       setError(t("saveFailed"));
+      await refresh();
       return;
     }
     await refresh();
@@ -100,7 +106,14 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("categories")}</h1>
-        <Button type="button" variant="brand-primary" onClick={() => setEditing(null)}>
+        <Button
+          type="button"
+          variant="brand-primary"
+          onClick={() => {
+            setEditing(null);
+            setAddKey((k) => k + 1);
+          }}
+        >
           {t("add")}
         </Button>
       </div>
@@ -152,6 +165,7 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
         ))}
       </div>
       <CategoryFormDialog
+        key={editing?.id ?? `new-${addKey}`}
         open={editing !== undefined}
         initialValue={editing ?? null}
         onSave={(value) => handleSave(value, editing?.id ? categories.find((c) => c.id === editing.id)?.parent_id ?? null : null)}

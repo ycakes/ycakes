@@ -48,6 +48,7 @@ export default async function AdminCakesPage({
 
   return (
     <CakesListContent
+      key={`${category ?? ""}|${subcategory ?? ""}|${sort ?? ""}|${dir ?? ""}|${currentPage}`}
       topLevel={topLevel}
       subcategories={subcategories}
       activeCategory={category ?? null}

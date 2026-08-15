@@ -22,13 +22,18 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
   const [toppers, setToppers] = useState(initialToppers);
   const [editing, setEditing] = useState<TopperFormValue | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [addKey, setAddKey] = useState(0);
   const supabase = createClient();
 
   async function refresh() {
-    const { data } = await supabase
+    const { data, error: fetchError } = await supabase
       .from("toppers")
       .select("id, name, price_modifier, has_color_variants, image_url, active, sort_order, topper_colors(color_id, colors(id, name, hex_code))")
       .order("sort_order");
+    if (fetchError) {
+      setError(t("saveFailed"));
+      return;
+    }
     if (data) setToppers(data as unknown as Row[]);
   }
 
@@ -155,13 +160,27 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("toppers")}</h1>
-        <Button type="button" variant="brand-primary" onClick={() => setEditing(null)}>
+        <Button
+          type="button"
+          variant="brand-primary"
+          onClick={() => {
+            setEditing(null);
+            setAddKey((k) => k + 1);
+          }}
+        >
           {t("add")}
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <AdminTable columns={columns} rows={toppers} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
-      <TopperFormDialog open={editing !== undefined} initialValue={editing ?? null} allColors={allColors} onSave={handleSave} onCancel={() => setEditing(undefined)} />
+      <TopperFormDialog
+        key={editing?.id ?? `new-${addKey}`}
+        open={editing !== undefined}
+        initialValue={editing ?? null}
+        allColors={allColors}
+        onSave={handleSave}
+        onCancel={() => setEditing(undefined)}
+      />
     </div>
   );
 }
