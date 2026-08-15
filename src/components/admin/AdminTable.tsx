@@ -15,17 +15,17 @@ export function AdminTable<T>({
   rows,
   getRowId,
   emptyMessage,
-  sortKey,
-  sortDir,
-  sortBasePath,
+  currentSortKey,
+  currentSortDir,
+  buildSortHref,
 }: {
   columns: AdminTableColumn<T>[];
   rows: T[];
   getRowId: (row: T) => string;
   emptyMessage: string;
-  sortKey?: string | null;
-  sortDir?: "asc" | "desc";
-  sortBasePath?: string;
+  currentSortKey?: string | null;
+  currentSortDir?: "asc" | "desc";
+  buildSortHref?: (key: string, nextDir: "asc" | "desc") => string;
 }) {
   if (rows.length === 0) {
     return <p className="py-16 text-center text-text-secondary">{emptyMessage}</p>;
@@ -37,18 +37,18 @@ export function AdminTable<T>({
         <thead>
           <tr className="border-b border-border-default bg-bg-surface-alt text-start">
             {columns.map((col) => {
-              const isSorted = sortBasePath && col.sortKey && sortKey === col.sortKey;
-              const nextDir = isSorted && sortDir === "asc" ? "desc" : "asc";
+              const isSorted = buildSortHref && col.sortKey && currentSortKey === col.sortKey;
+              const nextDir = isSorted && currentSortDir === "asc" ? "desc" : "asc";
               const header = (
                 <span className="flex items-center gap-1">
                   {col.header}
-                  {isSorted && (sortDir === "asc" ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />)}
+                  {isSorted && (currentSortDir === "asc" ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />)}
                 </span>
               );
               return (
                 <th key={col.header} className="p-3 text-start font-semibold text-text-primary">
-                  {sortBasePath && col.sortKey ? (
-                    <Link href={`${sortBasePath}?sort=${col.sortKey}&dir=${nextDir}`}>{header}</Link>
+                  {buildSortHref && col.sortKey ? (
+                    <Link href={buildSortHref(col.sortKey, nextDir)}>{header}</Link>
                   ) : (
                     header
                   )}

@@ -51,7 +51,11 @@
       "unitQuantity": "الكمية",
       "unitCm": "سنتيمتر",
       "categories": "الفئات",
-      "slug": "الرابط المختصر"
+      "slug": "الرابط المختصر",
+      "cakes": "الكيكات",
+      "cake": "الكيكة",
+      "category": "الفئة",
+      "all": "الكل"
     },
     "imageUploader": {
       "upload": "رفع صورة",

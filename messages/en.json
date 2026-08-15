@@ -51,7 +51,11 @@
       "unitQuantity": "Quantity",
       "unitCm": "Centimeters",
       "categories": "Categories",
-      "slug": "URL Slug"
+      "slug": "URL Slug",
+      "cakes": "Cakes",
+      "cake": "Cake",
+      "category": "Category",
+      "all": "All"
     },
     "imageUploader": {
       "upload": "Upload",
