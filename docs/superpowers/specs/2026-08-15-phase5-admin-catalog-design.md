@@ -11,7 +11,17 @@ Out of scope (explicitly deferred): migrating existing local `public/images/*` p
 
 ## 1. Schema change
 
-One migration, `cake_images` gets a primary-image flag and a sync trigger:
+One migration, two changes:
+
+**`toppers.image_url`**: toppers need a real photo (e.g. a graduation-hat topper shown as an actual image when picking toppers on a Custom Cake). `src/components/storefront/TopperCard.tsx` already accepts an `imageSrc` prop but nothing has ever populated it — `toppers` has no image column today, so every topper currently renders an empty tinted box in the storefront customizer. Fixed by adding:
+
+```sql
+alter table public.toppers add column image_url text;
+```
+
+Single image per topper (not a multi-image join table like cakes — toppers are one simple pick-one visual, no gallery need). Nullable, since existing seeded toppers have none yet until the admin uploads one via the new Toppers admin page. `src/lib/catalog/queries.ts`'s `getToppers()` and `src/types/catalog.ts`'s `Topper` type both need `image_url` added so `CakeCustomizer` can finally pass a real `imageSrc` into `TopperCard` instead of leaving it undefined.
+
+**`cake_images` primary-image flag** + sync trigger:
 
 ```sql
 alter table public.cake_images add column is_primary boolean not null default false;
@@ -69,7 +79,7 @@ for each row execute function public.fn_sync_cake_primary_image();
 - **Admin - Cake Form** (`/admin/cakes/new`, `/admin/cakes/[id]`): bilingual name/description, Category `Select` + conditional Subcategory `Select` (Candy Corner only), base price, multi-image uploader w/ primary marking, active toggle, featured toggle.
 - **Admin - Categories** (`/admin/categories`): drag-to-reorder list, Candy Corner's 4 subcategories nested under an expand/collapse chevron with independent reorder, CRUD.
 - **Admin - Sizes** (`/admin/sizes`): Category `Select` at top re-filters the table; `AdminTable` beneath (min/max qty, unit, price modifier, active, actions).
-- **Admin - Flavors / Colors / Toppers**: each an `AdminTable` instance with its type-specific column (Flavors: price modifier; Colors: hex swatch + price N/A; Toppers: price modifier + color-variant swatches).
+- **Admin - Flavors / Colors / Toppers**: each an `AdminTable` instance with its type-specific column (Flavors: price modifier; Colors: hex swatch + price N/A; Toppers: thumbnail from `image_url` + price modifier + color-variant swatches). Toppers' row/form image upload reuses the same signed-Cloudinary-upload route as the Cake Form, single-file rather than multi.
 
 All forms: bilingual (en/ar) fields side by side or tabbed — follow the existing `InputField`/`Section` convention from `CakeCustomizer`/`Register` rather than inventing a new form pattern. All EN/AR strings via next-intl messages, no hardcoded English.
 
