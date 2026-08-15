@@ -38,7 +38,8 @@
     "imageUploader": {
       "upload": "Upload",
       "setPrimary": "Set as primary",
-      "remove": "Remove"
+      "remove": "Remove",
+      "uploadFailed": "Upload failed. Please try again."
     }
   },
   "NavBar": {

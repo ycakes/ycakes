@@ -22,10 +22,12 @@ export function ImageUploader({
   const t = useTranslations("Admin.imageUploader");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setUploading(true);
+    setError(null);
     try {
       const uploaded: UploadedImage[] = [];
       for (const file of Array.from(files)) {
@@ -37,6 +39,8 @@ export function ImageUploader({
         next[0].is_primary = true;
       }
       onChange(next);
+    } catch {
+      setError(t("uploadFailed"));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -101,6 +105,7 @@ export function ImageUploader({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

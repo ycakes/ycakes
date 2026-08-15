@@ -38,7 +38,8 @@
     "imageUploader": {
       "upload": "رفع صورة",
       "setPrimary": "تعيين كصورة رئيسية",
-      "remove": "إزالة"
+      "remove": "إزالة",
+      "uploadFailed": "فشل رفع الصورة. حاول مرة أخرى."
     }
   },
   "NavBar": {
