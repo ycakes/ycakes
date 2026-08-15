@@ -9,6 +9,7 @@
   },
   "Admin": {
     "nav": {
+      "brand": "لوحة تحكم واي كيكس",
       "catalog": "الكتالوج",
       "cakes": "الكيكات",
       "categories": "الفئات",
@@ -17,10 +18,19 @@
       "colors": "الألوان",
       "toppers": "الإضافات",
       "orders": "الطلبات",
+      "allOrders": "كل الطلبات",
+      "deliveryAreas": "مناطق التوصيل",
+      "deliveryCalendar": "تقويم التوصيل",
+      "promoCodes": "أكواد الخصم",
       "money": "الحسابات",
+      "expenses": "المصروفات",
+      "analytics": "التحليلات",
       "team": "الفريق",
+      "adminsAndRoles": "المسؤولون والأدوار",
       "toggleSidebar": "تبديل الشريط الجانبي",
-      "logOut": "تسجيل الخروج"
+      "logOut": "تسجيل الخروج",
+      "role": "مسؤول",
+      "switchLanguage": "تغيير اللغة"
     },
     "table": {
       "edit": "تعديل",

@@ -9,23 +9,31 @@ import {
   Palette,
   PartyPopper,
   ShoppingBag,
+  MapPin,
+  Calendar,
+  Tag,
   Wallet,
+  BarChart3,
   Users,
   ChevronsLeft,
   ChevronsRight,
   LogOut,
+  User,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, Link } from "@/i18n/navigation";
 import { AdminNavItem } from "./AdminNavItem";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
-export function AdminSidebarNav() {
+export function AdminSidebarNav({ adminName }: { adminName?: string }) {
   const t = useTranslations("Admin.nav");
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const otherLocale = locale === "en" ? "ar" : "en";
 
   const catalogItems = [
     { href: "/admin/cakes", icon: Cake, label: t("cakes") },
@@ -36,74 +44,163 @@ export function AdminSidebarNav() {
     { href: "/admin/toppers", icon: PartyPopper, label: t("toppers") },
   ];
 
-  const futureItems = [
-    { icon: ShoppingBag, label: t("orders") },
-    { icon: Wallet, label: t("money") },
-    { icon: Users, label: t("team") },
+  const ordersItems = [
+    { icon: ShoppingBag, label: t("allOrders") },
+    { icon: MapPin, label: t("deliveryAreas") },
+    { icon: Calendar, label: t("deliveryCalendar") },
+    { icon: Tag, label: t("promoCodes") },
   ];
+
+  const moneyItems = [
+    { icon: Wallet, label: t("expenses") },
+    { icon: BarChart3, label: t("analytics") },
+  ];
+
+  const teamItems = [{ icon: Users, label: t("adminsAndRoles") }];
+
+  const displayName = adminName || t("role");
+  const initial = adminName ? adminName.trim().charAt(0).toUpperCase() : null;
 
   return (
     <aside
-      className={
-        collapsed
-          ? "flex h-full w-[76px] shrink-0 flex-col gap-6 border-e border-border-default bg-bg-surface p-3"
-          : "flex h-full w-64 shrink-0 flex-col gap-6 border-e border-border-default bg-bg-surface p-4"
-      }
+      className={cn(
+        "flex h-full shrink-0 flex-col border-e border-border-default bg-bg-surface transition-[width] duration-200",
+        collapsed ? "w-[76px]" : "w-[240px]",
+      )}
     >
-      <div className="flex items-center justify-between">
-        {!collapsed && <span className="font-heading text-lg font-bold text-brand-primary">YCakes</span>}
+      <div className="flex h-[64px] shrink-0 items-center justify-between border-b border-border-default pe-[16px] ps-[20px]">
+        {!collapsed && (
+          <span className="truncate font-heading text-[18px] font-semibold text-brand-primary">
+            {t("brand")}
+          </span>
+        )}
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={t("toggleSidebar")}
-          className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-surface-alt"
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-surface-alt"
         >
           {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
         </button>
       </div>
 
-      <nav className="flex flex-col gap-1">
-        {!collapsed && (
-          <p className="px-3 pb-1 text-xs font-semibold uppercase text-text-secondary/70">
-            {t("catalog")}
-          </p>
-        )}
-        {catalogItems.map((item) => (
-          <AdminNavItem
-            key={item.href}
-            href={item.href}
-            icon={item.icon}
-            label={item.label}
-            active={pathname.startsWith(item.href)}
-            collapsed={collapsed}
-          />
-        ))}
-      </nav>
+      <div className="flex flex-1 flex-col gap-[20px] overflow-y-auto p-[16px]">
+        <nav className="flex flex-col gap-1">
+          {!collapsed && (
+            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+              {t("catalog")}
+            </p>
+          )}
+          {catalogItems.map((item) => (
+            <AdminNavItem
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={item.label}
+              active={pathname.startsWith(item.href)}
+              collapsed={collapsed}
+            />
+          ))}
+        </nav>
 
-      <nav className="flex flex-col gap-1">
-        {futureItems.map((item) => (
-          <AdminNavItem
-            key={item.label}
-            href={null}
-            icon={item.icon}
-            label={item.label}
-            active={false}
-            collapsed={collapsed}
-          />
-        ))}
-      </nav>
+        <nav className="flex flex-col gap-1">
+          {!collapsed && (
+            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+              {t("orders")}
+            </p>
+          )}
+          {ordersItems.map((item) => (
+            <AdminNavItem
+              key={item.label}
+              href={null}
+              icon={item.icon}
+              label={item.label}
+              active={false}
+              collapsed={collapsed}
+            />
+          ))}
+        </nav>
 
-      <button
-        type="button"
-        onClick={async () => {
-          await createClient().auth.signOut();
-          router.push("/");
-        }}
-        className="mt-auto flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-text-primary hover:bg-bg-surface-alt"
-      >
-        <LogOut className="size-5 shrink-0" />
-        {!collapsed && <span>{t("logOut")}</span>}
-      </button>
+        <nav className="flex flex-col gap-1">
+          {!collapsed && (
+            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+              {t("money")}
+            </p>
+          )}
+          {moneyItems.map((item) => (
+            <AdminNavItem
+              key={item.label}
+              href={null}
+              icon={item.icon}
+              label={item.label}
+              active={false}
+              collapsed={collapsed}
+              dimmed
+            />
+          ))}
+        </nav>
+
+        <nav className="flex flex-col gap-1">
+          {!collapsed && (
+            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+              {t("team")}
+            </p>
+          )}
+          {teamItems.map((item) => (
+            <AdminNavItem
+              key={item.label}
+              href={null}
+              icon={item.icon}
+              label={item.label}
+              active={false}
+              collapsed={collapsed}
+              dimmed
+            />
+          ))}
+        </nav>
+      </div>
+
+      <div className="flex h-[64px] shrink-0 items-center justify-between border-t border-border-default bg-bg-subtle px-[16px]">
+        <div className="flex min-w-0 items-center gap-[8px]">
+          <span className="flex size-[32px] shrink-0 items-center justify-center rounded-full bg-bg-surface-alt text-text-primary">
+            {initial ? (
+              <span className="text-[13px] font-semibold">{initial}</span>
+            ) : (
+              <User className="size-4" />
+            )}
+          </span>
+          {!collapsed && (
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate font-sans text-[13px] font-medium text-text-primary">
+                {displayName}
+              </span>
+              <span className="truncate font-sans text-[11px] text-text-secondary">{t("role")}</span>
+            </span>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-[4px]">
+          <Link
+            href={pathname}
+            locale={otherLocale}
+            aria-label={t("switchLanguage")}
+            className="flex size-8 items-center justify-center rounded-lg text-[12px] font-semibold text-text-secondary hover:bg-bg-surface-alt"
+          >
+            {otherLocale.toUpperCase()}
+          </Link>
+          <button
+            type="button"
+            onClick={async () => {
+              await createClient().auth.signOut();
+              router.push("/");
+            }}
+            aria-label={t("logOut")}
+            title={t("logOut")}
+            className="flex size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-surface-alt"
+          >
+            <LogOut className="size-4" />
+          </button>
+        </div>
+      </div>
     </aside>
   );
 }

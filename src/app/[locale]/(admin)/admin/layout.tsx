@@ -9,11 +9,12 @@ export default async function AdminLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  await requireAdmin(locale);
+  const profile = await requireAdmin(locale);
+  const adminName = [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim() || undefined;
 
   return (
     <div className="flex min-h-screen bg-bg-page">
-      <AdminSidebarNav />
+      <AdminSidebarNav adminName={adminName} />
       <div className="flex-1 overflow-x-auto">{children}</div>
     </div>
   );

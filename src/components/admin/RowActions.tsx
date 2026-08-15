@@ -22,32 +22,40 @@ export function RowActions({
   const [confirming, setConfirming] = useState(false);
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-[4px]">
       {editHref ? (
         <Link href={editHref}>
-          <Button type="button" variant="ghost" size="icon-sm" aria-label={t("edit")}>
-            <Pencil className="size-4" />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={t("edit")}
+            className="size-[32px] rounded-[8px] text-text-secondary"
+          >
+            <Pencil className="size-[16px]" />
           </Button>
         </Link>
       ) : (
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           aria-label={t("edit")}
           onClick={onEdit}
+          className="size-[32px] rounded-[8px] text-text-secondary"
         >
-          <Pencil className="size-4" />
+          <Pencil className="size-[16px]" />
         </Button>
       )}
       <Button
         type="button"
         variant="ghost"
-        size="icon-sm"
+        size="icon"
         aria-label={t("delete")}
         onClick={() => setConfirming(true)}
+        className="size-[32px] rounded-[8px] text-destructive"
       >
-        <Trash2 className="size-4 text-destructive" />
+        <Trash2 className="size-[16px]" />
       </Button>
       <ConfirmDialog
         open={confirming}

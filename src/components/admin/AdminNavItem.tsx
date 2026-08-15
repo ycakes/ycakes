@@ -8,26 +8,32 @@ export function AdminNavItem({
   label,
   active,
   collapsed,
+  dimmed = false,
 }: {
   href: string | null;
   icon: LucideIcon;
   label: string;
   active: boolean;
   collapsed: boolean;
+  dimmed?: boolean;
 }) {
   const content = (
     <span
       className={cn(
-        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+        "flex h-[36px] items-center gap-[12px] rounded-[16px] px-[12px] py-[8px] font-sans text-[14px] transition-colors",
         active
-          ? "bg-brand-primary text-text-on-brand"
+          ? "bg-brand-primary font-semibold text-text-on-brand"
           : href
-            ? "text-text-primary hover:bg-bg-surface-alt"
-            : "cursor-not-allowed text-text-secondary/50",
+            ? "font-medium text-text-secondary hover:bg-bg-surface-alt"
+            : "cursor-default font-medium text-text-secondary",
       )}
     >
-      <Icon className="size-5 shrink-0" />
-      {!collapsed && <span className="truncate">{label}</span>}
+      <span className={cn("flex shrink-0 items-center justify-center", dimmed && "opacity-40")}>
+        <Icon className="size-[18px]" />
+      </span>
+      {!collapsed && (
+        <span className={cn("truncate", dimmed && "opacity-50")}>{label}</span>
+      )}
     </span>
   );
 

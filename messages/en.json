@@ -9,6 +9,7 @@
   },
   "Admin": {
     "nav": {
+      "brand": "yCakes Admin",
       "catalog": "Catalog",
       "cakes": "Cakes",
       "categories": "Categories",
@@ -17,10 +18,19 @@
       "colors": "Colors",
       "toppers": "Toppers",
       "orders": "Orders",
+      "allOrders": "All Orders",
+      "deliveryAreas": "Delivery Areas",
+      "deliveryCalendar": "Delivery Calendar",
+      "promoCodes": "Promo Codes",
       "money": "Money",
+      "expenses": "Expenses",
+      "analytics": "Analytics",
       "team": "Team",
+      "adminsAndRoles": "Admins & Roles",
       "toggleSidebar": "Toggle sidebar",
-      "logOut": "Log Out"
+      "logOut": "Log Out",
+      "role": "Admin",
+      "switchLanguage": "Switch language"
     },
     "table": {
       "edit": "Edit",

@@ -18,6 +18,7 @@ export function AdminTable<T>({
   currentSortKey,
   currentSortDir,
   buildSortHref,
+  rowHeight = "60",
 }: {
   columns: AdminTableColumn<T>[];
   rows: T[];
@@ -26,27 +27,31 @@ export function AdminTable<T>({
   currentSortKey?: string | null;
   currentSortDir?: "asc" | "desc";
   buildSortHref?: (key: string, nextDir: "asc" | "desc") => string;
+  rowHeight?: "60" | "64";
 }) {
   if (rows.length === 0) {
     return <p className="py-16 text-center text-text-secondary">{emptyMessage}</p>;
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border-default">
+    <div className="overflow-x-auto rounded-[24px] border border-border-default">
       <table className="w-full text-start text-sm">
         <thead>
-          <tr className="border-b border-border-default bg-bg-surface-alt text-start">
+          <tr className="h-[44px] border-b border-border-default bg-bg-subtle text-start">
             {columns.map((col) => {
               const isSorted = buildSortHref && col.sortKey && currentSortKey === col.sortKey;
               const nextDir = isSorted && currentSortDir === "asc" ? "desc" : "asc";
               const header = (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 uppercase tracking-[0.48px]">
                   {col.header}
                   {isSorted && (currentSortDir === "asc" ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />)}
                 </span>
               );
               return (
-                <th key={col.header} className="p-3 text-start font-semibold text-text-primary">
+                <th
+                  key={col.header}
+                  className="px-[24px] text-start text-[12px] font-semibold text-text-secondary"
+                >
                   {buildSortHref && col.sortKey ? (
                     <Link href={buildSortHref(col.sortKey, nextDir)}>{header}</Link>
                   ) : (
@@ -58,10 +63,17 @@ export function AdminTable<T>({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={getRowId(row)} className={cn("border-b border-border-default last:border-0 hover:bg-bg-surface-alt")}>
+          {rows.map((row, index) => (
+            <tr
+              key={getRowId(row)}
+              className={cn(
+                "border-b border-border-default last:border-0 hover:bg-bg-surface-alt",
+                rowHeight === "64" ? "h-[64px]" : "h-[60px]",
+                index % 2 === 0 ? "bg-bg-surface" : "bg-bg-subtle",
+              )}
+            >
               {columns.map((col) => (
-                <td key={col.header} className="p-3 align-middle text-text-primary">
+                <td key={col.header} className="px-[24px] align-middle text-text-primary">
                   {col.render(row)}
                 </td>
               ))}
