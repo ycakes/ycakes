@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Menu, User, X } from "lucide-react";
+import { Menu as MenuIcon, User, X } from "lucide-react";
+import { Menu } from "@base-ui/react/menu";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useCartCount } from "@/store/cart";
+import { useSession } from "@/hooks/useSession";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -19,9 +22,18 @@ export function NavBar({ className }: { className?: string }) {
   const t = useTranslations("NavBar");
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
   const cartCount = useCartCount();
+  const { session } = useSession();
   const otherLocale = locale === "en" ? "ar" : "en";
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  async function handleLogOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.replace("/");
+    router.refresh();
+  }
 
   // Most-specific href wins so /shop/custom highlights "Custom Cakes" only,
   // while any other /shop/[category] still highlights "Shop".
@@ -69,15 +81,42 @@ export function NavBar({ className }: { className?: string }) {
           >
             {otherLocale.toUpperCase()}
           </Link>
-          {/* No auth system yet (Phase 4 in progress) — always points to
-              /login until session state exists to branch to /profile. */}
-          <Link
-            href="/login"
-            aria-label={t("profile")}
-            className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-sm sm:size-11"
-          >
-            <User className="size-4" />
-          </Link>
+          {session ? (
+            <Menu.Root>
+              <Menu.Trigger
+                aria-label={t("profile")}
+                className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-sm sm:size-11"
+              >
+                <User className="size-4" />
+              </Menu.Trigger>
+              <Menu.Portal>
+                <Menu.Positioner side="bottom" align="end" sideOffset={8} className="z-30">
+                  <Menu.Popup className="min-w-[160px] rounded-2xl border border-border-default bg-bg-surface p-1.5 shadow-md">
+                    <Menu.LinkItem
+                      render={<Link href="/profile" />}
+                      className="cursor-pointer rounded-xl px-3 py-2 text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"
+                    >
+                      {t("profileLink")}
+                    </Menu.LinkItem>
+                    <Menu.Item
+                      onClick={handleLogOut}
+                      className="cursor-pointer rounded-xl px-3 py-2 text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"
+                    >
+                      {t("logOut")}
+                    </Menu.Item>
+                  </Menu.Popup>
+                </Menu.Positioner>
+              </Menu.Portal>
+            </Menu.Root>
+          ) : (
+            <Link
+              href="/login"
+              aria-label={t("profile")}
+              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-sm sm:size-11"
+            >
+              <User className="size-4" />
+            </Link>
+          )}
           <Link
             href="/cart"
             className="relative flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface shadow-sm sm:size-11"
@@ -96,7 +135,7 @@ export function NavBar({ className }: { className?: string }) {
             aria-expanded={mobileOpen}
             className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-sm md:hidden"
           >
-            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            {mobileOpen ? <X className="size-5" /> : <MenuIcon className="size-5" />}
           </button>
         </div>
       </div>

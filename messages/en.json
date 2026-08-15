@@ -14,7 +14,9 @@
     "contact": "Contact",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "profile": "Account"
+    "profile": "Account",
+    "profileLink": "Profile",
+    "logOut": "Log Out"
   },
   "Footer": {
     "tagline": "Handmade cakes for every celebration, baked fresh in Cairo.",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { NavBar } from "@/components/layout/NavBar";
@@ -10,6 +10,7 @@ import { ToggleChip } from "@/components/storefront/ToggleChip";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useSession } from "@/hooks/useSession";
 import type { PendingSignupData } from "@/types/auth";
 
 const MAX_ADDRESSES = 5;
@@ -34,6 +35,7 @@ function RegisterForm() {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { session, loading } = useSession();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -77,6 +79,11 @@ function RegisterForm() {
     ...phones.map((entry) => `phone-${entry.id}`),
   ];
   const fieldError = (id: string) => (attempted ? fieldErrors[id] : undefined);
+
+  // Already logged in — this page makes no sense to show, redirect home.
+  useEffect(() => {
+    if (!loading && session) router.replace("/");
+  }, [loading, session, router]);
 
   function addAddress() {
     if (addresses.length >= MAX_ADDRESSES) return;
@@ -174,6 +181,14 @@ function RegisterForm() {
     }
 
     setSubmittedEmail(email);
+  }
+
+  if (loading || session) {
+    return (
+      <main className="flex flex-col bg-bg-page">
+        <NavBar />
+      </main>
+    );
   }
 
   if (submittedEmail) {

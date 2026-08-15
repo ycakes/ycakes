@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
@@ -8,15 +8,22 @@ import { InputField } from "@/components/storefront/InputField";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useSession } from "@/hooks/useSession";
 
 export default function LoginPage() {
   const t = useTranslations("Login");
   const router = useRouter();
+  const { session, loading } = useSession();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Already logged in — this page makes no sense to show, redirect home.
+  useEffect(() => {
+    if (!loading && session) router.replace("/");
+  }, [loading, session, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +47,14 @@ export default function LoginPage() {
 
     router.replace("/");
     router.refresh();
+  }
+
+  if (loading || session) {
+    return (
+      <main className="flex flex-col bg-bg-page">
+        <NavBar />
+      </main>
+    );
   }
 
   return (

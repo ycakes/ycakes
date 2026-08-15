@@ -130,7 +130,9 @@ Home (`/`), Shop/category browse (`/shop`, `/shop/[category]`), Cake Detail (`/c
 ## Nav Bar (Phase 3 follow-up, confirmed post-Figma-review)
 
 - The four nav links (Home/Shop/Custom Cakes/Contact) are now **centered** on the page — previously `justify-between`-style distribution skewed them off-center toward the wider action-icon side (language toggle/cart/etc.). Fixed as part of the Phase 4 design session's Nav Bar component update.
-- A **Profile icon** was added to the nav actions area, positioned between the language toggle and the cart icon: links to `/login` when logged out, `/profile` (or equivalent route) when logged in.
+- A **Profile icon** was added to the nav actions area, positioned between the language toggle and the cart icon, styled to match the cart/language-toggle (bordered circle, `bg-bg-surface`, shadow).
+- **Session-aware** (`src/hooks/useSession.ts`, a thin wrapper over `supabase.auth.getSession()` + `onAuthStateChange`, shared by NavBar/Login/Register): logged out → plain link to `/login`. Logged in → a Base UI `Menu` dropdown (`@base-ui/react/menu`, already a dependency via `Button`) with **Profile** (links to `/profile`, not built yet) and **Log Out** (calls `supabase.auth.signOut()`, redirects home). No separate dropdown library was added — Base UI's headless `Menu` primitive covers it.
+- Login and Register both redirect to `/` if a session already exists (checked via the same `useSession()` hook) — a logged-in user has no reason to see either page.
 
 ## Phase 4 — Checkout & accounts (Figma design confirmed)
 
