@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
 import { buildOrderWhatsAppUrl } from "@/lib/contact";
 import { getLastOrder, clearLastOrder } from "@/lib/orders/lastOrder";
+import { useCartStore } from "@/store/cart";
 import type { OrderConfirmationSnapshot } from "@/types/orders";
 
 export default function OrderConfirmationPage() {
@@ -32,6 +33,10 @@ export default function OrderConfirmationPage() {
     // One-time receipt — clear so a later back-navigation to this URL
     // doesn't show a stale order.
     clearLastOrder();
+    // Cleared here, not in Checkout, so Checkout's own "redirect to /cart if
+    // empty" effect never fires while still mounted on /checkout — see the
+    // comment on that call site for the bug this caused.
+    useCartStore.getState().clear();
   }, [router]);
 
   if (!order) return null;

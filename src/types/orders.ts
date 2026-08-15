@@ -1,4 +1,33 @@
 import type { ContactMethod } from "./auth";
+import type { Bilingual } from "./catalog";
+
+export type OrderStatus = "pending" | "confirmed" | "completed" | "cancelled";
+
+export type OrderHistoryRow = {
+  id: string;
+  order_number: string;
+  status: OrderStatus;
+  created_at: string;
+  subtotal_estimate: number;
+  final_price: number | null;
+  order_items: { quantity: number; cakes: { name: Bilingual } | null }[];
+};
+
+export type OrderDetail = {
+  order_number: string;
+  status: OrderStatus;
+  created_at: string;
+  fulfillment_type: "pickup" | "delivery";
+  delivery_address: string | null;
+  fulfillment_date: string;
+  notes: string | null;
+  subtotal_estimate: number;
+  delivery_price: number;
+  discount_amount: number;
+  final_price: number | null;
+  delivery_areas: { name: Bilingual } | null;
+  order_items: { quantity: number; line_estimate: number; cakes: { name: Bilingual } | null }[];
+};
 
 // What Order Confirmation renders. Guests have no DB read access to their
 // own order (ARCHITECTURE.md: "visible only to admin"), so this is built

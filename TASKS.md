@@ -102,7 +102,14 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
   - **Known limitation**: `from:` is Resend's sandbox sender (`onboarding@resend.dev`), which only delivers to the Resend account's own email (`ycakesnet@gmail.com`) until a domain is verified — blocked on the still-open "Connect custom domain" task under Phase 1. Real customers can't get confirmation emails until that's done.
 - [x] Login page (`/login`): Email/Password with show/hide toggle, Forgot Password link present but inert (not wired — flagged open in ARCHITECTURE.md), calls `supabase.auth.signInWithPassword()`.
 - [x] `profiles.full_name` → `first_name`/`last_name` split (`20260815140000_profiles_first_last_name.sql`), populated at signup via `auth.users.raw_user_meta_data`.
-- [ ] Profile page (`/profile`, new scope this session): sidebar Profile Info + Saved Addresses + Saved Phone Numbers (up to 5 each, Edit/Remove), main panel Order History (status color-coded, item summary, price, View Details)
+- [x] Profile page (`/profile`, new scope this session): sidebar Profile Info (name editable, email read-only — changing it needs Supabase's own re-confirmation flow, out of scope) + Saved Addresses + Saved Phone Numbers (up to 5 each, real Edit/Remove with a confirmation prompt before delete, live DB reads/writes), main panel Order History (status color-coded, item summary, price, working **View Details** modal). Requires a session — redirects to `/login` otherwise.
+  - Edit/Remove buttons use the real `Button` component (matching Profile Info's own Edit button) instead of plain text links, and Remove now confirms before deleting — both fixed after initial feedback.
+  - **View Details** (`OrderDetailModal`) built after feedback that the compact card alone wasn't enough — lazily fetches full order details on open via the same owner-scoped RLS, no separate page needed.
+  - **Known limitation**: item-summary names go blank for a since-discontinued cake (customer-role RLS on `cakes` only exposes `active = true`, unlike the accountant role) — not fixed this pass, see ARCHITECTURE.md.
+- [x] Checkout auto-fills First/Last Name and Email from the account when logged in, only into fields still empty (never overwrites typed input) — added after feedback, matches the "Use this" chip rule already in place for saved addresses.
+- [x] **Bug fix**: placing an order didn't show the Confirmation page — Checkout was clearing the cart *before* navigating, which raced its own "redirect to /cart if empty" effect against the navigation to `/order-confirmation`. The order itself was still created successfully (visible in Order History), just not shown to the customer. Fixed by moving the cart-clear into Order Confirmation's effect instead.
+
+**Phase 4 is functionally complete** except "Confirmation email (Resend)" above — deliberately deferred (owner decision) until the custom domain is connected and verified in Resend, same blocker as the account-confirmation email's sender address.
 
 ## Phase 5 — Admin: catalog
 

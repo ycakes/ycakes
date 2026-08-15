@@ -60,6 +60,24 @@ export function CheckoutPageContent({
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
 
+  // Pre-fill from the account when logged in — only into fields still empty,
+  // never overwriting anything already typed (same rule as the saved-address
+  // "Use this" chips).
+  useEffect(() => {
+    if (!session) return;
+    const supabase = createClient();
+    supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", session.user.id)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile?.first_name) setFirstName((current) => current || profile.first_name);
+        if (profile?.last_name) setLastName((current) => current || profile.last_name);
+        if (session.user.email) setEmail((current) => current || session.user.email!);
+      });
+  }, [session]);
+
   const [savingAddress, setSavingAddress] = useState(false);
   const [saveAddressMessage, setSaveAddressMessage] = useState<string | null>(null);
 
@@ -224,7 +242,11 @@ export function CheckoutPageContent({
         total,
       };
       setLastOrder(snapshot);
-      useCartStore.getState().clear();
+      // Cart is cleared by the Order Confirmation page itself, not here —
+      // clearing it while still mounted on /checkout made `items.length ===
+      // 0` true immediately, which raced this navigation against the
+      // redirect-to-/cart effect above and could send the customer to an
+      // empty cart instead of their confirmation page.
       router.push("/order-confirmation");
     } catch (err) {
       console.error("create order error:", err);
