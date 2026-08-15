@@ -74,7 +74,7 @@ export function NavBar({ className }: { className?: string }) {
           <Link
             href="/login"
             aria-label={t("profile")}
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-bg-subtle text-text-primary"
+            className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-sm sm:size-11"
           >
             <User className="size-4" />
           </Link>

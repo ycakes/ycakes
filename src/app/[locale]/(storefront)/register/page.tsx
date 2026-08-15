@@ -8,7 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { InputField } from "@/components/storefront/InputField";
 import { ToggleChip } from "@/components/storefront/ToggleChip";
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { PendingSignupData } from "@/types/auth";
 
@@ -33,6 +33,7 @@ function RegisterForm() {
   const tCommon = useTranslations("Common");
   const locale = useLocale();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -42,10 +43,40 @@ function RegisterForm() {
   const [addresses, setAddresses] = useState<AddressEntry[]>([]);
   const [phones, setPhones] = useState<PhoneEntry[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [attempted, setAttempted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(
     searchParams.get("confirmError") ? t("errorGeneric") : null,
   );
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const fieldErrors: Record<string, string> = {};
+  if (!firstName.trim()) fieldErrors.firstName = t("errorRequired");
+  if (!lastName.trim()) fieldErrors.lastName = t("errorRequired");
+  if (!email.trim()) fieldErrors.email = t("errorRequired");
+  else if (!emailValid) fieldErrors.email = t("errorEmailInvalid");
+  if (!password) fieldErrors.password = t("errorRequired");
+  else if (password.length < MIN_PASSWORD_LENGTH) fieldErrors.password = t("errorPasswordTooShort");
+  if (!confirmPassword) fieldErrors.confirmPassword = t("errorRequired");
+  else if (password !== confirmPassword) fieldErrors.confirmPassword = t("errorPasswordMismatch");
+  for (const entry of addresses) {
+    if (!entry.label.trim()) fieldErrors[`address-label-${entry.id}`] = t("errorRequired");
+    if (!entry.address.trim()) fieldErrors[`address-address-${entry.id}`] = t("errorRequired");
+  }
+  for (const entry of phones) {
+    if (!entry.phone.trim()) fieldErrors[`phone-${entry.id}`] = t("errorRequired");
+  }
+
+  const fieldOrder = [
+    "firstName",
+    "lastName",
+    "email",
+    "password",
+    "confirmPassword",
+    ...addresses.flatMap((entry) => [`address-label-${entry.id}`, `address-address-${entry.id}`]),
+    ...phones.map((entry) => `phone-${entry.id}`),
+  ];
+  const fieldError = (id: string) => (attempted ? fieldErrors[id] : undefined);
 
   function addAddress() {
     if (addresses.length >= MAX_ADDRESSES) return;
@@ -76,19 +107,17 @@ function RegisterForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMessage(null);
+    setAttempted(true);
 
-    if (password !== confirmPassword) {
-      setErrorMessage(t("errorPasswordMismatch"));
-      return;
-    }
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      setErrorMessage(t("errorPasswordTooShort"));
+    const firstErrorId = fieldOrder.find((id) => fieldErrors[id]);
+    if (firstErrorId) {
+      document.getElementById(firstErrorId)?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
     setSubmitting(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -99,7 +128,40 @@ function RegisterForm() {
     setSubmitting(false);
 
     if (error) {
+      // Logged for debugging — Supabase's client-facing error message is
+      // often generic ("Database error saving new user", a failed Send
+      // Email hook, etc.) and worth checking in devtools/Edge Function logs.
+      console.error("signUp error:", error);
       setErrorMessage(error.message.toLowerCase().includes("already") ? t("errorEmailInUse") : t("errorGeneric"));
+      return;
+    }
+
+    // With "Enable email confirmations" OFF (temporary, pre-domain setup —
+    // see ARCHITECTURE.md), signUp() returns an active session immediately
+    // and there's no confirmation link to wait for, so sync addresses/phones
+    // right away instead of stashing them for /register/complete.
+    if (data.session) {
+      if (addresses.length > 0 || phones.length > 0) {
+        await Promise.all([
+          ...addresses.map((entry) =>
+            supabase.from("customer_addresses").insert({
+              customer_id: data.session!.user.id,
+              label: entry.label,
+              address: entry.address,
+              apartment: entry.apartment || null,
+            }),
+          ),
+          ...phones.map((entry) =>
+            supabase.from("customer_phones").insert({
+              customer_id: data.session!.user.id,
+              phone: entry.phone,
+              contact_method: entry.contactMethod,
+            }),
+          ),
+        ]);
+      }
+      router.replace("/");
+      router.refresh();
       return;
     }
 
@@ -146,44 +208,54 @@ function RegisterForm() {
 
           <div className="flex gap-3">
             <InputField
+              id="firstName"
               label={t("firstName")}
               placeholder={t("firstNamePlaceholder")}
               value={firstName}
               onChange={setFirstName}
               autoComplete="given-name"
+              error={fieldError("firstName")}
             />
             <InputField
+              id="lastName"
               label={t("lastName")}
               placeholder={t("lastNamePlaceholder")}
               value={lastName}
               onChange={setLastName}
               autoComplete="family-name"
+              error={fieldError("lastName")}
             />
           </div>
 
           <InputField
+            id="email"
             label={t("email")}
             type="email"
             placeholder={t("emailPlaceholder")}
             value={email}
             onChange={setEmail}
             autoComplete="email"
+            error={fieldError("email")}
           />
           <InputField
+            id="password"
             label={t("password")}
             type="password"
             placeholder={t("passwordPlaceholder")}
             value={password}
             onChange={setPassword}
             autoComplete="new-password"
+            error={fieldError("password")}
           />
           <InputField
+            id="confirmPassword"
             label={t("confirmPassword")}
             type="password"
             placeholder={t("confirmPasswordPlaceholder")}
             value={confirmPassword}
             onChange={setConfirmPassword}
             autoComplete="new-password"
+            error={fieldError("confirmPassword")}
           />
 
           <p className="font-heading text-lg font-semibold text-brand-primary">{t("addressesHeading")}</p>
@@ -202,15 +274,19 @@ function RegisterForm() {
                 </button>
               </div>
               <InputField
+                id={`address-label-${entry.id}`}
                 label={t("addressLabel")}
                 placeholder={t("addressLabelPlaceholder")}
                 value={entry.label}
                 onChange={(value) => updateAddress(entry.id, { label: value })}
+                error={fieldError(`address-label-${entry.id}`)}
               />
               <InputField
+                id={`address-address-${entry.id}`}
                 label={t("addressAddress")}
                 value={entry.address}
                 onChange={(value) => updateAddress(entry.id, { address: value })}
+                error={fieldError(`address-address-${entry.id}`)}
               />
               <InputField
                 label={t("addressApartment")}
@@ -243,11 +319,13 @@ function RegisterForm() {
               <div className="flex items-end gap-2">
                 <div className="flex-1">
                   <InputField
+                    id={`phone-${entry.id}`}
                     label=""
                     type="tel"
                     placeholder={t("phonePlaceholder")}
                     value={entry.phone}
                     onChange={(value) => updatePhone(entry.id, { phone: value })}
+                    error={fieldError(`phone-${entry.id}`)}
                   />
                 </div>
                 <div className="flex gap-1.5 pb-3">

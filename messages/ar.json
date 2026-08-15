@@ -70,6 +70,8 @@
     "errorPasswordMismatch": "كلمتا المرور غير متطابقتين.",
     "errorPasswordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
     "errorEmailInUse": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
+    "errorRequired": "هذا الحقل مطلوب.",
+    "errorEmailInvalid": "الرجاء إدخال بريد إلكتروني صحيح.",
     "errorGeneric": "حدث خطأ ما — الرجاء المحاولة مرة أخرى."
   },
   "Login": {

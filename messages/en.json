@@ -70,6 +70,8 @@
     "errorPasswordMismatch": "Passwords don't match.",
     "errorPasswordTooShort": "Password must be at least 8 characters.",
     "errorEmailInUse": "An account with this email already exists.",
+    "errorRequired": "This field is required.",
+    "errorEmailInvalid": "Please enter a valid email address.",
     "errorGeneric": "Something went wrong — please try again."
   },
   "Login": {
