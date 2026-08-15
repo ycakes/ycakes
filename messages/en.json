@@ -33,7 +33,9 @@
       "save": "Save",
       "name": "Name",
       "nameEn": "Name (English)",
-      "nameAr": "Name (Arabic)"
+      "nameAr": "Name (Arabic)",
+      "colors": "Colors",
+      "noResults": "No results yet."
     },
     "imageUploader": {
       "upload": "Upload",
