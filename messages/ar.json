@@ -194,6 +194,7 @@
     "empty": "سلتك فارغة.",
     "browseCakes": "تصفح الكيكات",
     "remove": "إزالة العنصر",
+    "edit": "تعديل",
     "cmChip": "{cm} سم",
     "tierChip": "{count, plural, one {طابق واحد} other {# طوابق}}",
     "orderSummary": "ملخص الطلب",
@@ -341,7 +342,11 @@
     "errorColorRequired": "الرجاء اختيار لون الكريمة",
     "errorColorArrangementRequired": "الرجاء وصف كيفية توزيع الألوان المختارة",
     "errorShapeRequired": "الرجاء اختيار الشكل",
-    "errorFakeSizeRequired": "الرجاء إدخال الحجم بالسنتيمتر"
+    "errorFakeSizeRequired": "الرجاء إدخال الحجم بالسنتيمتر",
+    "addedToCartTitle": "تمت الإضافة إلى السلة!",
+    "addedToCartBody": "تابع التصفح، أو اذهب إلى سلتك لإتمام الطلب.",
+    "goToCart": "الذهاب إلى السلة",
+    "continueShopping": "متابعة التسوق"
   },
   "Home": {
     "eyebrow": "بالحب نخبز",

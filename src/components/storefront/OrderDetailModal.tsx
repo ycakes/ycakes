@@ -186,12 +186,12 @@ export function OrderDetailModal({ orderId }: { orderId: string }) {
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-40 bg-black/40" />
         <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[92vw] max-w-[460px] -translate-x-1/2 -translate-y-1/2 flex-col gap-3 overflow-y-auto rounded-3xl bg-bg-surface p-6 shadow-lg">
-          <div className="flex items-center justify-between">
+          <div className="sticky -top-6 -mx-6 -mt-6 z-10 flex items-center justify-between bg-bg-surface px-6 pb-3 pt-6">
             <Dialog.Title className="font-heading text-xl font-semibold text-brand-primary">
               {t("orderDetailsTitle")}
             </Dialog.Title>
-            <Dialog.Close aria-label={t("close")} className="flex size-8 items-center justify-center rounded-full text-text-secondary hover:bg-bg-surface-alt">
-              <X className="size-4" />
+            <Dialog.Close aria-label={t("close")} className="flex size-10 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-bg-surface-alt">
+              <X className="size-5" />
             </Dialog.Close>
           </div>
 

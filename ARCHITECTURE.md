@@ -225,6 +225,23 @@ A second, related bug: even after the fix above, the page could still redirect t
 
 Next.js's dev-mode console flagged `birthday.jpeg` as the Largest Contentful Paint candidate without `loading="eager"`. The Shop-by-Category grid already passes `priority` to its first three `CategoryCard`s (birthday included), but the same file is *also* reused as the placeholder photo for Birthday's Trending Cakes row further down the same page (`ProductCard`, Phase 3's placeholder-cake seed) — those instances had no `priority` at all. Fixed by passing `priority` to the first category's first three `ProductCard`s too, matching the Shop grid's existing convention.
 
+### Add to Cart no longer auto-navigates to Cart
+
+`CakeCustomizer`'s "Add to Cart" used to call `router.push("/cart")` immediately after adding the item — changed (owner decision) to a confirmation modal instead (Base UI `Dialog`, fully controlled, no `Dialog.Trigger`) with **Continue Shopping** (just closes the modal — the customer stays on the same Cake Detail page, useful for adding several items from one product) and **Go to Cart** (navigates to `/cart`, matching the same `Button render={<Link .../>}` pattern used elsewhere for link-styled buttons).
+
+### Cart items are now editable
+
+Each `CartItemRow` gained an Edit button (pencil icon, next to Remove) alongside the existing quantity stepper. Clicking it stashes the full `CartItem` in `sessionStorage` (`src/lib/cart/editItem.ts`, `setEditCartItem`) and navigates to that cake's Detail page. `CakeCustomizer` reads it once on mount (an effect, not a lazy `useState` initializer — same SSR/hydration-mismatch reasoning as Order Confirmation's snapshot read) and pre-fills every field from it, then clears the sessionStorage key.
+
+- **Editing never touches the original cart row** — confirmed owner decision: the pre-filled form is a fresh customization pass, and clicking "Add to Cart" again creates a **new** cart item via the normal flow. The old item stays in the cart until the customer removes it manually. This was a deliberate choice, not a missing "replace" feature — asking the customer to explicitly remove the old one avoids a customization change accidentally discarding an item they still wanted.
+- **Known limitation carried over from Fake Cake's reference image**: if the edited item had a reference image, `referenceImageUrl` is a client-side `blob:` URL (Cloudinary isn't wired up yet) — it will only still resolve if the browser tab that created it is still open. A stale/closed-tab blob URL will just show as a broken image on re-edit; not fixed this pass, same root cause as the `OrderDetailModal` reference-image note above.
+
+### "Use this" chips and Order Details' close button
+
+Two smaller polish items from feedback:
+- Checkout's saved-address/phone "Use this" chips were plain underlined text links — now a real `Button` (`variant="brand-primary"`), matching the styling of the Apply button next to Promo Code, for visual consistency between the two "commit a suggested value" actions on the same page.
+- `OrderDetailModal`'s close (X) button is now `sticky` within the popup's own scroll container (bleeds to the popup's edges with a matching background so content scrolls invisibly underneath it) instead of scrolling away with the content, and slightly larger (`size-10` button / `size-5` icon, up from `size-8`/`size-4`).
+
 ### Data model additions needed for Phase 4 (saved addresses/phones)
 
 **Implemented** (`20260815130000_customer_addresses_phones.sql`, pushed to hosted): dedicated join tables (`customer_addresses`, `customer_phones`), not JSONB arrays — matches the existing `order_item_flavors`/`order_item_colors` join-table pattern and keeps RLS/edit/remove straightforward. Confirmed requirements driving the design:

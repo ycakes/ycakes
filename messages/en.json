@@ -194,6 +194,7 @@
     "empty": "Your cart is empty.",
     "browseCakes": "Browse Cakes",
     "remove": "Remove item",
+    "edit": "Edit",
     "cmChip": "{cm} cm",
     "tierChip": "{count, plural, one {1 Tier} other {# Tiers}}",
     "orderSummary": "Order Summary",
@@ -341,7 +342,11 @@
     "errorColorRequired": "Please choose an icing color",
     "errorColorArrangementRequired": "Please describe how to arrange your chosen colors",
     "errorShapeRequired": "Please choose a shape",
-    "errorFakeSizeRequired": "Please enter a size in centimeters"
+    "errorFakeSizeRequired": "Please enter a size in centimeters",
+    "addedToCartTitle": "Added to Cart!",
+    "addedToCartBody": "Keep browsing, or head to your cart to check out.",
+    "goToCart": "Go to Cart",
+    "continueShopping": "Continue Shopping"
   },
   "Home": {
     "eyebrow": "Baked with love",

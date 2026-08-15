@@ -128,19 +128,15 @@ export function CheckoutAuthCard({
             {savedAddresses.map((address) => (
               <div
                 key={address.id}
-                className="flex items-center justify-between rounded-2xl bg-bg-subtle px-3.5 py-2.5 text-[13px]"
+                className="flex items-center justify-between gap-2 rounded-2xl bg-bg-subtle px-3.5 py-2.5 text-[13px]"
               >
                 <p className="text-text-primary">
                   {address.label} — {address.address}
                   {address.apartment ? `, ${address.apartment}` : ""}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => onUseAddress(address)}
-                  className="shrink-0 font-semibold text-brand-primary underline"
-                >
+                <Button type="button" variant="brand-primary" className="shrink-0" onClick={() => onUseAddress(address)}>
                   {t("useThis")}
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -151,16 +147,12 @@ export function CheckoutAuthCard({
             {savedPhones.map((phone) => (
               <div
                 key={phone.id}
-                className="flex items-center justify-between rounded-2xl bg-bg-subtle px-3.5 py-2.5 text-[13px]"
+                className="flex items-center justify-between gap-2 rounded-2xl bg-bg-subtle px-3.5 py-2.5 text-[13px]"
               >
                 <p className="text-text-primary">{phone.phone}</p>
-                <button
-                  type="button"
-                  onClick={() => onUsePhone(phone)}
-                  className="shrink-0 font-semibold text-brand-primary underline"
-                >
+                <Button type="button" variant="brand-primary" className="shrink-0" onClick={() => onUsePhone(phone)}>
                   {t("useThis")}
-                </button>
+                </Button>
               </div>
             ))}
           </div>
