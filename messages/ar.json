@@ -34,6 +34,11 @@
       "name": "الاسم",
       "nameEn": "الاسم (إنجليزي)",
       "nameAr": "الاسم (عربي)"
+    },
+    "imageUploader": {
+      "upload": "رفع صورة",
+      "setPrimary": "تعيين كصورة رئيسية",
+      "remove": "إزالة"
     }
   },
   "NavBar": {
