@@ -84,13 +84,15 @@
       "addSubcategory": "+ Add Subcategory",
       "variantsCount": "{count, plural, one {1 variant} other {# variants}}",
       "allowFake": "Available as Fake Cake",
-      "allowFakeHelper": "Lets customers order a display-only version of this design. Not shown for Bento or Candy Corner categories."
+      "allowFakeHelper": "Lets customers order a display-only version of this design. Not shown for Bento or Candy Corner categories.",
+      "activeHelper": "Inactive cakes are hidden from the storefront."
     },
     "imageUploader": {
       "upload": "Upload",
       "setPrimary": "Set as primary",
       "remove": "Remove",
-      "uploadFailed": "Upload failed. Please try again."
+      "uploadFailed": "Upload failed. Please try again.",
+      "primaryBadge": "PRIMARY"
     }
   },
   "NavBar": {

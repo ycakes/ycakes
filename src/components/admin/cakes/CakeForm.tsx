@@ -10,7 +10,7 @@ import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Cake, CakeImage, Category } from "@/types/catalog";
 
-type CakeFormValue = Pick<Cake, "id" | "category_id" | "name" | "description" | "base_price" | "featured"> & {
+type CakeFormValue = Pick<Cake, "id" | "category_id" | "name" | "description" | "base_price" | "featured" | "allow_fake"> & {
   active: boolean;
 };
 
@@ -43,6 +43,7 @@ export function CakeForm({
   const [subcategoryId, setSubcategoryId] = useState(initialSubcategoryId);
   const [featured, setFeatured] = useState(cake?.featured ?? false);
   const [active, setActive] = useState(cake?.active ?? true);
+  const [allowFake, setAllowFake] = useState(cake?.allow_fake ?? true);
   const [cakeImages, setCakeImages] = useState<UploadedImage[]>(
     images.map((img) => ({ url: img.url, sort_order: img.sort_order, is_primary: img.is_primary })),
   );
@@ -63,6 +64,7 @@ export function CakeForm({
         base_price: Number(basePrice) || 0,
         featured,
         active,
+        allow_fake: allowFake,
         ...(images.length > 0 && cakeImages.length === 0 ? { primary_image_url: null } : {}),
       };
 
@@ -185,17 +187,29 @@ export function CakeForm({
         <Switch checked={featured} onCheckedChange={setFeatured} />
         {t("featured")}
       </label>
-      <label className="flex items-center gap-2 text-[13px] font-medium text-text-primary">
-        <Switch checked={active} onCheckedChange={setActive} />
-        {t("active")}
-      </label>
+      <div className="flex flex-col gap-3 border-t border-border-default pt-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium text-text-primary">{t("active")}</span>
+            <span className="text-xs text-text-secondary">{t("activeHelper")}</span>
+          </div>
+          <Switch checked={active} onCheckedChange={setActive} />
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium text-text-primary">{t("allowFake")}</span>
+            <span className="text-xs text-text-secondary">{t("allowFakeHelper")}</span>
+          </div>
+          <Switch checked={allowFake} onCheckedChange={setAllowFake} />
+        </div>
+      </div>
 
       <div className="mt-2 flex gap-2">
+        <Button type="button" variant="brand-secondary" onClick={() => router.push("/admin/cakes")}>
+          {t("cancel")}
+        </Button>
         <Button type="button" variant="brand-primary" disabled={saving} onClick={handleSubmit}>
           {t("save")}
-        </Button>
-        <Button type="button" variant="brand-ghost" onClick={() => router.push("/admin/cakes")}>
-          {t("cancel")}
         </Button>
       </div>
     </div>

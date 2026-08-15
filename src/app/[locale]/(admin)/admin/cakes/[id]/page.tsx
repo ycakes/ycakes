@@ -16,7 +16,7 @@ export default async function AdminCakeFormPage({ params }: { params: Promise<{ 
   }
 
   const [{ data: cake, error: cakeError }, { data: images, error: imagesError }] = await Promise.all([
-    supabase.from("cakes").select("id, category_id, name, description, base_price, featured, active").eq("id", id).maybeSingle(),
+    supabase.from("cakes").select("id, category_id, name, description, base_price, featured, active, allow_fake").eq("id", id).maybeSingle(),
     supabase.from("cake_images").select("id, cake_id, url, sort_order, is_primary").eq("cake_id", id).order("sort_order"),
   ]);
   if (cakeError) throw cakeError;
