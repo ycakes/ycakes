@@ -4,8 +4,8 @@ import type { CartItem } from "@/types/cart";
 
 export type FulfillmentMethod = "pickup" | "delivery";
 
-/** Flip to true once Phase 4 checkout actually exists to submit an order to. */
-export const CHECKOUT_ENABLED = false;
+/** Phase 4 checkout page exists now — flipped on. */
+export const CHECKOUT_ENABLED = true;
 
 type CartState = {
   items: CartItem[];

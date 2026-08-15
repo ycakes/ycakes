@@ -1,19 +1,15 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Store, Truck } from "lucide-react";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
 import { Divider } from "@/components/storefront/Divider";
 import { CartItemRow } from "@/components/storefront/CartItemRow";
-import { DatePicker } from "@/components/storefront/DatePicker";
+import { FulfillmentFields } from "@/components/storefront/FulfillmentFields";
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { CHECKOUT_ENABLED, useCartStore, useCartSubtotal, useFulfillmentComplete } from "@/store/cart";
-import { cn } from "@/lib/utils";
 import type { DeliveryArea } from "@/types/catalog";
-
-const PICKUP_LOCATION = { en: "New Cairo", ar: "التجمع الخامس" };
 
 export function CartPageContent({
   deliveryAreas,
@@ -25,6 +21,7 @@ export function CartPageContent({
   const t = useTranslations("Cart");
   const tCommon = useTranslations("Common");
   const locale = useLocale() as "en" | "ar";
+  const router = useRouter();
   const items = useCartStore((state) => state.items);
   const removeItem = useCartStore((state) => state.removeItem);
   const setQuantity = useCartStore((state) => state.setQuantity);
@@ -86,75 +83,17 @@ export function CartPageContent({
               </div>
               <div className="h-px w-full bg-border-default" />
 
-              <div className="flex flex-col gap-2">
-                <p className="text-[15px] font-semibold text-text-primary">{t("fulfillmentType")}</p>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFulfillmentType("pickup")}
-                    className={cn(
-                      "flex flex-1 items-center gap-2 rounded-2xl border-[1.5px] px-3 py-2.5 text-sm",
-                      fulfillmentType === "pickup"
-                        ? "border-brand-primary bg-bg-surface-alt text-text-primary"
-                        : "border-border-default text-text-primary",
-                    )}
-                  >
-                    <Store className="size-5 shrink-0" />
-                    <span className="flex flex-col items-start">
-                      <span className="font-semibold">{t("pickup")}</span>
-                      <span className="text-xs text-text-secondary">{PICKUP_LOCATION[locale]}</span>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFulfillmentType("delivery")}
-                    className={cn(
-                      "flex flex-1 items-center gap-2 rounded-2xl border-[1.5px] px-3 py-2.5 text-sm",
-                      fulfillmentType === "delivery"
-                        ? "border-brand-primary bg-bg-surface-alt text-text-primary"
-                        : "border-border-default text-text-primary",
-                    )}
-                  >
-                    <Truck className="size-5 shrink-0" />
-                    <span className="font-semibold">{t("delivery")}</span>
-                  </button>
-                </div>
-              </div>
-
-              {fulfillmentType === "delivery" && (
-                <div className="flex flex-col gap-2">
-                  <p className="text-[15px] font-semibold text-text-primary">{t("deliveryArea")}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {deliveryAreas.map((area) => (
-                      <button
-                        key={area.id}
-                        type="button"
-                        onClick={() => setDeliveryAreaId(area.id)}
-                        className={cn(
-                          "rounded-full border-[1.5px] px-3 py-1.5 text-sm",
-                          deliveryAreaId === area.id
-                            ? "border-brand-primary bg-brand-primary text-text-on-brand"
-                            : "border-border-default text-text-primary",
-                        )}
-                      >
-                        {area.name[locale]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {fulfillmentType && (
-                <div className="flex flex-col gap-2">
-                  <p className="text-[15px] font-semibold text-text-primary">{t("fulfillmentDate")}</p>
-                  <DatePicker
-                    locale={locale}
-                    value={fulfillmentDate}
-                    onChange={setFulfillmentDate}
-                    blockedDates={blockedDates}
-                  />
-                </div>
-              )}
+              <FulfillmentFields
+                locale={locale}
+                deliveryAreas={deliveryAreas}
+                blockedDates={blockedDates}
+                fulfillmentMethod={fulfillmentType}
+                onFulfillmentMethodChange={setFulfillmentType}
+                deliveryAreaId={deliveryAreaId}
+                onDeliveryAreaChange={setDeliveryAreaId}
+                fulfillmentDate={fulfillmentDate}
+                onFulfillmentDateChange={setFulfillmentDate}
+              />
 
               <div className="h-px w-full bg-border-default" />
               <div className="flex items-center justify-between text-[17px] font-semibold text-text-primary">
@@ -167,10 +106,10 @@ export function CartPageContent({
                 size="xl"
                 className="w-full justify-center"
                 disabled={!CHECKOUT_ENABLED || !fulfillmentComplete}
+                onClick={() => router.push("/checkout")}
               >
                 {t("proceedToCheckout")}
               </Button>
-              <p className="text-center text-xs text-text-secondary">{t("checkoutComingSoon")}</p>
             </div>
           </div>
         )}

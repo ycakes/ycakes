@@ -68,3 +68,11 @@ export type DeliveryArea = {
   name: Bilingual;
   price: number;
 };
+
+export type PromoCode = {
+  id: string;
+  code: string;
+  discount_type: "fixed" | "percentage";
+  discount_value: number;
+  min_order_amount: number | null;
+};

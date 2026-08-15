@@ -7,3 +7,16 @@ export type PendingSignupData = {
   addresses: { label: string; address: string; apartment: string }[];
   phones: { phone: string; contactMethod: ContactMethod }[];
 };
+
+export type SavedAddress = {
+  id: string;
+  label: string;
+  address: string;
+  apartment: string | null;
+};
+
+export type SavedPhone = {
+  id: string;
+  phone: string;
+  contact_method: ContactMethod;
+};
