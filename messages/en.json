@@ -55,7 +55,13 @@
       "cakes": "Cakes",
       "cake": "Cake",
       "category": "Category",
-      "all": "All"
+      "all": "All",
+      "descriptionEn": "Description (English)",
+      "descriptionAr": "Description (Arabic)",
+      "subcategory": "Subcategory",
+      "selectSubcategory": "Select a subcategory",
+      "images": "Images",
+      "featured": "Featured"
     },
     "imageUploader": {
       "upload": "Upload",

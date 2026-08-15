@@ -55,7 +55,13 @@
       "cakes": "الكيكات",
       "cake": "الكيكة",
       "category": "الفئة",
-      "all": "الكل"
+      "all": "الكل",
+      "descriptionEn": "الوصف (إنجليزي)",
+      "descriptionAr": "الوصف (عربي)",
+      "subcategory": "الفئة الفرعية",
+      "selectSubcategory": "اختر فئة فرعية",
+      "images": "الصور",
+      "featured": "مميز"
     },
     "imageUploader": {
       "upload": "رفع صورة",
