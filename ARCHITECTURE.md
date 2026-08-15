@@ -125,7 +125,8 @@ Admins need a way to register orders that came in through channels other than th
 
 ## Storefront pages (Phase 3 — all built)
 
-Home (`/`), Shop/category browse (`/shop`, `/shop/[category]`), Cake Detail (`/cakes/[id]`, customization flow with Normal + Fake Cake variants), Cart (`/cart`). **No separate Contact page** — "Contact" in the nav is an anchor link that scrolls to the footer, which contains the WhatsApp number and Instagram link. This was a deliberate simplification, not an oversight — don't build a `/contact` route.
+Home (`/`), Shop/category browse (`/shop`, `/shop/[category]`), Cake Detail (`/cakes/[id]`, customization flow with Normal + Fake Cake variants), Cart (`/cart`). **No separate Contact page** — don't build a `/contact` route. "Contact" in the nav and footer no longer scrolls to the footer (superseded, Phase 4 follow-up): it opens `ContactModal` (`src/components/layout/ContactModal.tsx`, Base UI `Dialog`) — phone number with Call (`tel:`) and WhatsApp buttons, plus an Instagram link, all opening in a new tab except Call. Footer's separate always-visible "Get in Touch" section (WhatsApp + Instagram inline) is unchanged, just now reads from the same shared constants.
+- **Contact info is centralized in `src/lib/contact.ts`** (`CONTACT_PHONE_DISPLAY`/`CONTACT_PHONE_TEL`/`CONTACT_WHATSAPP_URL`/`CONTACT_INSTAGRAM_URL`) — the phone number is still a placeholder (`+20 100 123 4567`) pending the owner providing the real one; swap it in this one file once known, everything else (modal, Footer) reads from it.
 
 ## Nav Bar (Phase 3 follow-up, confirmed post-Figma-review)
 
@@ -214,6 +215,6 @@ Design status: Figma design complete for Checkout, Order Confirmation, Register,
 - Real price modifiers for sizes/flavors/toppers/tiers/cakes (owner TBD, entered via Phase 5/7 admin UI — everything seeds at 0)
 - Whether admins can edit/reassign `orders.source` after creation, once Phase 6 manual entry exists (owner TBD) — the enum values themselves (`website`/`phone`/`instagram`/`in_person`) are locked in
 - Cart persistence (`cart_items` table for logged-in users, per the locked Cart stack decision) — not yet built, scheduled for Phase 3
-- Customer saved addresses/phones — schema not yet finalized, see "Data model additions needed for Phase 4" above; scheduled for Phase 4 alongside account order history
 - Forgot Password flow — Login page has the link designed but it's not wired to anything yet (owner TBD on email-reset vs. other approach)
+- Real business phone number (owner TBD) — placeholder `+20 100 123 4567` in `src/lib/contact.ts`, feeds ContactModal + Footer
 - Core Phase 2 schema implemented — see `docs/superpowers/specs/2026-08-13-phase2-data-model-design.md` and `supabase/migrations/`; cart persistence and saved-address storage still pending per Phase 3/4. Phase 2 follow-up migration (Dessert Cups, `fake` category removal, `order_items` fake-cake columns, `orders.source`) is done — see `20260814100000`–`20260814100400`.

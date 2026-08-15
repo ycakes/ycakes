@@ -18,6 +18,13 @@
     "profileLink": "الملف الشخصي",
     "logOut": "تسجيل الخروج"
   },
+  "ContactModal": {
+    "title": "تواصل معنا",
+    "call": "اتصال",
+    "whatsapp": "واتساب",
+    "instagram": "إنستغرام",
+    "close": "إغلاق"
+  },
   "Footer": {
     "tagline": "كيكات يدوية لكل مناسبة، تُخبز طازجة في القاهرة.",
     "quickLinks": "روابط سريعة",

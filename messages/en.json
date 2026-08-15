@@ -18,6 +18,13 @@
     "profileLink": "Profile",
     "logOut": "Log Out"
   },
+  "ContactModal": {
+    "title": "Get in Touch",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "instagram": "Instagram",
+    "close": "Close"
+  },
   "Footer": {
     "tagline": "Handmade cakes for every celebration, baked fresh in Cairo.",
     "quickLinks": "Quick Links",

@@ -52,7 +52,13 @@ export function HeroSection() {
             <Button render={<Link href="/shop" />} nativeButton={false} variant="brand-primary" size="xl">
               {t("browseCakes")}
             </Button>
-            <Button render={<Link href="/shop/custom" />} nativeButton={false} variant="brand-ghost" size="xl">
+            <Button
+              render={<Link href="/shop/custom" />}
+              nativeButton={false}
+              variant="brand-ghost"
+              size="xl"
+              className="hover:bg-bg-surface-alt/50"
+            >
               {t("customCake")}
             </Button>
           </div>

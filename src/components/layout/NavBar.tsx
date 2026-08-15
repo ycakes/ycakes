@@ -10,6 +10,7 @@ import { useCartCount } from "@/store/cart";
 import { useSession } from "@/hooks/useSession";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { ContactModal } from "@/components/layout/ContactModal";
 
 const navLinks = [
   { href: "/", key: "home" },
@@ -78,15 +79,19 @@ export function NavBar({ className }: { className?: string }) {
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 text-[15px] font-normal md:flex">
           {navLinks.map((link) => {
             const active = activeHref === link.href;
+            const linkClassName = cn(
+              "inline-block text-text-primary transition-transform duration-150 hover:scale-110",
+              active && "text-brand-secondary underline underline-offset-4",
+            );
+            if (link.key === "contact") {
+              return (
+                <ContactModal key={link.key} className={linkClassName}>
+                  {t(link.key)}
+                </ContactModal>
+              );
+            }
             return (
-              <Link
-                key={link.key}
-                href={link.href}
-                className={cn(
-                  "inline-block text-text-primary transition-transform duration-150 hover:scale-110",
-                  active && "text-brand-secondary underline underline-offset-4",
-                )}
-              >
+              <Link key={link.key} href={link.href} className={linkClassName}>
                 {t(link.key)}
               </Link>
             );
@@ -170,15 +175,23 @@ export function NavBar({ className }: { className?: string }) {
         <nav className="absolute inset-x-0 top-full z-20 flex flex-col gap-1 border-t border-border-default bg-bg-surface px-4 py-3 shadow-md md:hidden">
           {navLinks.map((link) => {
             const active = activeHref === link.href;
+            const linkClassName = cn(
+              "rounded-xl px-3 py-2.5 text-start text-[15px] text-text-primary",
+              active && "bg-bg-surface-alt text-brand-secondary",
+            );
+            if (link.key === "contact") {
+              return (
+                <ContactModal key={link.key} className={linkClassName}>
+                  {t(link.key)}
+                </ContactModal>
+              );
+            }
             return (
               <Link
                 key={link.key}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "rounded-xl px-3 py-2.5 text-[15px] text-text-primary",
-                  active && "bg-bg-surface-alt text-brand-secondary",
-                )}
+                className={linkClassName}
               >
                 {t(link.key)}
               </Link>

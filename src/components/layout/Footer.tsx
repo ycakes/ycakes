@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { ContactModal } from "@/components/layout/ContactModal";
+import { CONTACT_INSTAGRAM_URL, CONTACT_PHONE_DISPLAY, CONTACT_WHATSAPP_URL } from "@/lib/contact";
 
 const quickLinks = [
   { href: "/", key: "home" },
@@ -33,26 +35,32 @@ export function Footer() {
 
         <div className="flex flex-col gap-3">
           <p className="text-base font-semibold text-white">{t("quickLinks")}</p>
-          {quickLinks.map((link) => (
-            <Link key={link.key} href={link.href} className="text-sm text-text-on-brand-muted">
-              {t(link.key)}
-            </Link>
-          ))}
+          {quickLinks.map((link) =>
+            link.key === "contact" ? (
+              <ContactModal key={link.key} className="text-start text-sm text-text-on-brand-muted">
+                {t(link.key)}
+              </ContactModal>
+            ) : (
+              <Link key={link.key} href={link.href} className="text-sm text-text-on-brand-muted">
+                {t(link.key)}
+              </Link>
+            ),
+          )}
         </div>
 
         <div className="flex flex-col gap-3">
           <p className="text-base font-semibold text-white">{t("getInTouch")}</p>
           <a
-            href="https://wa.me/201001234567"
+            href={CONTACT_WHATSAPP_URL}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2.5 text-sm text-text-on-brand-muted"
           >
             <Image src="/icons/whatsapp.svg" alt="" width={18} height={18} />
-            +20 100 123 4567
+            {CONTACT_PHONE_DISPLAY}
           </a>
           <a
-            href="https://instagram.com/ycakes.eg"
+            href={CONTACT_INSTAGRAM_URL}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2.5 text-sm text-text-on-brand-muted"
