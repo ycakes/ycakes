@@ -13,7 +13,8 @@
     "customCakes": "Custom Cakes",
     "contact": "Contact",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "profile": "Account"
   },
   "Footer": {
     "tagline": "Handmade cakes for every celebration, baked fresh in Cairo.",
@@ -27,7 +28,69 @@
   },
   "Common": {
     "egp": "EGP",
-    "priceOnRequest": "Price on request"
+    "priceOnRequest": "Price on request",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "contactMethod": {
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "both": "Both"
+    }
+  },
+  "Register": {
+    "title": "Create Your Account",
+    "subtitle": "Just the basics for now — add addresses or phone numbers anytime later.",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Sara",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Ahmed",
+    "email": "Email",
+    "emailPlaceholder": "e.g. sara@email.com",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "addressesHeading": "Addresses (optional)",
+    "addressEntryTitle": "Address {n}",
+    "addressLabel": "Label",
+    "addressLabelPlaceholder": "e.g. Home, Work",
+    "addressAddress": "Street address",
+    "addressApartment": "Apartment, suite, etc. (optional)",
+    "addAddress": "+ Add Another Address ({count} of {max})",
+    "phonesHeading": "Phone Numbers (optional)",
+    "phoneEntryTitle": "Phone Number {n}",
+    "phonePlaceholder": "01012345678",
+    "addPhone": "+ Add Another Phone Number ({count} of {max})",
+    "remove": "Remove",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "logIn": "Log In",
+    "confirmEmailTitle": "Check your email",
+    "confirmEmailBody": "We've sent a confirmation link to {email}. Click it to finish creating your account.",
+    "errorPasswordMismatch": "Passwords don't match.",
+    "errorPasswordTooShort": "Password must be at least 8 characters.",
+    "errorEmailInUse": "An account with this email already exists.",
+    "errorGeneric": "Something went wrong — please try again."
+  },
+  "Login": {
+    "title": "Welcome Back",
+    "email": "Email",
+    "emailPlaceholder": "e.g. sara@email.com",
+    "password": "Password",
+    "passwordPlaceholder": "Your password",
+    "forgotPassword": "Forgot password?",
+    "logIn": "Log In",
+    "newToYcakes": "New to Ycakes?",
+    "createAccount": "Create an Account",
+    "errorInvalidCredentials": "Incorrect email or password.",
+    "errorEmailNotConfirmed": "Please confirm your email before logging in.",
+    "errorGeneric": "Something went wrong — please try again."
+  },
+  "RegisterComplete": {
+    "syncing": "Finishing setup…",
+    "success": "You're all set! Redirecting you now...",
+    "noSession": "Your email is confirmed. Please log in to continue.",
+    "logIn": "Log In"
   },
   "Shop": {
     "breadcrumbHome": "Home",

@@ -26,6 +26,17 @@ The storefront visual design is built and maintained in Figma, not invented ad h
 - **Cake Detail page** has two example variants on the same page: the default Normal Cake customization flow, and a second frame ("Cake Detail Page — Fake Cake Variant") showing the Fake Cake flow. A yellow/red annotation note on that page explains the conditional logic in plain language for implementation reference.
 - Category and product photography throughout is placeholder (dashed/tinted rectangles) pending real photos from the owner — do not treat placeholder colors as final brand colors for images.
 
+## Auth (Phase 4)
+
+- `profiles.full_name` was split into `first_name`/`last_name` (`20260815140000_profiles_first_last_name.sql`) — every Phase 4 mockup (Register, Checkout, Profile) treats them as separate fields, so a combined string split on whitespace later would be fragile. `handle_new_user()` now reads `first_name`/`last_name` out of `auth.users.raw_user_meta_data`, populated via `supabase.auth.signUp({ options: { data: { first_name, last_name } } })`.
+- **Email confirmation flow**: signUp() with confirmation required returns no active session until the user clicks the emailed confirmation link — so Register's optional Address/Phone entries can't be inserted at signup time (RLS requires `auth.uid() = customer_id`, and there's no `auth.uid()` yet). Confirmed approach: any addresses/phones entered during Register are held client-side (sessionStorage) until the confirmation link completes and lands the user in an authenticated session, at which point they're submitted then. A `/auth/confirm` route handler exchanges the emailed code for a session.
+- Saved-address/phone data doesn't survive a different device/browser confirming the email than the one that filled out Register (sessionStorage is per-browser) — accepted limitation, not solved this phase. Worth a "your addresses didn't come through, add them from Profile" fallback message if the sessionStorage read comes back empty post-confirmation.
+- **Implemented**: `/register`, `/login`, `/register/complete` (client components, `src/app/[locale]/(storefront)/...`), `/auth/confirm` (Route Handler, `src/app/auth/confirm/route.ts` — deliberately outside `[locale]` since it's a link target from an email, not app navigation; `proxy.ts`'s matcher excludes `/auth` so next-intl doesn't try to locale-prefix it). `src/lib/supabase/client.ts`/`server.ts` (already existed) are used as-is — browser client for signUp/signInWithPassword/inserts, server client for `verifyOtp`.
+- **Resend integration**: `supabase/functions/send-email/index.ts` is a Supabase Auth "Send Email" hook (Standard Webhooks-signature verified) — Supabase calls it instead of sending its own email, and it sends the real confirmation email via Resend (bilingual, driven by `user_metadata.locale` set at signUp). Confirmation link points at `/auth/confirm`. **Deployment is a separate manual step** (function deploy + `RESEND_API_KEY`/`SEND_EMAIL_HOOK_SECRET` secrets + enabling the hook and `enable_confirmations` on the hosted project) — not run yet, since the last step risks overwriting hosted-only Auth settings (e.g. `site_url`) that aren't visible without dashboard/MCP access. See TASKS.md for the exact command sequence.
+- Password fields enforce a client-side 8-character minimum (`Register`'s `MIN_PASSWORD_LENGTH`) ahead of Supabase's own `minimum_password_length` check.
+- `ToggleChip` (`src/components/storefront/ToggleChip.tsx`) is a new stateful button-based chip for the Call/WhatsApp/Both contact-method picker — the existing `FilterChip` is `Link`/URL-driven (built for Shop's category filters) and isn't usable inside a form, so this is a separate component rather than overloading that one.
+- `InputField` (`src/components/storefront/InputField.tsx`) gained a `type` prop (`text`/`email`/`tel`/`password`) and, for `password`, a show/hide eye-icon toggle (hidden by default) — used by Login/Register and will be reused by Checkout's inline Register tab.
+
 ## Roles
 
 - **Guest** — no account, can browse and order, gets a UUID-linked order visible only to admin
@@ -114,6 +125,64 @@ Admins need a way to register orders that came in through channels other than th
 
 Home (`/`), Shop/category browse (`/shop`, `/shop/[category]`), Cake Detail (`/cakes/[id]`, customization flow with Normal + Fake Cake variants), Cart (`/cart`). **No separate Contact page** — "Contact" in the nav is an anchor link that scrolls to the footer, which contains the WhatsApp number and Instagram link. This was a deliberate simplification, not an oversight — don't build a `/contact` route.
 
+## Nav Bar (Phase 3 follow-up, confirmed post-Figma-review)
+
+- The four nav links (Home/Shop/Custom Cakes/Contact) are now **centered** on the page — previously `justify-between`-style distribution skewed them off-center toward the wider action-icon side (language toggle/cart/etc.). Fixed as part of the Phase 4 design session's Nav Bar component update.
+- A **Profile icon** was added to the nav actions area, positioned between the language toggle and the cart icon: links to `/login` when logged out, `/profile` (or equivalent route) when logged in.
+
+## Phase 4 — Checkout & accounts (Figma design confirmed)
+
+Design status: Figma design complete for Checkout, Order Confirmation, Register, Login, and a new Profile page (all added in this session), plus the updated Nav Bar component covered above. File: "YCakes — Design System", key `UR2u2vVxduNHFheGewn9CH`, pages `Checkout`, `Order Confirmation`, `Register`, `Login`, `Profile`.
+
+### Checkout page (`/checkout`)
+
+- **Layout**: main column (auth tabs, contact details) + sidebar (right column) with **Fulfillment Details recap above Order Summary** — fulfillment recap is no longer a main-column section, it moved to the sidebar.
+  - Fulfillment recap's "Edit" action opens an **inline modal** (Pickup/Delivery toggle, delivery area chips, date picker) rather than navigating back to `/cart`. The modal reuses the existing `DatePicker.tsx` and delivery-area chip logic already built for the Cart page (`src/store/cart.ts`, `delivery_areas` table) — not a reimplementation.
+- **Auth**: a 3-way tab switcher (**Guest / Log In / Register**) sits inline at the top of Checkout, replacing the earlier simpler Guest/Create-Account toggle.
+  - Switching tabs must never clear anything already typed in Contact Details below — Contact Details state is independent of which auth tab is active.
+  - On successful inline login/register (without navigating away from Checkout, cart/session state preserved throughout), any saved addresses/phone numbers on the account appear as selectable chips that auto-fill Contact Details.
+- **Contact Details** (expanded from the earlier simpler version):
+  - Row: First Name + Last Name + Company (optional)
+  - Address
+  - Apartment/Suite (optional)
+  - Phone Number 1 and Phone Number 2 (optional), each paired with a **contact-method preference** (Call / WhatsApp / Both)
+  - Email (optional)
+  - **"Save Address" button** (shown only when logged in) saves name/address/phone to the account in one action — replaces the earlier per-field "save" checkbox idea.
+- **Order Summary**: Promo Code is now part of Order Summary, not a separate section — input + Apply button + applied-state feedback live directly under Subtotal.
+
+### Order Confirmation page
+
+- Success block: check icon, "Order Placed!", a greeting line ("Thanks, {first name} — we've got your order."), and the order number (format `YC-YYYYMMDD-####`, e.g. `YC-20260822-0842`).
+- "What Happens Next" card: explains the team will follow up over WhatsApp/phone to confirm final price, plus a "Message Us on WhatsApp" button — **confirmed via annotation**: this is a plain `wa.me` deep link prefilled with **the order number only** (no customer name or item summary — owner looks those up in the admin dashboard), not any WhatsApp API integration (matches the locked stack decision).
+- "Order Details" card: line items (thumbnail, name, an attribute summary string like `24>30 • 1 Tier • Vanilla, Chocolate • Black, Red • Heart • Qty 1`, price), a FULFILLMENT section (method + area, date), a CONTACT & DELIVERY ADDRESS section (name, phone + contact-method label, address), and the total with the same WhatsApp-confirmation-pricing disclaimer used elsewhere.
+- "Continue Shopping" CTA at the bottom, links back to the storefront.
+
+### Register page
+
+- Only **First Name, Last Name, Email, Password** are required (standalone `/register` page — no Confirm Password field here, per the actual Figma frame).
+- Address and phone number sections are **collapsed by default** (just a "+ Add Another Address (1 of 5)" / "+ Add Another Phone Number (1 of 5)" button, no entry form shown) — clicking expands an entry with Remove; the "+ Add" button's counter increments and the button disappears once 5 is reached. Fully optional to skip both; addable later from Checkout or the Profile page.
+- Each phone number entry pairs with the same Call/WhatsApp/Both contact-method chips used elsewhere.
+- **Confirmed (resolves the Figma frame inconsistency)**: **Confirm Password** is added to every password-creation form — the standalone `/register` page (beyond what its current frame shows) and the inline Checkout Register tab both get it, for consistency rather than following either frame literally.
+- **All password fields** (Login, Register, inline Checkout Register tab) get a show/hide toggle (eye icon) — **hidden by default**. Not in the current Figma frames; a UX addition confirmed at the start of Phase 4 implementation.
+
+### Login page
+
+- Standard Email/Password with a Forgot Password link — **not yet wired to a flow, open item** for a later phase.
+- Password field gets the same show/hide (eye icon, hidden by default) toggle as Register/Checkout.
+
+### Profile page (`/profile`, new scope)
+
+- Sidebar: editable Profile Info card (name/email + Edit button), Saved Addresses card (each entry has a short **label** like "Home"/"Work" plus the address text, Edit/Remove, "+ Add Address (N of 5)" counter button), Saved Phone Numbers card (same pattern — number + contact-method label like "WhatsApp", Edit/Remove, up to 5).
+- Main panel: Order History — cards per order (order number, date, color-coded status badge [Completed=green, Confirmed=blue, Cancelled=red, Pending presumably a 4th color — not shown in the 3 example cards], one-line item summary, price, "View Details" link).
+
+### Data model additions needed for Phase 4 (saved addresses/phones)
+
+**Implemented** (`20260815130000_customer_addresses_phones.sql`, pushed to hosted): dedicated join tables (`customer_addresses`, `customer_phones`), not JSONB arrays — matches the existing `order_item_flavors`/`order_item_colors` join-table pattern and keeps RLS/edit/remove straightforward. Confirmed requirements driving the design:
+- Saved **customer addresses**: capped at 5 per customer, each with a short free-text **label** (customer-typed, e.g. "Home"/"Work"/"Mom's House" — not a fixed enum) in addition to the address text (street/apartment).
+- Saved **customer phone numbers**: capped at 5 per customer, each with a call/WhatsApp/both contact-method preference.
+- Both need to be selectable/auto-fillable from Checkout (as chips) and manageable (add/edit/remove) from the Profile page and from Register's optional expandable sections.
+- Cap enforcement: a shared `fn_enforce_customer_item_cap()` trigger function (reads the max via `TG_ARGV[0]`, one function serves both tables). RLS: owner-only CRUD (`(select auth.uid()) = customer_id`, scoped to `authenticated` — guests can't have saved rows) plus `admin_all`; no accountant policy (address book isn't accountant's domain, see Roles). Audit-logged via the standard `fn_audit_log()` triggers, same as every other table.
+
 ## Development environment
 
 - **Hosted only, no local Docker stack** — decided 2026-08-14 after a working local setup was deliberately reverted (`supabase stop`). `.env.local` points at the hosted project (`https://yddapkhhniecjnnzrolv.supabase.co`); `npm run dev` always talks to hosted. This was tried both ways — the local stack did work at one point (Docker Desktop API-version issues fixed, all 23 migrations confirmed matching) — so if Docker workflow is ever wanted back, `supabase start` + swapping `.env.local` to `http://127.0.0.1:54321` (publishable key from `supabase status`) is the known-working path, just not the current one.
@@ -141,5 +210,6 @@ Home (`/`), Shop/category browse (`/shop`, `/shop/[category]`), Cake Detail (`/c
 - Real price modifiers for sizes/flavors/toppers/tiers/cakes (owner TBD, entered via Phase 5/7 admin UI — everything seeds at 0)
 - Whether admins can edit/reassign `orders.source` after creation, once Phase 6 manual entry exists (owner TBD) — the enum values themselves (`website`/`phone`/`instagram`/`in_person`) are locked in
 - Cart persistence (`cart_items` table for logged-in users, per the locked Cart stack decision) — not yet built, scheduled for Phase 3
-- Customer saved addresses — not yet built, scheduled for Phase 4 alongside account order history
+- Customer saved addresses/phones — schema not yet finalized, see "Data model additions needed for Phase 4" above; scheduled for Phase 4 alongside account order history
+- Forgot Password flow — Login page has the link designed but it's not wired to anything yet (owner TBD on email-reset vs. other approach)
 - Core Phase 2 schema implemented — see `docs/superpowers/specs/2026-08-13-phase2-data-model-design.md` and `supabase/migrations/`; cart persistence and saved-address storage still pending per Phase 3/4. Phase 2 follow-up migration (Dessert Cups, `fake` category removal, `order_items` fake-cake columns, `orders.source`) is done — see `20260814100000`–`20260814100400`.

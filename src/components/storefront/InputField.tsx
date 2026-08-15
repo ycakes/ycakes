@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export function InputField({
@@ -11,6 +14,8 @@ export function InputField({
   onChange,
   placeholder,
   multiline,
+  type = "text",
+  autoComplete,
 }: {
   id?: string;
   label: string;
@@ -20,10 +25,15 @@ export function InputField({
   onChange: (value: string) => void;
   placeholder?: string;
   multiline?: boolean;
+  type?: "text" | "email" | "tel" | "password";
+  autoComplete?: string;
 }) {
+  const tCommon = useTranslations("Common");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const fieldClassName = cn(
     "w-full rounded-2xl border-[1.5px] bg-bg-surface p-3 text-[15px] text-text-primary placeholder:text-text-secondary focus:outline-none",
     error ? "border-red-500 focus:border-red-500" : "border-border-default focus:border-brand-secondary",
+    type === "password" && "pe-11",
   );
 
   return (
@@ -38,13 +48,26 @@ export function InputField({
           className={cn(fieldClassName, "resize-none")}
         />
       ) : (
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={fieldClassName}
-        />
+        <div className="relative w-full">
+          <input
+            type={type === "password" && passwordVisible ? "text" : type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            className={fieldClassName}
+          />
+          {type === "password" && (
+            <button
+              type="button"
+              onClick={() => setPasswordVisible((visible) => !visible)}
+              aria-label={passwordVisible ? tCommon("hidePassword") : tCommon("showPassword")}
+              className="absolute inset-y-0 end-3 flex items-center text-text-secondary"
+            >
+              {passwordVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          )}
+        </div>
       )}
       {error ? (
         <p className="text-xs text-red-600">{error}</p>

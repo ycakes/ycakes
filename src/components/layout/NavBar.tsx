@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useCartCount } from "@/store/cart";
@@ -31,7 +31,7 @@ export function NavBar({ className }: { className?: string }) {
 
   return (
     <div className={cn("relative w-full", className)}>
-      <div className="flex h-20 w-full items-center justify-between gap-3 px-4 drop-shadow-[0px_1px_1.5px_rgba(43,30,25,0.08)] sm:h-24 sm:px-6 md:px-[100px]">
+      <div className="relative flex h-20 w-full items-center justify-between gap-3 px-4 drop-shadow-[0px_1px_1.5px_rgba(43,30,25,0.08)] sm:h-24 sm:px-6 md:px-[100px]">
         <Link href="/" className="relative h-12 w-20 shrink-0 sm:h-16 sm:w-28">
           <Image
             src="/images/brand/logo.png"
@@ -43,7 +43,7 @@ export function NavBar({ className }: { className?: string }) {
           />
         </Link>
 
-        <nav className="hidden items-center gap-6 text-[15px] font-normal md:flex">
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 text-[15px] font-normal md:flex">
           {navLinks.map((link) => {
             const active = activeHref === link.href;
             return (
@@ -68,6 +68,15 @@ export function NavBar({ className }: { className?: string }) {
             className="rounded-full border border-border-default bg-bg-surface px-2.5 py-1.5 text-[13px] font-semibold text-text-primary shadow-sm"
           >
             {otherLocale.toUpperCase()}
+          </Link>
+          {/* No auth system yet (Phase 4 in progress) — always points to
+              /login until session state exists to branch to /profile. */}
+          <Link
+            href="/login"
+            aria-label={t("profile")}
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-bg-subtle text-text-primary"
+          >
+            <User className="size-4" />
           </Link>
           <Link
             href="/cart"

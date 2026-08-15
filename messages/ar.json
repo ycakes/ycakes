@@ -13,7 +13,8 @@
     "customCakes": "كيكات مخصصة",
     "contact": "تواصل معنا",
     "openMenu": "فتح القائمة",
-    "closeMenu": "إغلاق القائمة"
+    "closeMenu": "إغلاق القائمة",
+    "profile": "الحساب"
   },
   "Footer": {
     "tagline": "كيكات يدوية لكل مناسبة، تُخبز طازجة في القاهرة.",
@@ -27,7 +28,69 @@
   },
   "Common": {
     "egp": "جنيه",
-    "priceOnRequest": "السعر عند الطلب"
+    "priceOnRequest": "السعر عند الطلب",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "contactMethod": {
+      "call": "اتصال",
+      "whatsapp": "واتساب",
+      "both": "كلاهما"
+    }
+  },
+  "Register": {
+    "title": "أنشئ حسابك",
+    "subtitle": "الأساسيات فقط الآن — يمكنك إضافة العناوين أو أرقام الهاتف في أي وقت لاحقاً.",
+    "firstName": "الاسم الأول",
+    "firstNamePlaceholder": "سارة",
+    "lastName": "اسم العائلة",
+    "lastNamePlaceholder": "أحمد",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "مثال: sara@email.com",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "8 أحرف على الأقل",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+    "addressesHeading": "العناوين (اختياري)",
+    "addressEntryTitle": "العنوان {n}",
+    "addressLabel": "التسمية",
+    "addressLabelPlaceholder": "مثال: المنزل، العمل",
+    "addressAddress": "العنوان بالتفصيل",
+    "addressApartment": "شقة، دور، إلخ (اختياري)",
+    "addAddress": "+ إضافة عنوان آخر ({count} من {max})",
+    "phonesHeading": "أرقام الهاتف (اختياري)",
+    "phoneEntryTitle": "رقم الهاتف {n}",
+    "phonePlaceholder": "01012345678",
+    "addPhone": "+ إضافة رقم هاتف آخر ({count} من {max})",
+    "remove": "إزالة",
+    "createAccount": "إنشاء حساب",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "logIn": "تسجيل الدخول",
+    "confirmEmailTitle": "تحقق من بريدك الإلكتروني",
+    "confirmEmailBody": "أرسلنا رابط تأكيد إلى {email}. اضغط عليه لإتمام إنشاء حسابك.",
+    "errorPasswordMismatch": "كلمتا المرور غير متطابقتين.",
+    "errorPasswordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+    "errorEmailInUse": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
+    "errorGeneric": "حدث خطأ ما — الرجاء المحاولة مرة أخرى."
+  },
+  "Login": {
+    "title": "مرحباً بعودتك",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "مثال: sara@email.com",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "كلمة المرور الخاصة بك",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "logIn": "تسجيل الدخول",
+    "newToYcakes": "جديد على واي كيكس؟",
+    "createAccount": "إنشاء حساب",
+    "errorInvalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "errorEmailNotConfirmed": "الرجاء تأكيد بريدك الإلكتروني قبل تسجيل الدخول.",
+    "errorGeneric": "حدث خطأ ما — الرجاء المحاولة مرة أخرى."
+  },
+  "RegisterComplete": {
+    "syncing": "جارٍ إنهاء الإعداد…",
+    "success": "تم! جارٍ تحويلك الآن...",
+    "noSession": "تم تأكيد بريدك الإلكتروني. الرجاء تسجيل الدخول للمتابعة.",
+    "logIn": "تسجيل الدخول"
   },
   "Shop": {
     "breadcrumbHome": "الرئيسية",

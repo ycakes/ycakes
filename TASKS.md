@@ -80,10 +80,21 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 
 ## Phase 4 — Checkout & orders
 
-- [ ] Checkout form (delivery area, promo code, contact details, delivery/pickup date against calendar blocks, notes)
+**Design status: Figma design complete for Checkout, Order Confirmation, Register, Login, and Profile — see ARCHITECTURE.md's "Phase 4 — Checkout & accounts" section for full page-by-page decisions.** File: "YCakes — Design System", key `UR2u2vVxduNHFheGewn9CH`.
+
+- [x] Nav Bar centering fix (Phase 3 follow-up): nav links now absolutely centered (`left-1/2 -translate-x-1/2`) independent of the logo/actions widths; Profile icon (lucide `User`, not the Figma emoji placeholder — this repo avoids emoji in code) added between the language toggle and cart icon. Currently always links to `/login` — no auth/session state exists yet to branch to `/profile`, revisit once Login/Register land. See ARCHITECTURE.md's "Nav Bar" section.
+- [x] Saved-address/saved-phone schema: `customer_addresses` (label, address, apartment) and `customer_phones` (phone, contact_method), both FK to `profiles(id)`, capped at 5 rows each via a shared `fn_enforce_customer_item_cap()` trigger, owner-only RLS + admin_all + audit log triggers (`20260815130000_customer_addresses_phones.sql`, pushed to hosted). Supabase advisors check not run this session — MCP server isn't authenticated; worth a manual pass before Phase 4 ships.
+- [ ] Checkout page (`/checkout`): 3-way Guest/Log In/Register tab switcher, expanded Contact Details, sidebar Fulfillment Details recap + inline Edit modal (reusing Cart's DatePicker/delivery-area logic), Order Summary with inline Promo Code
 - [ ] Guest order creation (UUID-linked) and account order creation
 - [ ] Confirmation email (Resend)
-- [ ] Optional account: register/login/profile/order history
+- [ ] Order Confirmation page: order number, "What Happens Next" WhatsApp `wa.me` deep link, full recap
+- [x] Register page (`/register`): First/Last Name + Email + Password + Confirm Password (all with show/hide toggle on password fields), optional expandable Address/Phone sections (up to 5 each, Call/WhatsApp/Both chips per phone). Calls `supabase.auth.signUp()`; any addresses/phones entered are held in `sessionStorage` until email confirmation completes (no session exists yet at signup time to write against), then synced by `/register/complete` once the confirmation link lands the user in an authenticated session — see ARCHITECTURE.md's "Auth (Phase 4)" section.
+- [x] `/auth/confirm` route handler (`src/app/auth/confirm/route.ts`, outside `[locale]` — `proxy.ts` matcher updated to exclude `/auth`): verifies the emailed `token_hash` via `supabase.auth.verifyOtp()`, redirects into `/register/complete`.
+- [x] Resend-powered confirmation email: `supabase/functions/send-email/index.ts` — a Supabase Auth "Send Email" hook (Standard Webhooks-verified) that sends the actual confirmation email via Resend instead of Supabase's built-in SMTP, bilingual (EN/AR based on `user_metadata.locale`).
+  - **Not yet deployed/wired** — needs, in order: (1) `supabase functions deploy send-email`, (2) `supabase secrets set RESEND_API_KEY=... SEND_EMAIL_HOOK_SECRET=...` (user has the Resend key), (3) enabling the hook + `enable_confirmations = true` on the **hosted** project. Step 3 touches live Supabase Auth settings (`supabase config push` syncs the *entire* local `config.toml`, which could silently overwrite hosted-only settings like `site_url` that aren't visible from here) — deliberately paused for explicit confirmation before running, see conversation.
+- [x] Login page (`/login`): Email/Password with show/hide toggle, Forgot Password link present but inert (not wired — flagged open in ARCHITECTURE.md), calls `supabase.auth.signInWithPassword()`.
+- [x] `profiles.full_name` → `first_name`/`last_name` split (`20260815140000_profiles_first_last_name.sql`), populated at signup via `auth.users.raw_user_meta_data`.
+- [ ] Profile page (`/profile`, new scope this session): sidebar Profile Info + Saved Addresses + Saved Phone Numbers (up to 5 each, Edit/Remove), main panel Order History (status color-coded, item summary, price, View Details)
 
 ## Phase 5 — Admin: catalog
 
