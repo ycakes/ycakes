@@ -124,7 +124,8 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 - [x] Categories CRUD + reorder (incl. Candy Corner subcategories — now 4: cupcakes, pops, popsicles, dessert cups)
 - [x] Sizes/Flavors/Colors/Toppers management (incl. temporary disable)
 - [ ] Migrate existing `public/images/*` photos (categories, placeholder cakes) to Cloudinary and re-point the DB rows — deferred follow-up, decided during pre-implementation brainstorming; easier to do through the now-working upload UI than by hand. See ARCHITECTURE.md's Phase 5 section.
-- [ ] **Discovered during implementation, deferred as follow-up hardening**: the shared `Pagination` component (reused as-is on the admin Cakes list) drops `category`/`subcategory`/`sort`/`dir` query params across page navigation — a real UX gap once any category has 20+ cakes. Fixing it means changing `Pagination` itself, which the storefront also uses, so it's out of this phase's scope. Also: Toppers' `topper_colors` edit path does a delete-then-insert that isn't wrapped in a transaction — a narrow window where delete succeeds but insert fails could leave a topper with zero color variants (the admin does get an error message, so it isn't silent, but it isn't atomic). Worth a Postgres RPC matching the `create_order` transaction pattern as a future hardening pass.
+- [x] `Pagination` now accepts an optional `extraParams` prop so the admin Cakes list's filter/sort survive page navigation (storefront callers unaffected, prop is opt-in).
+- [x] Toppers' `topper_colors` edit path now goes through `fn_replace_topper_colors`, a single `security definer` RPC (delete+insert in one transaction), instead of two separate client calls.
 
 ## Phase 6 — Admin: orders & operations
 

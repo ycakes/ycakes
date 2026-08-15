@@ -69,6 +69,10 @@ export function CakesListContent({
   if (activeCategory) query.set("category", activeCategory);
   if (activeSubcategory) query.set("subcategory", activeSubcategory);
 
+  const paginationParams: Record<string, string> = Object.fromEntries(query.entries());
+  if (sort) paginationParams.sort = sort;
+  if (dir) paginationParams.dir = dir;
+
   const columns: AdminTableColumn<Row>[] = [
     {
       header: t("cake"),
@@ -141,7 +145,12 @@ export function CakesListContent({
           return `${basePath}?${q.toString()}`;
         }}
       />
-      <Pagination basePath={basePath} currentPage={currentPage} totalPages={totalPages} />
+      <Pagination
+        basePath={basePath}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        extraParams={paginationParams}
+      />
     </div>
   );
 }
