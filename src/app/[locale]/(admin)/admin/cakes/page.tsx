@@ -31,7 +31,7 @@ export default async function AdminCakesPage({
     categoryIds = match ? [match.id] : [];
   }
 
-  let query = supabase.from("cakes").select("id, category_id, name, description, base_price, primary_image_url, featured, active, sort_order");
+  let query = supabase.from("cakes").select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, active, sort_order");
   if (categoryIds) query = query.in("category_id", categoryIds);
 
   // Note: sorting by `name` sorts the raw jsonb value, not name.en

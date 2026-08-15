@@ -39,7 +39,7 @@ export default async function CakeDetailPage({
     : category;
   if (!topLevelCategory) notFound();
 
-  const allowFakeCake = !NO_FAKE_CAKE_SLUGS.has(topLevelCategory.slug);
+  const allowFakeCake = cake.allow_fake && !NO_FAKE_CAKE_SLUGS.has(topLevelCategory.slug);
   const showToppers = topLevelCategory.slug === "custom";
 
   const [sizes, tiers, flavors, colors, shapes, toppers] = await Promise.all([

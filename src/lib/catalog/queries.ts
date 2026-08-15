@@ -77,7 +77,7 @@ export async function getTrendingCakesByCategory(
       }
       const { data, error } = await supabase
         .from("cakes")
-        .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+        .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
         .in("category_id", subIds)
         .eq("active", true)
         .order("sort_order")
@@ -89,7 +89,7 @@ export async function getTrendingCakesByCategory(
 
     const { data, error } = await supabase
       .from("cakes")
-      .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+      .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
       .eq("category_id", category.id)
       .eq("active", true)
       .order("sort_order")
@@ -116,7 +116,7 @@ export async function getCakesByCategorySlug(slug: string): Promise<Cake[]> {
 
   const { data, error } = await supabase
     .from("cakes")
-    .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+    .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
     .in("category_id", categoryIds)
     .eq("active", true)
     .order("sort_order");
@@ -129,7 +129,7 @@ export async function getAllCakes(): Promise<Cake[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("cakes")
-    .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+    .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
     .eq("active", true)
     .order("sort_order");
 
@@ -141,7 +141,7 @@ export async function getCakeById(id: string): Promise<Cake | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("cakes")
-    .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+    .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
     .eq("id", id)
     .maybeSingle();
 

@@ -19,6 +19,7 @@ export type Cake = {
   base_price: number;
   primary_image_url: string | null;
   featured: boolean;
+  allow_fake: boolean;
   sort_order: number;
 };
 
