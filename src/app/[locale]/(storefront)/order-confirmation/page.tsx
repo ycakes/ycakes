@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { CircleCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -18,8 +18,17 @@ export default function OrderConfirmationPage() {
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [order, setOrder] = useState<OrderConfirmationSnapshot | null>(null);
+  // Guards against the effect body running more than once — it did fire a
+  // second time in practice (e.g. next-intl's useRouter isn't guaranteed
+  // referentially stable across renders, and setOrder() below itself causes
+  // a re-render), and a second run would find sessionStorage already
+  // cleared and bounce straight to home a moment after the page appeared.
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
+    if (hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+
     // sessionStorage only exists client-side — a lazy useState initializer
     // would run during SSR too (crash) or risk a hydration mismatch, so this
     // has to be an effect despite the lint rule's general preference.

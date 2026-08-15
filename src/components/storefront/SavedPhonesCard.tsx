@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { InputField } from "@/components/storefront/InputField";
 import { ToggleChip } from "@/components/storefront/ToggleChip";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { createClient } from "@/lib/supabase/client";
 import type { ContactMethod, SavedPhone } from "@/types/auth";
 
@@ -27,6 +28,7 @@ export function SavedPhonesCard({
   const [method, setMethod] = useState<ContactMethod>("call");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   function resetForm() {
     setPhone("");
@@ -89,8 +91,10 @@ export function SavedPhonesCard({
     cancelForm();
   }
 
-  async function handleRemove(id: string) {
-    if (!window.confirm(t("confirmRemovePhone"))) return;
+  async function confirmRemove() {
+    if (!pendingRemoveId) return;
+    const id = pendingRemoveId;
+    setPendingRemoveId(null);
     const supabase = createClient();
     const { error: deleteError } = await supabase.from("customer_phones").delete().eq("id", id);
     if (!deleteError) onChange(phones.filter((entry) => entry.id !== id));
@@ -111,7 +115,7 @@ export function SavedPhonesCard({
                 <Button type="button" variant="brand-ghost" onClick={() => startEdit(entry)}>
                   {t("edit")}
                 </Button>
-                <Button type="button" variant="destructive" onClick={() => handleRemove(entry.id)}>
+                <Button type="button" variant="destructive" onClick={() => setPendingRemoveId(entry.id)}>
                   {t("remove")}
                 </Button>
               </div>
@@ -151,6 +155,16 @@ export function SavedPhonesCard({
           {t("addPhone", { count: phones.length, max: MAX_PHONES })}
         </Button>
       )}
+
+      <ConfirmDialog
+        open={pendingRemoveId !== null}
+        title={t("confirmRemoveTitle")}
+        message={t("confirmRemovePhone")}
+        confirmLabel={t("remove")}
+        cancelLabel={t("cancel")}
+        onConfirm={confirmRemove}
+        onCancel={() => setPendingRemoveId(null)}
+      />
     </div>
   );
 }

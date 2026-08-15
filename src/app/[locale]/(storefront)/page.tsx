@@ -51,7 +51,7 @@ export default async function HomePage() {
           <div className="h-[3px] w-16 rounded-full bg-brand-secondary" />
         </div>
         <div className="flex w-full max-w-[1352px] flex-col gap-10">
-          {categories.map((category) => {
+          {categories.map((category, categoryIndex) => {
             const cakes = trendingByCategory[category.slug] ?? [];
             if (cakes.length === 0) return null;
             return (
@@ -60,8 +60,8 @@ export default async function HomePage() {
                   {category.name[locale]}
                 </h3>
                 <div className="flex gap-6 overflow-x-auto pb-2">
-                  {cakes.map((cake) => (
-                    <ProductCard key={cake.id} cake={cake} />
+                  {cakes.map((cake, cakeIndex) => (
+                    <ProductCard key={cake.id} cake={cake} priority={categoryIndex === 0 && cakeIndex < 3} />
                   ))}
                 </div>
               </div>

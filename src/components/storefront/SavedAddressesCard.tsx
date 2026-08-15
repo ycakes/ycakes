@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { InputField } from "@/components/storefront/InputField";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { createClient } from "@/lib/supabase/client";
 import type { SavedAddress } from "@/types/auth";
 
@@ -26,6 +27,7 @@ export function SavedAddressesCard({
   const [apartment, setApartment] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   function resetForm() {
     setLabel("");
@@ -92,8 +94,10 @@ export function SavedAddressesCard({
     cancelForm();
   }
 
-  async function handleRemove(id: string) {
-    if (!window.confirm(t("confirmRemoveAddress"))) return;
+  async function confirmRemove() {
+    if (!pendingRemoveId) return;
+    const id = pendingRemoveId;
+    setPendingRemoveId(null);
     const supabase = createClient();
     const { error: deleteError } = await supabase.from("customer_addresses").delete().eq("id", id);
     if (!deleteError) onChange(addresses.filter((entry) => entry.id !== id));
@@ -114,7 +118,7 @@ export function SavedAddressesCard({
                 <Button type="button" variant="brand-ghost" onClick={() => startEdit(entry)}>
                   {t("edit")}
                 </Button>
-                <Button type="button" variant="destructive" onClick={() => handleRemove(entry.id)}>
+                <Button type="button" variant="destructive" onClick={() => setPendingRemoveId(entry.id)}>
                   {t("remove")}
                 </Button>
               </div>
@@ -149,6 +153,16 @@ export function SavedAddressesCard({
           {t("addAddress", { count: addresses.length, max: MAX_ADDRESSES })}
         </Button>
       )}
+
+      <ConfirmDialog
+        open={pendingRemoveId !== null}
+        title={t("confirmRemoveTitle")}
+        message={t("confirmRemoveAddress")}
+        confirmLabel={t("remove")}
+        cancelLabel={t("cancel")}
+        onConfirm={confirmRemove}
+        onCancel={() => setPendingRemoveId(null)}
+      />
     </div>
   );
 }
