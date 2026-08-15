@@ -123,9 +123,14 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 - [x] Cakes CRUD (images via Cloudinary, bilingual fields)
 - [x] Categories CRUD + reorder (incl. Candy Corner subcategories — now 4: cupcakes, pops, popsicles, dessert cups)
 - [x] Sizes/Flavors/Colors/Toppers management (incl. temporary disable)
-- [ ] Migrate existing `public/images/*` photos (categories, placeholder cakes) to Cloudinary and re-point the DB rows — deferred follow-up, decided during pre-implementation brainstorming; easier to do through the now-working upload UI than by hand. See ARCHITECTURE.md's Phase 5 section.
+- [x] Local placeholder photos removed from the live site (categories + the 24 seeded placeholder cakes) rather than migrated — owner decision, since they're being replaced by real photos anyway. Categories now have a real `image_url`/Cloudinary upload UI of their own.
 - [x] `Pagination` now accepts an optional `extraParams` prop so the admin Cakes list's filter/sort survive page navigation (storefront callers unaffected, prop is opt-in).
 - [x] Toppers' `topper_colors` edit path now goes through `fn_replace_topper_colors`, a single `security definer` RPC (delete+insert in one transaction), instead of two separate client calls.
+- [x] Figma design-alignment pass: sidebar rebuilt to match the real 4-section structure, Cake Form restructured (image section moved to top per owner request, deviating from Figma's side-by-side layout there specifically), Categories/Sizes/Flavors/Toppers pages picked up missing columns (subcategory count, tiers-available, restriction summary, hex text) and fixes (missing table header, smooth drag-reorder, unconditional "+Add Subcategory" per category, real category-restriction editing on Flavors, Toppers "Select All" colors, bigger Add buttons/image tiles throughout).
+- [x] Cloudinary cleanup: uploads now carry their `public_id`; removing an image (or deleting the cake/category/topper that owns it) deletes the asset from Cloudinary via a new signed `/api/admin/cloudinary-delete` route, not just the DB reference.
+- [x] Fixed a real pre-existing bug: `getTrendingCakesByCategory()` never actually filtered on `cakes.featured` — the Home page's "Trending Cakes" showed the first 4 active cakes per category regardless of the Featured toggle. Now correctly filtered; a new `/admin/cakes/trending` page manages which cakes are featured and their order per category.
+- [x] Added `cakes.allow_fake` (owner-confirmed schema addition) — a per-cake toggle from the Figma Cake Form design, gating whether that specific cake can be ordered as a Fake Cake on the storefront (ANDed with the existing category-based restriction).
+- [x] Fixed `next.config.ts` missing `images.remotePatterns` for `res.cloudinary.com` — a pre-existing gap since Cloudinary was first wired up; `next/image` would have rejected every Cloudinary-hosted photo.
 
 ## Phase 6 — Admin: orders & operations
 

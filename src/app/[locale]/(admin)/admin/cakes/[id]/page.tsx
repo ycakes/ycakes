@@ -7,7 +7,7 @@ export default async function AdminCakeFormPage({ params }: { params: Promise<{ 
 
   const { data: categories, error: categoriesError } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .order("sort_order");
   if (categoriesError) throw categoriesError;
 
@@ -17,7 +17,7 @@ export default async function AdminCakeFormPage({ params }: { params: Promise<{ 
 
   const [{ data: cake, error: cakeError }, { data: images, error: imagesError }] = await Promise.all([
     supabase.from("cakes").select("id, category_id, name, description, base_price, featured, active, allow_fake").eq("id", id).maybeSingle(),
-    supabase.from("cake_images").select("id, cake_id, url, sort_order, is_primary").eq("cake_id", id).order("sort_order"),
+    supabase.from("cake_images").select("id, cake_id, url, sort_order, is_primary, public_id").eq("cake_id", id).order("sort_order"),
   ]);
   if (cakeError) throw cakeError;
   if (imagesError) throw imagesError;

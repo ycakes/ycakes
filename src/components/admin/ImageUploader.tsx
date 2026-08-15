@@ -6,7 +6,7 @@ import { Star, Trash2, Upload, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { uploadToCloudinary } from "@/lib/admin/cloudinaryUpload";
 
-export type UploadedImage = { url: string; sort_order: number; is_primary: boolean };
+export type UploadedImage = { url: string; sort_order: number; is_primary: boolean; publicId: string | null };
 
 export function ImageUploader({
   images,
@@ -31,8 +31,8 @@ export function ImageUploader({
     try {
       const uploaded: UploadedImage[] = [];
       for (const file of Array.from(files)) {
-        const url = await uploadToCloudinary(file, folder);
-        uploaded.push({ url, sort_order: images.length + uploaded.length, is_primary: false });
+        const { url, publicId } = await uploadToCloudinary(file, folder);
+        uploaded.push({ url, publicId, sort_order: images.length + uploaded.length, is_primary: false });
       }
       const next = multiple ? [...images, ...uploaded] : uploaded.slice(0, 1);
       if (next.length > 0 && !next.some((img) => img.is_primary)) {
@@ -61,19 +61,19 @@ export function ImageUploader({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className={multiple ? "grid w-fit grid-cols-2 gap-[10px]" : "flex flex-wrap gap-3"}>
+      <div className={multiple ? "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4" : "flex flex-wrap gap-3"}>
         {images.map((img) => (
           <div
             key={img.url}
             className={
               multiple
-                ? `group relative size-[130px] shrink-0 overflow-hidden rounded-2xl bg-bg-surface-alt ${
+                ? `group relative size-[180px] shrink-0 overflow-hidden rounded-2xl bg-bg-surface-alt ${
                     img.is_primary ? "border-2 border-brand-primary" : "border-[1.5px] border-border-default"
                   }`
                 : "group relative size-24 shrink-0 overflow-hidden rounded-xl border-[1.5px] border-border-default bg-bg-surface-alt"
             }
           >
-            <Image src={img.url} alt="" fill sizes={multiple ? "130px" : "96px"} className="object-cover" />
+            <Image src={img.url} alt="" fill sizes={multiple ? "180px" : "96px"} className="object-cover" />
             {multiple && img.is_primary && (
               <span className="absolute start-1 top-1 rounded-full bg-brand-primary px-1.5 py-0.5 text-[10px] font-semibold text-text-on-brand">
                 {t("primaryBadge")}
@@ -106,7 +106,7 @@ export function ImageUploader({
             disabled={uploading}
             className={
               multiple
-                ? "flex size-[130px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border-[1.5px] border-dashed border-border-default text-text-secondary hover:bg-bg-surface-alt"
+                ? "flex size-[180px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border-[1.5px] border-dashed border-border-default text-text-secondary hover:bg-bg-surface-alt"
                 : "flex size-24 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border-[1.5px] border-dashed border-border-default text-text-secondary hover:bg-bg-surface-alt"
             }
           >

@@ -13,6 +13,7 @@ export type TopperFormValue = {
   name_ar: string;
   price_modifier: number;
   image_url: string | null;
+  image_public_id: string | null;
   has_color_variants: boolean;
   color_ids: string[];
 };
@@ -36,7 +37,9 @@ export function TopperFormDialog({
   const [nameAr, setNameAr] = useState(initialValue?.name_ar ?? "");
   const [priceModifier, setPriceModifier] = useState(String(initialValue?.price_modifier ?? 0));
   const [image, setImage] = useState<UploadedImage[]>(
-    initialValue?.image_url ? [{ url: initialValue.image_url, sort_order: 0, is_primary: true }] : [],
+    initialValue?.image_url
+      ? [{ url: initialValue.image_url, publicId: initialValue.image_public_id, sort_order: 0, is_primary: true }]
+      : [],
   );
   const [hasColorVariants, setHasColorVariants] = useState(initialValue?.has_color_variants ?? false);
   const [colorIds, setColorIds] = useState<string[]>(initialValue?.color_ids ?? []);
@@ -80,8 +83,17 @@ export function TopperFormDialog({
               {t("hasColorVariants")}
             </label>
             {hasColorVariants && (
-              <div className="flex flex-wrap gap-2">
-                {allColors.map((color) => (
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-3 text-xs font-medium text-brand-primary">
+                  <button type="button" onClick={() => setColorIds(allColors.map((c) => c.id))}>
+                    {t("selectAll")}
+                  </button>
+                  <button type="button" onClick={() => setColorIds([])}>
+                    {t("clearAll")}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {allColors.map((color) => (
                   <button
                     key={color.id}
                     type="button"
@@ -95,7 +107,8 @@ export function TopperFormDialog({
                     <span className="size-3.5 rounded-full border border-border-default" style={{ backgroundColor: color.hex_code ?? undefined }} />
                     {color.name.en}
                   </button>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -111,6 +124,7 @@ export function TopperFormDialog({
                   name_ar: nameAr,
                   price_modifier: Number(priceModifier) || 0,
                   image_url: image[0]?.url ?? null,
+                  image_public_id: image[0]?.publicId ?? null,
                   has_color_variants: hasColorVariants,
                   color_ids: hasColorVariants ? colorIds : [],
                 })

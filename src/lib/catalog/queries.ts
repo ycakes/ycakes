@@ -24,7 +24,7 @@ export async function getTopLevelCategories(): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .is("parent_id", null)
     .in("slug", TOP_LEVEL_SLUGS)
     .order("sort_order");
@@ -37,7 +37,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -49,7 +49,7 @@ export async function getSubcategories(parentId: string): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("parent_id", parentId)
     .order("sort_order");
 
@@ -80,6 +80,7 @@ export async function getTrendingCakesByCategory(
         .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
         .in("category_id", subIds)
         .eq("active", true)
+        .eq("featured", true)
         .order("sort_order")
         .limit(limit);
       if (error) throw error;
@@ -92,6 +93,7 @@ export async function getTrendingCakesByCategory(
       .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
       .eq("category_id", category.id)
       .eq("active", true)
+      .eq("featured", true)
       .order("sort_order")
       .limit(limit);
     if (error) throw error;
@@ -153,7 +155,7 @@ export async function getCategoryById(id: string): Promise<Category | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("id", id)
     .maybeSingle();
 

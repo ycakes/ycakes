@@ -85,7 +85,20 @@
       "variantsCount": "{count, plural, one {تدرج لوني واحد} other {# تدرجات لونية}}",
       "allowFake": "متاح ككيكة عرض",
       "allowFakeHelper": "يتيح للعملاء طلب نسخة عرض فقط من هذا التصميم. غير متاح لفئتي بينتو وركن الحلوى.",
-      "activeHelper": "الكيكات غير المفعّلة مخفية عن المتجر."
+      "activeHelper": "الكيكات غير المفعّلة مخفية عن المتجر.",
+      "actions": "الإجراءات",
+      "subcategoriesCountHeader": "الفئات الفرعية",
+      "selectAll": "تحديد الكل",
+      "clearAll": "إلغاء التحديد",
+      "back": "رجوع",
+      "restrictedToNone": "بدون قيود (متاح في كل مكان)",
+      "trendingCakes": "الكيكات الرائجة",
+      "trendingCakesHelper": "الكيكات المعروضة هنا تظهر في قسم \"الكيكات الرائجة\" في الصفحة الرئيسية، مجمّعة حسب الفئة.",
+      "noTrendingCakes": "لا توجد كيكات رائجة في هذه الفئة بعد.",
+      "addToTrending": "إضافة كيكة إلى الرائجة…",
+      "moveUp": "تحريك لأعلى",
+      "moveDown": "تحريك لأسفل",
+      "removeFromTrending": "إزالة من الرائجة"
     },
     "imageUploader": {
       "upload": "رفع صورة",

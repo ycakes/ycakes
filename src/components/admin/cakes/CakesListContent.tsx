@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { deleteFromCloudinary } from "@/lib/admin/cloudinaryUpload";
 import type { Cake, Category } from "@/types/catalog";
 
 type Row = Cake & { active: boolean };
@@ -46,12 +47,19 @@ export function CakesListContent({
 
   async function handleDelete(id: string) {
     setError(null);
+    const { data: cakeImages } = await supabase.from("cake_images").select("public_id").eq("cake_id", id);
     const { error: deleteError } = await supabase.from("cakes").delete().eq("id", id);
     if (deleteError) {
       setError(t("saveFailed"));
       return;
     }
     setRows((prev) => prev.filter((r) => r.id !== id));
+    await Promise.all(
+      (cakeImages ?? [])
+        .map((img) => img.public_id)
+        .filter((publicId): publicId is string => !!publicId)
+        .map((publicId) => deleteFromCloudinary(publicId)),
+    );
   }
 
   async function toggleActive(id: string, active: boolean) {
@@ -110,11 +118,16 @@ export function CakesListContent({
     <div className="flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("cakes")}</h1>
-        <Link href="/admin/cakes/new">
-          <Button type="button" variant="brand-primary">
-            {t("add")}
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/admin/cakes/trending" className="text-sm font-medium text-brand-primary hover:underline">
+            {t("trendingCakes")}
+          </Link>
+          <Link href="/admin/cakes/new">
+            <Button type="button" variant="brand-primary" size="xl">
+              {t("add")}
+            </Button>
+          </Link>
+        </div>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex flex-wrap gap-2">
@@ -125,6 +138,7 @@ export function CakesListContent({
       </div>
       {activeCategory === "candy-corner" && (
         <div className="flex flex-wrap gap-2 ps-4">
+          <FilterChip href={`${basePath}?category=candy-corner`} label={t("all")} active={!activeSubcategory} />
           {subcategories.map((sub) => (
             <FilterChip key={sub.id} href={`${basePath}?category=candy-corner&subcategory=${sub.id}`} label={sub.name.en} active={activeSubcategory === sub.id} />
           ))}

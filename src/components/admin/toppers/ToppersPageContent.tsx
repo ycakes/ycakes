@@ -8,12 +8,14 @@ import { RowActions } from "@/components/admin/RowActions";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { deleteFromCloudinary } from "@/lib/admin/cloudinaryUpload";
 import { TopperFormDialog, type TopperFormValue } from "./TopperFormDialog";
 import type { Color, Topper } from "@/types/catalog";
 
 type Row = Topper & {
   active: boolean;
   sort_order: number;
+  image_public_id: string | null;
   topper_colors: { color_id: string; colors: Color }[];
 };
 
@@ -28,7 +30,7 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
   async function refresh() {
     const { data, error: fetchError } = await supabase
       .from("toppers")
-      .select("id, name, price_modifier, has_color_variants, image_url, active, sort_order, topper_colors(color_id, colors(id, name, hex_code))")
+      .select("id, name, price_modifier, has_color_variants, image_url, image_public_id, active, sort_order, topper_colors(color_id, colors(id, name, hex_code))")
       .order("sort_order");
     if (fetchError) {
       setError(t("saveFailed"));
@@ -39,10 +41,12 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
 
   async function handleSave(value: TopperFormValue) {
     setError(null);
+    const existing = value.id ? toppers.find((tp) => tp.id === value.id) : null;
     const payload = {
       name: { en: value.name_en, ar: value.name_ar },
       price_modifier: value.price_modifier,
       image_url: value.image_url,
+      image_public_id: value.image_public_id,
       has_color_variants: value.has_color_variants,
     };
 
@@ -72,16 +76,24 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
       return;
     }
 
+    if (existing?.image_public_id && existing.image_public_id !== value.image_public_id) {
+      await deleteFromCloudinary(existing.image_public_id);
+    }
+
     setEditing(undefined);
     await refresh();
   }
 
   async function handleDelete(id: string) {
     setError(null);
+    const topper = toppers.find((tp) => tp.id === id);
     const { error: deleteError } = await supabase.from("toppers").delete().eq("id", id);
     if (deleteError) {
       setError(t("saveFailed"));
       return;
+    }
+    if (topper?.image_public_id) {
+      await deleteFromCloudinary(topper.image_public_id);
     }
     await refresh();
   }
@@ -149,6 +161,7 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
               name_ar: row.name.ar,
               price_modifier: row.price_modifier,
               image_url: row.image_url,
+              image_public_id: row.image_public_id,
               has_color_variants: row.has_color_variants,
               color_ids: row.topper_colors.map((tc) => tc.color_id),
             })
@@ -166,6 +179,7 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
         <Button
           type="button"
           variant="brand-primary"
+          size="xl"
           onClick={() => {
             setEditing(null);
             setAddKey((k) => k + 1);

@@ -82,7 +82,11 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
     },
     {
       header: t("hex"),
-      render: (row) => <span className="text-text-secondary">{row.hex_code ?? "—"}</span>,
+      render: (row) => (
+        <span dir="ltr" className="inline-block text-text-secondary">
+          {row.hex_code ?? "—"}
+        </span>
+      ),
     },
     {
       header: t("active"),
@@ -109,6 +113,7 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
         <Button
           type="button"
           variant="brand-primary"
+          size="xl"
           onClick={() => {
             setEditing(null);
             setAddKey((k) => k + 1);

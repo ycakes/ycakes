@@ -35,7 +35,6 @@ export default async function HomePage() {
               key={category.id}
               category={category}
               subtitle={t(`categorySubtitle.${category.slug}` as never)}
-              imageSrc={`/images/categories/${category.slug}.jpeg`}
               priority={index < 3}
             />
           ))}

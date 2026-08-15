@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { GripVertical } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { RowActions } from "@/components/admin/RowActions";
@@ -14,6 +15,7 @@ export function CategoryRow({
   onDragStart,
   onDragOver,
   onDrop,
+  onDragEnd,
   onToggleActive,
   onEdit,
   onDelete,
@@ -25,6 +27,7 @@ export function CategoryRow({
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
+  onDragEnd?: () => void;
   onToggleActive: (active: boolean) => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -35,12 +38,17 @@ export function CategoryRow({
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      style={{ viewTransitionName: `category-row-${category.id}` }}
       className={cn(
-        "flex items-center gap-3 rounded-xl border border-border-default bg-bg-surface p-3",
+        "flex items-center gap-3 rounded-xl border border-border-default bg-bg-surface p-3 transition-shadow",
         indented && "ms-8",
       )}
     >
       <GripVertical className="size-4 shrink-0 cursor-grab text-text-secondary" />
+      <span className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-bg-surface-alt">
+        {category.image_url && <Image src={category.image_url} alt="" fill sizes="36px" className="object-cover" />}
+      </span>
       <span className="flex-1 text-sm font-medium text-text-primary">
         {category.name.en} / {category.name.ar}
       </span>

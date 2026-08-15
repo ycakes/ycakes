@@ -9,6 +9,7 @@ export type Category = {
   name: Bilingual;
   slug: string;
   sort_order: number;
+  image_url: string | null;
 };
 
 export type Cake = {
@@ -29,6 +30,7 @@ export type CakeImage = {
   url: string;
   sort_order: number;
   is_primary: boolean;
+  public_id: string | null;
 };
 
 export type Size = {

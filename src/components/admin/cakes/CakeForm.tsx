@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUploader, type UploadedImage } from "@/components/admin/ImageUploader";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { deleteFromCloudinary } from "@/lib/admin/cloudinaryUpload";
 import type { Cake, CakeImage, Category } from "@/types/catalog";
 
 type CakeFormValue = Pick<Cake, "id" | "category_id" | "name" | "description" | "base_price" | "featured" | "allow_fake"> & {
@@ -45,7 +47,7 @@ export function CakeForm({
   const [active, setActive] = useState(cake?.active ?? true);
   const [allowFake, setAllowFake] = useState(cake?.allow_fake ?? true);
   const [cakeImages, setCakeImages] = useState<UploadedImage[]>(
-    images.map((img) => ({ url: img.url, sort_order: img.sort_order, is_primary: img.is_primary })),
+    images.map((img) => ({ url: img.url, publicId: img.public_id, sort_order: img.sort_order, is_primary: img.is_primary })),
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,13 +93,24 @@ export function CakeForm({
 
       if (cakeImages.length > 0) {
         const { error: imagesError } = await supabase.from("cake_images").insert(
-          cakeImages.map((img) => ({ cake_id: cakeId, url: img.url, sort_order: img.sort_order, is_primary: img.is_primary })),
+          cakeImages.map((img) => ({
+            cake_id: cakeId,
+            url: img.url,
+            public_id: img.publicId,
+            sort_order: img.sort_order,
+            is_primary: img.is_primary,
+          })),
         );
         if (imagesError) {
           setError(t("saveFailed"));
           return;
         }
       }
+
+      // Clean up Cloudinary assets for any images that were removed from this cake.
+      const keptPublicIds = new Set(cakeImages.map((img) => img.publicId));
+      const removedPublicIds = images.map((img) => img.public_id).filter((id): id is string => !!id && !keptPublicIds.has(id));
+      await Promise.all(removedPublicIds.map((id) => deleteFromCloudinary(id)));
 
       router.push("/admin/cakes");
     } finally {
@@ -106,101 +119,113 @@ export function CakeForm({
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-4 p-6">
+    <div className="flex max-w-4xl flex-col gap-4 p-6">
+      <Link
+        href="/admin/cakes"
+        className="flex w-fit items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary"
+      >
+        <ArrowLeft className="size-4 rtl:rotate-180" />
+        {t("back")}
+      </Link>
+
       <h1 className="font-heading text-2xl font-bold text-text-primary">{cake ? t("edit") : t("add")}</h1>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
-        {t("nameEn")}
-        <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
-      </label>
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
-        {t("nameAr")}
-        <input dir="rtl" value={nameAr} onChange={(e) => setNameAr(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
-      </label>
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
-        {t("descriptionEn")}
-        <textarea value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={3} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
-      </label>
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
-        {t("descriptionAr")}
-        <textarea dir="rtl" value={descriptionAr} onChange={(e) => setDescriptionAr(e.target.value)} rows={3} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
-      </label>
-
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
-        {t("category")}
-        <Select
-          value={topLevelId}
-          onValueChange={(value) => {
-            setTopLevelId(value ?? "");
-            setSubcategoryId("");
-          }}
-          items={topLevel.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {topLevel.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
-                {category.name.en}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </label>
-
-      {isCandyCorner && (
-        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
-          {t("subcategory")}
-          <Select
-            value={subcategoryId}
-            onValueChange={(value) => setSubcategoryId(value ?? "")}
-            items={subcategories.map((sub) => ({ value: sub.id, label: `${sub.name.en} / ${sub.name.ar}` }))}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("selectSubcategory")} />
-            </SelectTrigger>
-            <SelectContent>
-              {subcategories.map((sub) => (
-                <SelectItem key={sub.id} value={sub.id}>
-                  {sub.name.en}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </label>
-      )}
-
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
-        {t("priceModifier")}
-        <input type="number" step="0.01" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
-      </label>
-
-      <div className="flex flex-col gap-1">
-        <span className="text-[13px] font-medium text-text-primary">{t("images")}</span>
+      <div className="flex flex-col gap-2 rounded-3xl border border-border-default bg-bg-surface p-5">
+        <span className="text-[16px] font-heading font-semibold text-text-primary">{t("images")}</span>
         <ImageUploader images={cakeImages} onChange={setCakeImages} folder="cakes" multiple />
       </div>
 
-      <label className="flex items-center gap-2 text-[13px] font-medium text-text-primary">
-        <Switch checked={featured} onCheckedChange={setFeatured} />
-        {t("featured")}
-      </label>
-      <div className="flex flex-col gap-3 border-t border-border-default pt-2">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium text-text-primary">{t("active")}</span>
-            <span className="text-xs text-text-secondary">{t("activeHelper")}</span>
-          </div>
-          <Switch checked={active} onCheckedChange={setActive} />
+      <div className="flex flex-col gap-4 rounded-3xl border border-border-default bg-bg-surface p-6">
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("nameEn")}
+          <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("nameAr")}
+          <input dir="rtl" value={nameAr} onChange={(e) => setNameAr(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("descriptionEn")}
+          <textarea value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={3} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("descriptionAr")}
+          <textarea dir="rtl" value={descriptionAr} onChange={(e) => setDescriptionAr(e.target.value)} rows={3} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+
+        <div className="flex gap-4">
+          <label className="flex flex-1 flex-col gap-1 text-[13px] font-medium text-text-primary">
+            {t("category")}
+            <Select
+              value={topLevelId}
+              onValueChange={(value) => {
+                setTopLevelId(value ?? "");
+                setSubcategoryId("");
+              }}
+              items={topLevel.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {topLevel.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+          <label className="flex w-[200px] flex-col gap-1 text-[13px] font-medium text-text-primary">
+            {t("priceModifier")}
+            <input type="number" step="0.01" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+          </label>
         </div>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium text-text-primary">{t("allowFake")}</span>
-            <span className="text-xs text-text-secondary">{t("allowFakeHelper")}</span>
+
+        {isCandyCorner && (
+          <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+            {t("subcategory")}
+            <Select
+              value={subcategoryId}
+              onValueChange={(value) => setSubcategoryId(value ?? "")}
+              items={subcategories.map((sub) => ({ value: sub.id, label: `${sub.name.en} / ${sub.name.ar}` }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectSubcategory")} />
+              </SelectTrigger>
+              <SelectContent>
+                {subcategories.map((sub) => (
+                  <SelectItem key={sub.id} value={sub.id}>
+                    {sub.name.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+        )}
+
+        <label className="flex items-center gap-2 text-[13px] font-medium text-text-primary">
+          <Switch checked={featured} onCheckedChange={setFeatured} />
+          {t("featured")}
+        </label>
+
+        <div className="flex flex-col gap-3 border-t border-border-default pt-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-text-primary">{t("active")}</span>
+              <span className="text-xs text-text-secondary">{t("activeHelper")}</span>
+            </div>
+            <Switch checked={active} onCheckedChange={setActive} />
           </div>
-          <Switch checked={allowFake} onCheckedChange={setAllowFake} />
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-text-primary">{t("allowFake")}</span>
+              <span className="text-xs text-text-secondary">{t("allowFakeHelper")}</span>
+            </div>
+            <Switch checked={allowFake} onCheckedChange={setAllowFake} />
+          </div>
         </div>
       </div>
 

@@ -61,7 +61,7 @@ export function ColorFormDialog({
             </label>
             <label className="flex items-center gap-3 text-[13px] font-medium text-text-primary">
               <input type="color" value={hex} onChange={(e) => setHex(e.target.value)} className="size-9 rounded-lg border-[1.5px] border-border-default" />
-              {hex}
+              <span dir="ltr">{hex}</span>
             </label>
           </div>
           <div className="mt-5 flex gap-2">

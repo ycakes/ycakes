@@ -85,7 +85,20 @@
       "variantsCount": "{count, plural, one {1 variant} other {# variants}}",
       "allowFake": "Available as Fake Cake",
       "allowFakeHelper": "Lets customers order a display-only version of this design. Not shown for Bento or Candy Corner categories.",
-      "activeHelper": "Inactive cakes are hidden from the storefront."
+      "activeHelper": "Inactive cakes are hidden from the storefront.",
+      "actions": "Actions",
+      "subcategoriesCountHeader": "Subcategories",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "back": "Back",
+      "restrictedToNone": "No restriction (available everywhere)",
+      "trendingCakes": "Trending Cakes",
+      "trendingCakesHelper": "Cakes shown here appear in the \"Trending Cakes\" section of the Home page, grouped by category.",
+      "noTrendingCakes": "No trending cakes in this category yet.",
+      "addToTrending": "Add a cake to Trending…",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeFromTrending": "Remove from Trending"
     },
     "imageUploader": {
       "upload": "Upload",

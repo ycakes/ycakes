@@ -12,7 +12,7 @@ export default async function AdminSizesPage({
 
   const { data: categories, error: categoriesError } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .order("sort_order");
   if (categoriesError) throw categoriesError;
 

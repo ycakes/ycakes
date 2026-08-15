@@ -130,6 +130,7 @@ export function SizesPageContent({
         <Button
           type="button"
           variant="brand-primary"
+          size="xl"
           disabled={!selectedCategoryId}
           onClick={() => {
             setEditing(null);
@@ -147,12 +148,16 @@ export function SizesPageContent({
         }}
         items={categories.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
       >
-        <SelectTrigger className="w-fit">
+        <SelectTrigger className="h-11 w-full min-w-[260px] max-w-md text-[15px]">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
-          {categories.map((category) => (
-            <SelectItem key={category.id} value={category.id}>
+        <SelectContent className="min-w-[var(--anchor-width)]">
+          {categories.map((category, index) => (
+            <SelectItem
+              key={category.id}
+              value={category.id}
+              className={index > 0 ? "border-t border-border-default" : undefined}
+            >
               {category.name.en} / {category.name.ar}
             </SelectItem>
           ))}

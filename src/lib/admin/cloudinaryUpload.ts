@@ -1,4 +1,6 @@
-export async function uploadToCloudinary(file: File, folder: string): Promise<string> {
+export type CloudinaryUploadResult = { url: string; publicId: string };
+
+export async function uploadToCloudinary(file: File, folder: string): Promise<CloudinaryUploadResult> {
   const sigResponse = await fetch("/api/admin/cloudinary-signature", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -32,6 +34,15 @@ export async function uploadToCloudinary(file: File, folder: string): Promise<st
     throw new Error("Cloudinary upload failed");
   }
 
-  const data = (await uploadResponse.json()) as { secure_url: string };
-  return data.secure_url;
+  const data = (await uploadResponse.json()) as { secure_url: string; public_id: string };
+  return { url: data.secure_url, publicId: data.public_id };
+}
+
+/** Deletes a Cloudinary asset. Safe to call even if the asset is already gone. */
+export async function deleteFromCloudinary(publicId: string): Promise<void> {
+  await fetch("/api/admin/cloudinary-delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ publicId }),
+  });
 }
