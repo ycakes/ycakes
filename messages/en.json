@@ -49,7 +49,9 @@
       "unit": "Unit",
       "unitServings": "Servings",
       "unitQuantity": "Quantity",
-      "unitCm": "Centimeters"
+      "unitCm": "Centimeters",
+      "categories": "Categories",
+      "slug": "URL Slug"
     },
     "imageUploader": {
       "upload": "Upload",

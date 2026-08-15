@@ -49,7 +49,9 @@
       "unit": "الوحدة",
       "unitServings": "أفراد",
       "unitQuantity": "الكمية",
-      "unitCm": "سنتيمتر"
+      "unitCm": "سنتيمتر",
+      "categories": "الفئات",
+      "slug": "الرابط المختصر"
     },
     "imageUploader": {
       "upload": "رفع صورة",
