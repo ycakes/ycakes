@@ -21,6 +21,19 @@
       "team": "Team",
       "toggleSidebar": "Toggle sidebar",
       "logOut": "Log Out"
+    },
+    "table": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete this item?",
+      "deleteMessage": "\"{item}\" will be permanently removed. This can't be undone.",
+      "cancel": "Cancel",
+      "active": "Active",
+      "add": "Add",
+      "save": "Save",
+      "name": "Name",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)"
     }
   },
   "NavBar": {
