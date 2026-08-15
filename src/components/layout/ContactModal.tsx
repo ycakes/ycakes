@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import { Phone, X } from "lucide-react";
 import { Dialog } from "@base-ui/react/dialog";
@@ -16,6 +16,13 @@ import {
 // the old scroll-to-footer anchor link.
 export function ContactModal({ className, children }: { className?: string; children: ReactNode }) {
   const t = useTranslations("ContactModal");
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopyPhone() {
+    await navigator.clipboard.writeText(CONTACT_PHONE_DISPLAY);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <Dialog.Root>
@@ -33,23 +40,35 @@ export function ContactModal({ className, children }: { className?: string; chil
           <Dialog.Title className="font-heading text-xl font-semibold text-brand-primary">
             {t("title")}
           </Dialog.Title>
-          <p className="mt-1 text-sm text-text-secondary">{CONTACT_PHONE_DISPLAY}</p>
+          <button
+            type="button"
+            onClick={handleCopyPhone}
+            className="mt-1 text-start text-sm text-text-secondary transition-transform duration-150 hover:scale-105"
+          >
+            {copied ? t("copied") : CONTACT_PHONE_DISPLAY}
+          </button>
 
           <div className="mt-4 flex gap-2.5">
             <a
               href={`tel:${CONTACT_PHONE_TEL}`}
               className="flex flex-1 items-center justify-center gap-2 rounded-full border-[1.5px] border-border-default px-4 py-2.5 text-sm font-semibold text-text-primary transition-transform duration-150 hover:scale-105"
             >
-              <Phone className="size-4" />
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-primary">
+                <Phone className="size-3 text-text-on-brand" />
+              </span>
               {t("call")}
             </a>
             <a
               href={CONTACT_WHATSAPP_URL}
               target="_blank"
               rel="noreferrer"
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2.5 text-sm font-semibold text-text-on-brand transition-transform duration-150 hover:scale-105"
+              className="flex flex-1 items-center justify-center gap-2 rounded-full border-[1.5px] border-border-default px-4 py-2.5 text-sm font-semibold text-text-primary transition-transform duration-150 hover:scale-105"
             >
-              <Image src="/icons/whatsapp.svg" alt="" width={16} height={16} />
+              {/* whatsapp.svg is hardcoded white (built for Footer's dark
+                  background) — a small dark badge keeps it visible here. */}
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-primary">
+                <Image src="/icons/whatsapp.svg" alt="" width={12} height={12} />
+              </span>
               {t("whatsapp")}
             </a>
           </div>
@@ -60,8 +79,10 @@ export function ContactModal({ className, children }: { className?: string; chil
             rel="noreferrer"
             className="mt-3 flex items-center justify-center gap-2 rounded-full border-[1.5px] border-border-default px-4 py-2.5 text-sm font-semibold text-text-primary transition-transform duration-150 hover:scale-105"
           >
-            <Image src="/icons/instagram.svg" alt="" width={18} height={18} />
-            {t("instagram")}
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-primary">
+              <Image src="/icons/instagram.svg" alt="" width={14} height={14} />
+            </span>
+            {t("instagram")} @ycakes.eg
           </a>
         </Dialog.Popup>
       </Dialog.Portal>

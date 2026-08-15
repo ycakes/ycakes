@@ -23,7 +23,8 @@
     "call": "Call",
     "whatsapp": "WhatsApp",
     "instagram": "Instagram",
-    "close": "Close"
+    "close": "Close",
+    "copied": "Copied phone number to clipboard!"
   },
   "Footer": {
     "tagline": "Handmade cakes for every celebration, baked fresh in Cairo.",
