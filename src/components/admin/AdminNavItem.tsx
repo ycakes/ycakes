@@ -31,7 +31,12 @@ export function AdminNavItem({
     </span>
   );
 
-  if (!href) return <div title={collapsed ? label : undefined}>{content}</div>;
+  if (!href)
+    return (
+      <div title={label} aria-disabled="true">
+        {content}
+      </div>
+    );
 
   return (
     <Link href={href} title={collapsed ? label : undefined}>
