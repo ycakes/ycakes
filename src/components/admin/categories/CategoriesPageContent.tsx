@@ -19,6 +19,7 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
   const [dragId, setDragId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [addKey, setAddKey] = useState(0);
+  const [addingSubcategoryUnderCandyCorner, setAddingSubcategoryUnderCandyCorner] = useState(false);
   const supabase = createClient();
 
   const topLevel = categories.filter((c) => c.parent_id === null);
@@ -79,6 +80,7 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
       }
     }
     setEditing(undefined);
+    setAddingSubcategoryUnderCandyCorner(false);
     await refresh();
   }
 
@@ -111,6 +113,7 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
           variant="brand-primary"
           onClick={() => {
             setEditing(null);
+            setAddingSubcategoryUnderCandyCorner(false);
             setAddKey((k) => k + 1);
           }}
         >
@@ -132,6 +135,11 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
                   category={category}
                   active={category.active}
                   indented={false}
+                  subcategoriesLabel={
+                    category.slug === "candy-corner"
+                      ? t("subcategoriesCount", { count: subcategories.length })
+                      : "—"
+                  }
                   onDragStart={() => setDragId(category.id)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(topLevel, category.id)}
@@ -159,6 +167,17 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
                     onDelete={() => handleDelete(sub.id)}
                   />
                 ))}
+                <button
+                  type="button"
+                  className="ms-8 self-start text-sm font-medium text-brand-primary"
+                  onClick={() => {
+                    setEditing(null);
+                    setAddingSubcategoryUnderCandyCorner(true);
+                    setAddKey((k) => k + 1);
+                  }}
+                >
+                  {t("addSubcategory")}
+                </button>
               </div>
             )}
           </div>
@@ -168,8 +187,20 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
         key={editing?.id ?? `new-${addKey}`}
         open={editing !== undefined}
         initialValue={editing ?? null}
-        onSave={(value) => handleSave(value, editing?.id ? categories.find((c) => c.id === editing.id)?.parent_id ?? null : null)}
-        onCancel={() => setEditing(undefined)}
+        onSave={(value) =>
+          handleSave(
+            value,
+            editing?.id
+              ? (categories.find((c) => c.id === editing.id)?.parent_id ?? null)
+              : addingSubcategoryUnderCandyCorner
+                ? (candyCorner?.id ?? null)
+                : null,
+          )
+        }
+        onCancel={() => {
+          setEditing(undefined);
+          setAddingSubcategoryUnderCandyCorner(false);
+        }}
       />
     </div>
   );

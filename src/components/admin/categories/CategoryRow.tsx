@@ -10,6 +10,7 @@ export function CategoryRow({
   category,
   active,
   indented,
+  subcategoriesLabel,
   onDragStart,
   onDragOver,
   onDrop,
@@ -20,6 +21,7 @@ export function CategoryRow({
   category: Category;
   active: boolean;
   indented: boolean;
+  subcategoriesLabel?: string;
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
@@ -42,6 +44,9 @@ export function CategoryRow({
       <span className="flex-1 text-sm font-medium text-text-primary">
         {category.name.en} / {category.name.ar}
       </span>
+      {subcategoriesLabel !== undefined && (
+        <span className="w-40 shrink-0 text-sm text-text-secondary">{subcategoriesLabel}</span>
+      )}
       <Switch checked={active} onCheckedChange={onToggleActive} />
       <RowActions itemLabel={category.name.en} onEdit={onEdit} onDelete={onDelete} />
     </div>

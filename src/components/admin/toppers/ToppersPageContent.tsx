@@ -53,11 +53,6 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
         setError(t("saveFailed"));
         return;
       }
-      const { error: deleteError } = await supabase.from("topper_colors").delete().eq("topper_id", topperId);
-      if (deleteError) {
-        setError(t("saveFailed"));
-        return;
-      }
     } else {
       const nextSort = toppers.length > 0 ? Math.max(...toppers.map((tp) => tp.sort_order)) + 1 : 0;
       const { data, error: insertError } = await supabase.from("toppers").insert({ ...payload, sort_order: nextSort }).select("id").single();
@@ -68,12 +63,13 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
       topperId = data.id;
     }
 
-    if (value.color_ids.length > 0) {
-      const { error: colorsError } = await supabase.from("topper_colors").insert(value.color_ids.map((color_id) => ({ topper_id: topperId, color_id })));
-      if (colorsError) {
-        setError(t("saveFailed"));
-        return;
-      }
+    const { error: colorsError } = await supabase.rpc("fn_replace_topper_colors", {
+      p_topper_id: topperId,
+      p_color_ids: value.color_ids,
+    });
+    if (colorsError) {
+      setError(t("saveFailed"));
+      return;
     }
 
     setEditing(undefined);
@@ -121,10 +117,17 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
       header: t("colorVariants"),
       render: (row) =>
         row.topper_colors.length > 0 ? (
-          <span className="flex gap-1">
-            {row.topper_colors.map((tc) => (
-              <span key={tc.color_id} className="size-4 rounded-full border border-border-default" style={{ backgroundColor: tc.colors.hex_code ?? undefined }} />
-            ))}
+          <span className="flex items-center gap-1.5">
+            <span className="flex items-center">
+              {row.topper_colors.map((tc, index) => (
+                <span
+                  key={tc.color_id}
+                  className="size-[18px] shrink-0 rounded-full border-2 border-bg-surface"
+                  style={{ backgroundColor: tc.colors.hex_code ?? undefined, marginInlineStart: index === 0 ? 0 : "-6px" }}
+                />
+              ))}
+            </span>
+            <span className="text-text-secondary">{t("variantsCount", { count: row.topper_colors.length })}</span>
           </span>
         ) : (
           <span className="text-text-secondary">{t("noColorVariants")}</span>
@@ -172,7 +175,7 @@ export function ToppersPageContent({ initialToppers, allColors }: { initialToppe
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <AdminTable columns={columns} rows={toppers} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
+      <AdminTable columns={columns} rows={toppers} getRowId={(row) => row.id} emptyMessage={t("noResults")} rowHeight="64" />
       <TopperFormDialog
         key={editing?.id ?? `new-${addKey}`}
         open={editing !== undefined}
