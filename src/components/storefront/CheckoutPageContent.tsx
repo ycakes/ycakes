@@ -10,11 +10,15 @@ import { CheckoutAuthCard } from "@/components/storefront/CheckoutAuthCard";
 import { EditFulfillmentModal } from "@/components/storefront/EditFulfillmentModal";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useCartStore, useCartSubtotal } from "@/store/cart";
+import { useCartStore, useCartSubtotal, useFulfillmentComplete } from "@/store/cart";
 import { useSession } from "@/hooks/useSession";
 import { createClient } from "@/lib/supabase/client";
+import { createOrder } from "@/lib/orders/createOrder";
+import { setLastOrder } from "@/lib/orders/lastOrder";
 import type { DeliveryArea, PromoCode } from "@/types/catalog";
 import type { ContactMethod, SavedAddress, SavedPhone } from "@/types/auth";
+import type { CartItem } from "@/types/cart";
+import type { OrderConfirmationSnapshot } from "@/types/orders";
 
 const PICKUP_LOCATION = { en: "New Cairo", ar: "التجمع الخامس" };
 
@@ -37,6 +41,7 @@ export function CheckoutPageContent({
   const fulfillmentMethod = useCartStore((state) => state.fulfillmentMethod);
   const deliveryAreaId = useCartStore((state) => state.deliveryAreaId);
   const fulfillmentDate = useCartStore((state) => state.fulfillmentDate);
+  const fulfillmentComplete = useFulfillmentComplete();
   const deliveryArea = deliveryAreas.find((area) => area.id === deliveryAreaId);
 
   useEffect(() => {
@@ -62,6 +67,18 @@ export function CheckoutPageContent({
   const [promoApplying, setPromoApplying] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
+
+  const [attempted, setAttempted] = useState(false);
+  const [submittingOrder, setSubmittingOrder] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+
+  const fieldErrors: Record<string, string> = {};
+  if (!firstName.trim()) fieldErrors.firstName = t("errorRequired");
+  if (!lastName.trim()) fieldErrors.lastName = t("errorRequired");
+  if (!address.trim()) fieldErrors.address = t("errorRequired");
+  if (!phone1.trim()) fieldErrors.phone1 = t("errorRequired");
+  const fieldOrder = ["firstName", "lastName", "address", "phone1"];
+  const fieldError = (id: string) => (attempted ? fieldErrors[id] : undefined);
 
   function handleUseAddress(saved: SavedAddress) {
     setAddress(saved.address);
@@ -117,21 +134,17 @@ export function CheckoutPageContent({
 
     setPromoApplying(true);
     const supabase = createClient();
-    const today = new Date().toISOString().slice(0, 10);
-    const { data, error } = await supabase
-      .from("promo_codes")
-      .select("id, code, discount_type, discount_value, min_order_amount")
-      .eq("code", code)
-      .eq("active", true)
-      .or(`expiry_date.is.null,expiry_date.gte.${today}`)
-      .maybeSingle();
+    // promo_codes has no public SELECT policy (anyone could otherwise
+    // enumerate every active code) — validate_promo_code is a narrow,
+    // exact-match RPC instead (20260814090200_promo_code_lookup.sql).
+    const { data, error } = await supabase.rpc("validate_promo_code", { p_code: code }).maybeSingle();
     setPromoApplying(false);
 
     if (error || !data) {
       setPromoError(t("promoInvalid"));
       return;
     }
-    const promo = data as PromoCode;
+    const promo = { ...data, code } as PromoCode;
     if (promo.min_order_amount && subtotal < promo.min_order_amount) {
       setPromoError(t("promoMinOrder", { amount: promo.min_order_amount }));
       return;
@@ -145,6 +158,80 @@ export function CheckoutPageContent({
       : Math.round((subtotal * appliedPromo.discount_value) / 100)
     : 0;
   const total = Math.max(0, subtotal - discount);
+
+  function attributesSummary(item: CartItem) {
+    const parts: string[] = [];
+    if (item.isFake) parts.push(`${item.fakeSizeCm} cm`);
+    else if (item.sizeLabel) parts.push(item.sizeLabel);
+    if (item.tierCount) parts.push(t("tierCount", { count: item.tierCount }));
+    if (item.flavorNames.length > 0) parts.push(item.flavorNames.join(", "));
+    if (item.colorNames.length > 0) parts.push(item.colorNames.join(", "));
+    const shapeName = item.isFake ? item.fakeShapeName : item.shapeName;
+    if (shapeName) parts.push(shapeName);
+    parts.push(t("qty", { count: item.quantity }));
+    return parts.join(" • ");
+  }
+
+  async function handlePlaceOrder() {
+    setOrderError(null);
+    setAttempted(true);
+
+    const firstErrorId = fieldOrder.find((id) => fieldErrors[id]);
+    if (firstErrorId) {
+      document.getElementById(firstErrorId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (!fulfillmentComplete || !fulfillmentMethod || !fulfillmentDate) {
+      setOrderError(t("errorFulfillmentIncomplete"));
+      return;
+    }
+
+    setSubmittingOrder(true);
+    const fullAddress = apartment.trim() ? `${address}, ${apartment}` : address;
+    try {
+      const { orderNumber } = await createOrder({
+        customerId: session?.user.id ?? null,
+        guestName: session ? null : `${firstName} ${lastName}`.trim(),
+        guestPhone: session ? null : phone1,
+        fulfillmentType: fulfillmentMethod,
+        deliveryAreaId: fulfillmentMethod === "delivery" ? deliveryAreaId : null,
+        deliveryAddress: fullAddress,
+        fulfillmentDate,
+        promoCodeId: appliedPromo?.id ?? null,
+        subtotalEstimate: subtotal,
+        deliveryPrice: fulfillmentMethod === "delivery" ? (deliveryArea?.price ?? 0) : 0,
+        discountAmount: discount,
+        notes: notes.trim() || null,
+        items,
+      });
+
+      const snapshot: OrderConfirmationSnapshot = {
+        orderNumber,
+        lineItems: items.map((item) => ({
+          name: item.cakeName[locale],
+          image: item.cakeImage,
+          attributesSummary: attributesSummary(item),
+          quantity: item.quantity,
+          lineEstimate: item.lineEstimate,
+        })),
+        fulfillmentMethod,
+        deliveryAreaName: fulfillmentMethod === "delivery" ? (deliveryArea?.name[locale] ?? null) : PICKUP_LOCATION[locale],
+        fulfillmentDate,
+        contactName: `${firstName} ${lastName}`.trim(),
+        phone: phone1,
+        phoneMethod: phone1Method,
+        address: fullAddress,
+        total,
+      };
+      setLastOrder(snapshot);
+      useCartStore.getState().clear();
+      router.push("/order-confirmation");
+    } catch (err) {
+      console.error("create order error:", err);
+      setOrderError(t("placeOrderError"));
+      setSubmittingOrder(false);
+    }
+  }
 
   if (items.length === 0) return null;
 
@@ -173,16 +260,16 @@ export function CheckoutPageContent({
                 {t("contactDetailsTitle")}
               </p>
               <div className="flex gap-3">
-                <InputField label={t("firstName")} value={firstName} onChange={setFirstName} />
-                <InputField label={t("lastName")} value={lastName} onChange={setLastName} />
+                <InputField id="firstName" label={t("firstName")} value={firstName} onChange={setFirstName} error={fieldError("firstName")} />
+                <InputField id="lastName" label={t("lastName")} value={lastName} onChange={setLastName} error={fieldError("lastName")} />
                 <InputField label={t("company")} value={company} onChange={setCompany} />
               </div>
-              <InputField label={t("address")} value={address} onChange={setAddress} />
+              <InputField id="address" label={t("address")} value={address} onChange={setAddress} error={fieldError("address")} />
               <InputField label={t("apartment")} value={apartment} onChange={setApartment} />
 
               <div className="flex items-end gap-2">
                 <div className="flex-1">
-                  <InputField label={t("phone1")} type="tel" value={phone1} onChange={setPhone1} />
+                  <InputField id="phone1" label={t("phone1")} type="tel" value={phone1} onChange={setPhone1} error={fieldError("phone1")} />
                 </div>
                 <div className="flex gap-1.5 pb-3">
                   {(["call", "whatsapp", "both"] as const).map((method) => (
@@ -296,10 +383,16 @@ export function CheckoutPageContent({
                 <span>{total > 0 ? `${total} ${tCommon("egp")}` : tCommon("priceOnRequest")}</span>
               </div>
               <p className="text-xs text-text-secondary">{t("priceDisclaimer")}</p>
-              <Button variant="brand-primary" size="xl" className="w-full justify-center" disabled>
+              {orderError && <p className="text-center text-sm text-red-600">{orderError}</p>}
+              <Button
+                variant="brand-primary"
+                size="xl"
+                className="w-full justify-center"
+                disabled={submittingOrder}
+                onClick={handlePlaceOrder}
+              >
                 {t("placeOrder")}
               </Button>
-              <p className="text-center text-xs text-text-secondary">{t("placeOrderComingSoon")}</p>
             </div>
 
             <div className="flex flex-col gap-2 rounded-3xl bg-bg-surface p-4">

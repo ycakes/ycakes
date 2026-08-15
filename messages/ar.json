@@ -41,6 +41,8 @@
     "priceOnRequest": "السعر عند الطلب",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور",
+    "decreaseQuantity": "إنقاص الكمية",
+    "increaseQuantity": "زيادة الكمية",
     "contactMethod": {
       "call": "اتصال",
       "whatsapp": "واتساب",
@@ -178,7 +180,10 @@
     "estimatedTotal": "الإجمالي التقديري",
     "priceDisclaimer": "يتم تأكيد السعر النهائي من فريقنا عبر واتساب أو الهاتف قبل إنهاء طلبك.",
     "placeOrder": "إتمام الطلب",
-    "placeOrderComingSoon": "إرسال الطلب قريباً — سيتواصل معك فريقنا مباشرة في الوقت الحالي.",
+    "placeOrderError": "حدث خطأ أثناء إرسال طلبك — الرجاء المحاولة مرة أخرى.",
+    "errorFulfillmentIncomplete": "الرجاء تحديد طريقة وتاريخ التنفيذ (انظر تفاصيل التنفيذ على اليمين).",
+    "tierCount": "{count, plural, one {طابق واحد} other {# طوابق}}",
+    "qty": "الكمية {count}",
     "orderNotesTitle": "ملاحظات الطلب",
     "notes": "ملاحظات إضافية (اختياري)",
     "notesPlaceholder": "مثال: تعليمات التوصيل، رمز البوابة، وقت التواصل المفضل..."
@@ -202,6 +207,27 @@
     "fulfillmentDate": "التاريخ",
     "priceDisclaimer": "يتم تأكيد السعر النهائي من فريقنا عبر واتساب أو الهاتف قبل إنهاء طلبك.",
     "proceedToCheckout": "المتابعة للدفع"
+  },
+  "OrderConfirmation": {
+    "orderPlaced": "تم إرسال الطلب!",
+    "thanks": "شكراً {name} — استلمنا طلبك.",
+    "orderNumber": "طلب رقم #{number}",
+    "whatsNextTitle": "ماذا يحدث الآن",
+    "whatsNextBody": "سيتواصل معك فريقنا عبر واتساب أو الهاتف خلال ساعات قليلة لتأكيد السعر النهائي وتفاصيل طلبك.",
+    "messageWhatsApp": "راسلنا على واتساب",
+    "orderDetailsTitle": "تفاصيل الطلب",
+    "fulfillmentLabel": "التنفيذ",
+    "method": "الطريقة",
+    "date": "التاريخ",
+    "contactLabel": "التواصل وعنوان التوصيل",
+    "name": "الاسم",
+    "phone": "الهاتف",
+    "address": "العنوان",
+    "estimatedTotal": "الإجمالي التقديري",
+    "priceDisclaimer": "يتم تأكيد السعر النهائي من فريقنا عبر واتساب أو الهاتف قبل إنهاء طلبك.",
+    "continueShopping": "متابعة التسوق",
+    "delivery": "توصيل",
+    "pickup": "استلام"
   },
   "CakeDetail": {
     "cakeType": "نوع الكيكة",

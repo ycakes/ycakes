@@ -41,6 +41,8 @@
     "priceOnRequest": "Price on request",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
     "contactMethod": {
       "call": "Call",
       "whatsapp": "WhatsApp",
@@ -178,7 +180,10 @@
     "estimatedTotal": "Estimated Total",
     "priceDisclaimer": "Final price is confirmed by our team over WhatsApp or phone before your order is finalized.",
     "placeOrder": "Place Order",
-    "placeOrderComingSoon": "Order submission is coming soon — for now, our team will follow up with you directly.",
+    "placeOrderError": "Something went wrong placing your order — please try again.",
+    "errorFulfillmentIncomplete": "Please set your fulfillment method and date (see Fulfillment Details on the right).",
+    "tierCount": "{count, plural, one {1 Tier} other {# Tiers}}",
+    "qty": "Qty {count}",
     "orderNotesTitle": "Order Notes",
     "notes": "Additional Notes (optional)",
     "notesPlaceholder": "e.g. delivery instructions, gate code, preferred contact time..."
@@ -202,6 +207,27 @@
     "fulfillmentDate": "Date",
     "priceDisclaimer": "Final price is confirmed by our team over WhatsApp or phone before your order is finalized.",
     "proceedToCheckout": "Proceed to Checkout"
+  },
+  "OrderConfirmation": {
+    "orderPlaced": "Order Placed!",
+    "thanks": "Thanks, {name} — we've got your order.",
+    "orderNumber": "Order #{number}",
+    "whatsNextTitle": "What Happens Next",
+    "whatsNextBody": "Our team will reach out over WhatsApp or phone within a few hours to confirm your final price and order details.",
+    "messageWhatsApp": "Message Us on WhatsApp",
+    "orderDetailsTitle": "Order Details",
+    "fulfillmentLabel": "FULFILLMENT",
+    "method": "Method",
+    "date": "Date",
+    "contactLabel": "CONTACT & DELIVERY ADDRESS",
+    "name": "Name",
+    "phone": "Phone",
+    "address": "Address",
+    "estimatedTotal": "Estimated Total",
+    "priceDisclaimer": "Final price is confirmed by our team over WhatsApp or phone before your order is finalized.",
+    "continueShopping": "Continue Shopping",
+    "delivery": "Delivery",
+    "pickup": "Pickup"
   },
   "CakeDetail": {
     "cakeType": "Cake Type",
