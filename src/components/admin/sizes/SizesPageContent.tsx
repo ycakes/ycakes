@@ -130,6 +130,7 @@ export function SizesPageContent({
         onValueChange={(value) => {
           if (value) router.push(`/admin/sizes?category=${value}`);
         }}
+        items={categories.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
       >
         <SelectTrigger className="w-fit">
           <SelectValue />

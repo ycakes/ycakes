@@ -134,6 +134,7 @@ export function CakeForm({
             setTopLevelId(value ?? "");
             setSubcategoryId("");
           }}
+          items={topLevel.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
         >
           <SelectTrigger className="w-full">
             <SelectValue />
@@ -151,7 +152,11 @@ export function CakeForm({
       {isCandyCorner && (
         <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
           {t("subcategory")}
-          <Select value={subcategoryId} onValueChange={(value) => setSubcategoryId(value ?? "")}>
+          <Select
+            value={subcategoryId}
+            onValueChange={(value) => setSubcategoryId(value ?? "")}
+            items={subcategories.map((sub) => ({ value: sub.id, label: `${sub.name.en} / ${sub.name.ar}` }))}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={t("selectSubcategory")} />
             </SelectTrigger>
