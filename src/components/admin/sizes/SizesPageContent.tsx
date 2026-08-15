@@ -118,7 +118,7 @@ export function SizesPageContent({
       >
         {categories.map((category) => (
           <option key={category.id} value={category.id}>
-            {category.name.en}
+            {category.name.en} / {category.name.ar}
           </option>
         ))}
       </select>

@@ -29,6 +29,7 @@ export default async function AdminSizesPage({
 
   return (
     <SizesPageContent
+      key={selectedCategoryId}
       categories={categories as Category[]}
       selectedCategoryId={selectedCategoryId}
       initialSizes={(sizes ?? []) as (Size & { active: boolean })[]}
