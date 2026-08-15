@@ -42,6 +42,10 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
   function handleDrop(group: Row[], targetId: string) {
     if (!dragId || dragId === targetId) return;
     const fromIndex = group.findIndex((c) => c.id === dragId);
+    if (fromIndex === -1) {
+      setDragId(null);
+      return;
+    }
     const toIndex = group.findIndex((c) => c.id === targetId);
     const reordered = [...group];
     const [moved] = reordered.splice(fromIndex, 1);
