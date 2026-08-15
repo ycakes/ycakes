@@ -35,6 +35,8 @@
       "nameEn": "Name (English)",
       "nameAr": "Name (Arabic)",
       "colors": "Colors",
+      "flavors": "Flavors",
+      "priceModifier": "Price Modifier",
       "noResults": "No results yet.",
       "saveFailed": "Failed to save. Please try again."
     },
