@@ -22,6 +22,14 @@ export type Cake = {
   sort_order: number;
 };
 
+export type CakeImage = {
+  id: string;
+  cake_id: string;
+  url: string;
+  sort_order: number;
+  is_primary: boolean;
+};
+
 export type Size = {
   id: string;
   category_id: string;
@@ -61,6 +69,7 @@ export type Topper = {
   name: Bilingual;
   price_modifier: number;
   has_color_variants: boolean;
+  image_url: string | null;
 };
 
 export type DeliveryArea = {

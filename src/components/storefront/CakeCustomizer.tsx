@@ -502,6 +502,7 @@ export function CakeCustomizer({
                 label={topper.name[locale]}
                 selected={topperId === topper.id}
                 onSelect={() => setTopperId(topper.id)}
+                imageSrc={topper.image_url}
               />
             ))}
           </div>

@@ -267,7 +267,7 @@ export async function getToppers(): Promise<Topper[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("toppers")
-    .select("id, name, price_modifier, has_color_variants")
+    .select("id, name, price_modifier, has_color_variants, image_url")
     .eq("active", true)
     .order("sort_order");
 
