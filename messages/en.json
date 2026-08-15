@@ -42,7 +42,14 @@
       "colorVariants": "Color Variants",
       "noColorVariants": "No color variants",
       "noResults": "No results yet.",
-      "saveFailed": "Failed to save. Please try again."
+      "saveFailed": "Failed to save. Please try again.",
+      "sizes": "Sizes",
+      "minQty": "Min",
+      "maxQty": "Max",
+      "unit": "Unit",
+      "unitServings": "Servings",
+      "unitQuantity": "Quantity",
+      "unitCm": "Centimeters"
     },
     "imageUploader": {
       "upload": "Upload",

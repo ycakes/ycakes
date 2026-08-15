@@ -42,7 +42,14 @@
       "colorVariants": "التدرجات اللونية",
       "noColorVariants": "لا توجد تدرجات لونية",
       "noResults": "لا توجد نتائج بعد.",
-      "saveFailed": "فشل الحفظ. حاول مرة أخرى."
+      "saveFailed": "فشل الحفظ. حاول مرة أخرى.",
+      "sizes": "الأحجام",
+      "minQty": "الحد الأدنى",
+      "maxQty": "الحد الأقصى",
+      "unit": "الوحدة",
+      "unitServings": "أفراد",
+      "unitQuantity": "الكمية",
+      "unitCm": "سنتيمتر"
     },
     "imageUploader": {
       "upload": "رفع صورة",
