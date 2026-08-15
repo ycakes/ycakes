@@ -7,6 +7,22 @@
     "title": "Admin dashboard",
     "description": "Coming soon."
   },
+  "Admin": {
+    "nav": {
+      "catalog": "Catalog",
+      "cakes": "Cakes",
+      "categories": "Categories",
+      "sizes": "Sizes",
+      "flavors": "Flavors",
+      "colors": "Colors",
+      "toppers": "Toppers",
+      "orders": "Orders",
+      "money": "Money",
+      "team": "Team",
+      "toggleSidebar": "Toggle sidebar",
+      "logOut": "Log Out"
+    }
+  },
   "NavBar": {
     "home": "Home",
     "shop": "Shop",

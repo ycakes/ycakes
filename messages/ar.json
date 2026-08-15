@@ -7,6 +7,22 @@
     "title": "لوحة التحكم",
     "description": "قريباً."
   },
+  "Admin": {
+    "nav": {
+      "catalog": "الكتالوج",
+      "cakes": "الكيكات",
+      "categories": "الفئات",
+      "sizes": "الأحجام",
+      "flavors": "النكهات",
+      "colors": "الألوان",
+      "toppers": "الإضافات",
+      "orders": "الطلبات",
+      "money": "الحسابات",
+      "team": "الفريق",
+      "toggleSidebar": "تبديل الشريط الجانبي",
+      "logOut": "تسجيل الخروج"
+    }
+  },
   "NavBar": {
     "home": "الرئيسية",
     "shop": "المتجر",
