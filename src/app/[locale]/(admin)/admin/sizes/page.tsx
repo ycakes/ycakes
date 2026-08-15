@@ -27,12 +27,28 @@ export default async function AdminSizesPage({
     : { data: [], error: null };
   if (sizesError) throw sizesError;
 
+  const sizeIds = (sizes ?? []).map((s) => s.id);
+  const { data: sizeTiers, error: sizeTiersError } =
+    sizeIds.length > 0
+      ? await supabase.from("size_tiers").select("size_id, tiers(tier_count)").in("size_id", sizeIds)
+      : { data: [], error: null };
+  if (sizeTiersError) throw sizeTiersError;
+
+  const tiersBySizeId: Record<string, number[]> = {};
+  for (const row of sizeTiers ?? []) {
+    const tierCount = (row.tiers as unknown as { tier_count: number } | null)?.tier_count;
+    if (tierCount == null) continue;
+    (tiersBySizeId[row.size_id] ??= []).push(tierCount);
+  }
+  for (const counts of Object.values(tiersBySizeId)) counts.sort((a, b) => a - b);
+
   return (
     <SizesPageContent
       key={selectedCategoryId}
       categories={categories as Category[]}
       selectedCategoryId={selectedCategoryId}
       initialSizes={(sizes ?? []) as (Size & { active: boolean })[]}
+      tiersBySizeId={tiersBySizeId}
     />
   );
 }

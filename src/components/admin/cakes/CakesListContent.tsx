@@ -39,6 +39,7 @@ export function CakesListContent({
   totalPages: number;
 }) {
   const t = useTranslations("Admin.table");
+  const tCommon = useTranslations("Common");
   const [rows, setRows] = useState(cakes);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
@@ -86,7 +87,11 @@ export function CakesListContent({
       ),
     },
     { header: t("category"), render: (row) => categoriesById[row.category_id]?.name.en ?? "" },
-    { header: t("priceModifier"), sortKey: "price", render: (row) => row.base_price },
+    {
+      header: t("priceModifier"),
+      sortKey: "price",
+      render: (row) => tCommon("egpPrice", { amount: row.base_price }),
+    },
     {
       header: t("active"),
       render: (row) => <Switch checked={row.active} onCheckedChange={(checked) => toggleActive(row.id, checked)} />,
@@ -126,6 +131,7 @@ export function CakesListContent({
         rows={rows}
         getRowId={(row) => row.id}
         emptyMessage={t("noResults")}
+        rowHeight="64"
         currentSortKey={sort}
         currentSortDir={dir}
         buildSortHref={(key, nextDir) => {

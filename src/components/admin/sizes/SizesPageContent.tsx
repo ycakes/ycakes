@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { AdminTable, type AdminTableColumn } from "@/components/admin/AdminTable";
 import { RowActions } from "@/components/admin/RowActions";
 import { Switch } from "@/components/ui/switch";
@@ -18,12 +18,15 @@ export function SizesPageContent({
   categories,
   selectedCategoryId,
   initialSizes,
+  tiersBySizeId,
 }: {
   categories: Category[];
   selectedCategoryId: string | null;
   initialSizes: Row[];
+  tiersBySizeId: Record<string, number[]>;
 }) {
   const t = useTranslations("Admin.table");
+  const locale = useLocale();
   const router = useRouter();
   const [sizes, setSizes] = useState(initialSizes);
   const [editing, setEditing] = useState<SizeFormValue | null | undefined>(undefined);
@@ -87,10 +90,22 @@ export function SizesPageContent({
     setSizes((prev) => prev.map((s) => (s.id === id ? { ...s, active } : s)));
   }
 
+  function formatTiersAvailable(sizeId: string) {
+    const counts = tiersBySizeId[sizeId];
+    if (!counts || counts.length === 0) return t("noTiers");
+    const list = new Intl.ListFormat(locale, { style: "long", type: "disjunction" }).format(
+      counts.map((c) => String(c)),
+    );
+    return `${list} ${t("tierWord", { count: counts.length })}`;
+  }
+
   const columns: AdminTableColumn<Row>[] = [
-    { header: t("minQty"), render: (row) => row.min_qty },
-    { header: t("maxQty"), render: (row) => row.max_qty },
-    { header: t("unit"), render: (row) => t(`unit${row.unit.charAt(0).toUpperCase()}${row.unit.slice(1)}` as "unitServings" | "unitQuantity" | "unitCm") },
+    {
+      header: t("size"),
+      render: (row) =>
+        `${row.min_qty}>${row.max_qty} ${t(`unit${row.unit.charAt(0).toUpperCase()}${row.unit.slice(1)}` as "unitServings" | "unitQuantity" | "unitCm")}`,
+    },
+    { header: t("tiersAvailable"), render: (row) => formatTiersAvailable(row.id) },
     { header: t("priceModifier"), render: (row) => row.price_modifier },
     {
       header: t("active"),
