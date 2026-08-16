@@ -54,7 +54,7 @@
       "any": "Any",
       "apply": "Apply",
       "dateRangeHint": "Click a day, then a second day for a range. Click the same day twice for a single day.",
-      "searchPlaceholder": "Search order # (e.g. 20260814-0921)",
+      "searchPlaceholder": "Search order # or customer name",
       "showingCount": "Showing {start}–{end} of {total} orders",
       "statusValue": {
         "pending": "Pending",
@@ -69,6 +69,7 @@
         "in_person": "In-Person"
       },
       "edit": "Edit",
+      "viewDetails": "View Details",
       "collapse": "Collapse",
       "expand": "Expand",
       "sizeTier": "Size / Tier",
@@ -234,6 +235,26 @@
       "deliveryPrice": "Delivery Price (EGP)",
       "priceTbd": "0 (TBD)",
       "price": "Delivery Price (EGP)"
+    },
+    "staff": {
+      "title": "Admins & Roles",
+      "hint": "Manage who has admin or accountant access to this dashboard. New staff create an account via Register first, then get added here by email.",
+      "addStaffMember": "+ Add Staff Member",
+      "editStaffMember": "Edit Staff Member",
+      "modalHint": "The account must already exist via Register — this only looks up and assigns a role, it doesn't create one.",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "emailRequired": "Enter an email address.",
+      "role": "Role",
+      "roleAdmin": "Admin",
+      "roleAccountant": "Accountant",
+      "name": "Name",
+      "added": "Added",
+      "unnamed": "(No name on file)",
+      "you": "(You)",
+      "revokeTitle": "Revoke dashboard access?",
+      "revokeMessage": "{name} will lose admin/accountant access to this dashboard and revert to a regular customer account. Their account itself is not deleted.",
+      "revoke": "Revoke Access"
     },
     "deliveryCalendar": {
       "title": "Delivery Calendar",
@@ -618,7 +639,7 @@
     "phone1": "Phone Number 1",
     "phone2": "Phone Number 2 (optional)",
     "emailOptional": "Email (optional)",
-    "saveAddress": "Save Address",
+    "saveAddress": "Save Address and Phone Numbers",
     "saveAddressHint": "Shown only when logged in — saves this name/address/phone to the account in one action",
     "saveAddressCapReached": "You've already saved the maximum of 5 addresses or phone numbers.",
     "saveAddressSuccess": "Saved to your account.",

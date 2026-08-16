@@ -33,7 +33,7 @@ export function HeroSection() {
           className="object-cover"
         />
       </div>
-      <NavBar className="relative z-10" />
+      <NavBar className="relative z-20" />
       <div className="relative z-10 flex flex-col gap-6 px-6 py-8 md:flex-row md:items-center md:gap-10 md:px-[100px] md:py-24">
         <div className="flex max-w-[620px] flex-col items-start gap-4 md:gap-5">
           <div className="flex items-center gap-1.5">

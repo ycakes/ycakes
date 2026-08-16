@@ -135,6 +135,15 @@ export function CheckoutPageContent({
         });
         if (phoneError) throw phoneError;
       }
+
+      if (phone2.trim()) {
+        const { error: phone2Error } = await supabase.from("customer_phones").insert({
+          customer_id: session.user.id,
+          phone: phone2,
+          contact_method: phone2Method,
+        });
+        if (phone2Error) throw phone2Error;
+      }
       setSaveAddressMessage(t("saveAddressSuccess"));
     } catch (err) {
       console.error("save address error:", err);
@@ -374,6 +383,17 @@ export function CheckoutPageContent({
               </div>
             </div>
 
+            <div className="flex flex-col gap-2 rounded-3xl bg-bg-surface p-4">
+              <p className="font-heading text-[22px] font-semibold text-text-primary">{t("orderNotesTitle")}</p>
+              <InputField
+                label={t("notes")}
+                placeholder={t("notesPlaceholder")}
+                value={notes}
+                onChange={setNotes}
+                multiline
+              />
+            </div>
+
             <div className="flex flex-col gap-4 rounded-3xl bg-bg-surface p-4">
               <p className="font-heading text-[22px] font-semibold text-text-primary">{t("orderSummaryTitle")}</p>
               <div className="flex items-center justify-between text-sm text-text-secondary">
@@ -416,17 +436,6 @@ export function CheckoutPageContent({
               >
                 {t("placeOrder")}
               </Button>
-            </div>
-
-            <div className="flex flex-col gap-2 rounded-3xl bg-bg-surface p-4">
-              <p className="font-heading text-[22px] font-semibold text-text-primary">{t("orderNotesTitle")}</p>
-              <InputField
-                label={t("notes")}
-                placeholder={t("notesPlaceholder")}
-                value={notes}
-                onChange={setNotes}
-                multiline
-              />
             </div>
           </div>
         </div>

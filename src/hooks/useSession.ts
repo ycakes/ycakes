@@ -37,5 +37,11 @@ export function useSession() {
     return () => subscription.unsubscribe();
   }, []);
 
-  return { session, role, loading, isAdmin: role === "admin" };
+  return {
+    session,
+    role,
+    loading,
+    isAdmin: role === "admin",
+    isStaff: role === "admin" || role === "accountant",
+  };
 }

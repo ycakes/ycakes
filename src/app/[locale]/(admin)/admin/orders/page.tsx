@@ -5,6 +5,57 @@ import type { AdminOrderListRow } from "@/types/orders";
 
 const PAGE_SIZE = 20;
 
+// Business is Cairo-based; the Order Date filter's from/to values are plain
+// calendar dates picked in the admin's local browser. created_at is
+// timestamptz, so a naive "YYYY-MM-DDT00:00:00" string would be parsed in the
+// DB session's UTC timezone instead of Cairo's — silently shifting the
+// window by 2-3 hours and missing/including the wrong orders. Convert the
+// intended Cairo wall-clock instant to its real UTC instant instead.
+//
+// This must not rely on the host process's own default timezone (e.g. via
+// `new Date(someLocaleString)`, which re-parses using the *local* TZ and
+// silently cancels out or doubles the correction depending on what that
+// happens to be — broken on a Cairo-based dev machine, fine on a UTC
+// server). Intl.DateTimeFormat's `timeZone` option is explicit and doesn't
+// depend on host TZ, so we use it to measure Cairo's offset directly.
+const CAIRO_TZ = "Africa/Cairo";
+
+function cairoOffsetMs(instant: Date): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: CAIRO_TZ,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })
+    .formatToParts(instant)
+    .reduce<Record<string, string>>((acc, part) => {
+      if (part.type !== "literal") acc[part.type] = part.value;
+      return acc;
+    }, {});
+  const wallClockAsUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  );
+  return wallClockAsUtc - instant.getTime();
+}
+
+function cairoWallTimeToUtcISOString(dateStr: string, timeStr: string): string {
+  // First guess: treat the wall-clock digits as if they were UTC.
+  const naiveUtc = new Date(`${dateStr}T${timeStr}Z`);
+  // Cairo's offset barely changes across a single day, so using the guess's
+  // offset to correct the guess itself is accurate enough here.
+  const offset = cairoOffsetMs(naiveUtc);
+  return new Date(naiveUtc.getTime() - offset).toISOString();
+}
+
 export default async function AdminOrdersPage({
   params,
   searchParams,
@@ -36,8 +87,8 @@ export default async function AdminOrdersPage({
 
   if (status) query = query.eq("status", status);
   if (source) query = query.eq("source", source);
-  if (orderFrom) query = query.gte("created_at", `${orderFrom}T00:00:00`);
-  if (orderTo) query = query.lte("created_at", `${orderTo}T23:59:59`);
+  if (orderFrom) query = query.gte("created_at", cairoWallTimeToUtcISOString(orderFrom, "00:00:00"));
+  if (orderTo) query = query.lte("created_at", cairoWallTimeToUtcISOString(orderTo, "23:59:59.999"));
   if (deliveryFrom) query = query.gte("fulfillment_date", deliveryFrom);
   if (deliveryTo) query = query.lte("fulfillment_date", deliveryTo);
 
@@ -49,10 +100,20 @@ export default async function AdminOrdersPage({
 
   const rows = (allOrders ?? []) as unknown as AdminOrderListRow[];
 
-  // Search matches order_number with or without hyphens — strip "-" from
-  // both the query and the stored value before comparing.
+  // Search matches order_number (with or without hyphens — strip "-" from
+  // both the query and the stored value before comparing) OR customer name
+  // (account holder's first/last name, or the guest name for guest orders).
   const needle = search?.trim().replace(/-/g, "").toLowerCase();
-  const filtered = needle ? rows.filter((o) => o.order_number.replace(/-/g, "").toLowerCase().includes(needle)) : rows;
+  const nameNeedle = search?.trim().toLowerCase();
+  const filtered = needle
+    ? rows.filter((o) => {
+        if (o.order_number.replace(/-/g, "").toLowerCase().includes(needle)) return true;
+        const customerName = o.profiles
+          ? [o.profiles.first_name, o.profiles.last_name].filter(Boolean).join(" ")
+          : (o.guest_name ?? "");
+        return customerName.toLowerCase().includes(nameNeedle!);
+      })
+    : rows;
 
   const currentPage = Math.max(1, Number(page) || 1);
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));

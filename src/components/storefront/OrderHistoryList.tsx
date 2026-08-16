@@ -18,14 +18,18 @@ const STATUS_STYLE: Record<OrderStatus, string> = {
   cancelled: "bg-[rgba(191,38,26,0.15)] text-[#c23b2e]",
 };
 
-function CancelOrderAction({ order }: { order: OrderHistoryRow }) {
+function CancelOrderAction({ order, onCancelled }: { order: OrderHistoryRow; onCancelled: (orderId: string) => void }) {
   const t = useTranslations("Profile");
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState(false);
 
-  if (order.status !== "pending") {
+  if (order.status === "cancelled" || order.status === "completed") {
+    return null;
+  }
+
+  if (order.status === "confirmed") {
     return (
       <div className="flex flex-col gap-1.5 border-t border-border-default pt-2">
         <p className="text-xs text-text-secondary">{t("contactToCancel")}</p>
@@ -62,6 +66,7 @@ function CancelOrderAction({ order }: { order: OrderHistoryRow }) {
       setError(true);
       return;
     }
+    onCancelled(order.id);
     router.refresh();
   }
 
@@ -84,10 +89,15 @@ function CancelOrderAction({ order }: { order: OrderHistoryRow }) {
   );
 }
 
-export function OrderHistoryList({ orders }: { orders: OrderHistoryRow[] }) {
+export function OrderHistoryList({ orders: initialOrders }: { orders: OrderHistoryRow[] }) {
   const t = useTranslations("Profile");
   const tCommon = useTranslations("Common");
   const locale = useLocale() as "en" | "ar";
+  const [orders, setOrders] = useState(initialOrders);
+
+  function handleCancelled(orderId: string) {
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: "cancelled" } : o)));
+  }
 
   if (orders.length === 0) {
     return <p className="text-sm text-text-secondary">{t("noOrders")}</p>;
@@ -126,7 +136,7 @@ export function OrderHistoryList({ orders }: { orders: OrderHistoryRow[] }) {
               </p>
               <OrderDetailModal orderId={order.id} />
             </div>
-            <CancelOrderAction order={order} />
+            <CancelOrderAction order={order} onCancelled={handleCancelled} />
           </div>
         );
       })}

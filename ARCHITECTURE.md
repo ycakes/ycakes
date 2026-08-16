@@ -71,7 +71,7 @@ All role-gated access enforced via Supabase Row-Level Security, not just UI hidi
 - `delivery_calendar_blocks` — dates admin has closed for both delivery and pickup
 - `expenses` — amount, date, category (admin-managed categories), free entry, backdatable
 - `expense_categories` — **Phase 7 note**: this table gets its first admin CRUD UI this phase (the "Manage Categories" modal, see Phase 7 section). Verify it already has a bilingual `name` (JSONB `{en, ar}`) matching every other catalog-style table's convention — add a migration if it's still a plain `text` column from its original Phase 2 seed, since every other admin-managed name field in this project is bilingual and Manage Categories will need EN/AR inputs.
-- `audit_log` — who changed what, when, on every admin/accountant mutation
+- `audit_log` — who changed what, when, on every admin/accountant mutation. **No admin-facing viewer exists or is planned** (cut from Phase 8's original scope, owner decision) — the table and its `fn_audit_log()` triggers keep running as-is (every table listed in `20260813121000_audit_log.sql` is still audited on every insert/update/delete), the data just has no UI to browse it. `audit_log_admin_read` RLS (admin can `select`) is also still in place, unused by any page today.
 - `newsletter_subscribers` — phone numbers that opted in to WhatsApp campaign updates
 
 ## Fake Cake ordering
@@ -530,6 +530,43 @@ All three built against their Figma frames, each reachable only via a "View Full
 ### Bug fixed while building this phase (Figma-only, applies to implementation too)
 
 A table-title clipping bug affected every list built with the "titleWrap" pattern this session (Cancelled Orders, Most-Ordered Cakes, Never-Ordered Cakes, Top Customers, Promo Code Performance) — the title text's container had a fixed height shorter than the text needed, clipping descenders. Purely a Figma auto-layout mistake (not a code bug, nothing to port), but flagging it here in case the visual "cut-off text" pattern rings a bell if a similar symptom ever shows up in the actual built UI — check for a fixed-height wrapper around a heading before assuming it's a font-loading issue.
+
+## Phase 8 — Roles & security
+
+**Design status: Figma design complete for the one screen built this pass.** Same file, key `UR2u2vVxduNHFheGewn9CH`, page `Admin - Admins & Roles`, root frame `191:2990`. The frame carries a single yellow annotation note (`193:3034`) that fully specifies the Add/Edit modal, the promote-by-email flow, and both guardrails — implemented as written, no deviations.
+
+Of Phase 8's original three sub-items, only **Multi-admin account management** was built this pass. **Audit log viewer was cut from scope entirely** (owner decision, not deferred) — see the amended `audit_log` bullet under Core Entities: the table and its triggers keep auditing every admin/accountant mutation exactly as they have since Phase 2, there's just no page to browse that data and none is planned. **Admin/accountant RLS enforcement pass** remains the one open Phase 8 item, to be done separately.
+
+### Multi-admin account management (`/admin/staff`) — done
+
+Admin-only (`requireAdmin` — accountants have no business managing other staff accounts, matching the existing catalog-write pattern of "accountant reads, never writes" for anything outside their own domain).
+
+- **Register-then-promote model, no invite-email flow.** A new admin/accountant doesn't get an account created for them here — they register normally via `/register` (ending up `role = 'customer'` like anyone else), and an existing admin then looks them up by email on this page and assigns a role. This replaces the manual "update `profiles.role` by hand in the Supabase SQL editor" workaround flagged back in Phase 5 with a real UI, but doesn't change the underlying model at all.
+- **Table**: Name, Email, Role (badge — Admin uses the same brand-brown/15% treatment as elsewhere, Accountant reuses the `#4a6fa5` blue already established for the `confirmed` status badge), Added (date), Actions. "Added" reads `profiles.created_at` (account creation date) — there's no dedicated "promoted to staff at" timestamp, and adding one for a single column on a low-traffic internal page wasn't worth a schema change; `audit_log` technically has the real promotion timestamp buried in its `new_data` history if it's ever needed, but querying that from a page that otherwise has no audit-log integration would be scope creep the owner explicitly cut this same pass.
+- **"+ Add Staff Member" / row Edit** open the same modal (`StaffFormDialog`): Email (lookup only, no name/password fields) + Role (native `<select>`, Admin/Accountant — matches the existing `SizeFormDialog` unit-picker precedent for a small fixed option set, not the dedicated shadcn `Select` reserved for pickers the Figma spec calls out explicitly). Edit pre-fills both fields from the row; submitting either Add or Edit calls the same RPC (see below) — there's no meaningful difference between "add" and "edit" once both are just "look up this email, set this role."
+- **Row Delete** calls a revoke RPC (role → `customer`) via the existing `RowActions`/`ConfirmDialog` pattern. `RowActions` gained optional `deleteTitle`/`deleteMessage`/`deleteLabel` props (defaulting to its prior generic copy everywhere else) so this page's confirm dialog can say "will lose dashboard access, not delete their account" instead of the generic "will be permanently removed" wording every other admin table uses — reusing the one shared component rather than hand-rolling a second confirm-button set.
+- **The current user's own row shows no Actions at all** (a plain "—", replacing `RowActions` entirely) rather than disabled buttons — since editing or deleting your own row is *always* blocked (see guardrails below) regardless of what you'd change it to, there's no valid click for that row to ever produce, so hiding the controls is more honest than disabling them.
+
+### Guardrails — enforced at the trigger level, not just in the RPCs
+
+The annotation explicitly asked for server-side enforcement, "not just hidden in the UI." The `admin_all` RLS policy already lets an admin `UPDATE` any row of `profiles` directly (not just through this page's RPCs) — so putting the guardrail checks only inside the new RPCs would leave a real bypass: an admin issuing a raw `supabase.from("profiles").update({ role: "customer" }).eq("id", ownId)` from the browser console would sail straight through. Instead, both guardrails were added to `prevent_self_role_change()` (`profiles.sql`, Phase 2's existing `before update` trigger, already responsible for blocking non-admins from touching `role`), replaced via `create or replace function` in the new migration:
+
+1. **Last remaining admin can never be demoted or removed.** `old.role = 'admin' and (select count(*) from profiles where role = 'admin') <= 1` — evaluated inside the `before update` trigger, so the count still includes the row being changed at that point (its `role` hasn't actually written yet), giving an accurate "is this the only one left" read with a plain aggregate, no snapshot/locking trickery needed.
+2. **A signed-in admin can never change their own row's role.** `old.id = auth.uid()` — covers both the Edit path (self-lookup by own email resolves to the same profile id) and the Delete/revoke path identically, since both ultimately reduce to "does `profiles.role` change on my own row." Stepping down requires another admin to do it, per the annotation.
+
+Since the trigger is the actual enforcement point, the two new RPCs below are thin: they self-check `current_profile_role() = 'admin'` (same pattern as `create_order`/`update_order_item_customization`/`cancel_own_order`), do the plain lookup/update, and whatever the trigger raises propagates back through PostgREST as the RPC's error — the "No account found..." message is the one case that has to be raised in the RPC itself, before any update is attempted, since there's no row for the trigger to fire on. `messages/{en,ar}.json`'s `Admin.staff` namespace doesn't hardcode message strings for either guardrail error precisely because they surface directly from the trigger's `RAISE EXCEPTION` text — the modal renders `error.message` from the failed RPC call as-is.
+
+### New RPCs (`20260817120000_staff_roles_rpc.sql`)
+
+- **`admin_list_staff()`** — `security definer`, self-checks admin, returns every `admin`/`accountant` profile joined to `auth.users` for `email` (client code can never read `auth.users` directly — `profiles` has no email column of its own, see Auth section above). Ordered by `created_at` ascending.
+- **`admin_set_staff_role(p_email text, p_role text)`** — `security definer`, self-checks admin, validates `p_role in ('admin','accountant')`, looks up `auth.users` by case-insensitive trimmed email; raises the exact "No account found with this email — ask them to register first, then try again" message from the annotation if nothing matches, otherwise updates that profile's `role` (subject to the trigger guardrails above).
+- **`admin_revoke_staff_role(p_profile_id uuid)`** — `security definer`, self-checks admin, sets `role = 'customer'` on the given profile id (subject to the same trigger guardrails).
+- All three read `auth.users`/write `profiles` as the function owner (the migration-runner role, effectively superuser on hosted Supabase) rather than the caller's own grants — the standard Supabase pattern for a `security definer` function needing `auth.users`, since `authenticated` itself has no grant on that schema.
+- **No email is sent on a role change** (explicitly out of scope this pass, per the annotation) — the affected person simply sees new/removed `/admin` access the next time `requireAdmin`/`requireStaff` runs.
+
+### Sidebar
+
+TEAM section's "Admins & Roles" `AdminNavItem` was wired from a disabled placeholder (`href={null}`, `dimmed`) to a real link (`href="/admin/staff"`, active-state highlighting via `pathname.startsWith`) — same mechanism used to light up ORDERS (Phase 6) and MONEY (Phase 7) when those sections went live.
 
 ## Development environment
 
