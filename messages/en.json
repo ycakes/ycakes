@@ -251,6 +251,29 @@
       "redemptions": "Redemptions",
       "redemptionCount": "{used} / {cap}",
       "redemptionCapOptional": "Redemption Cap (optional)"
+    },
+    "dashboard": {
+      "welcomeNamed": "Welcome back, {name}!",
+      "welcomeGeneric": "Welcome back!",
+      "subline": "Here's what's happening today.",
+      "todayOrders": "Today's Orders",
+      "todayOrdersSubtext": "orders placed today",
+      "pendingOrders": "Pending Orders",
+      "pendingOrdersSubtext": "need your attention",
+      "revenueThisMonth": "Revenue This Month",
+      "trendUp": "+{pct}% vs last month",
+      "trendDown": "-{pct}% vs last month",
+      "trendFlat": "Same as last month",
+      "trendNoLastMonth": "No orders last month to compare",
+      "viewAllOrders": "View All Orders",
+      "filterToday": "Filter: Today",
+      "filterPending": "Filter: Pending",
+      "viewRevenue": "View Revenue",
+      "upcomingDeliveries": "Upcoming Deliveries",
+      "upcomingDeliveriesHint": "Next 7 days",
+      "viewAllOrdersLink": "View all orders →",
+      "noUpcomingDeliveries": "No deliveries or pickups scheduled in the next 7 days.",
+      "view": "View"
     }
   },
   "NavBar": {

@@ -68,8 +68,8 @@ function SidebarContent({
   ];
 
   const moneyItems = [
-    { icon: Wallet, label: t("expenses") },
-    { icon: BarChart3, label: t("analytics") },
+    { href: isAdmin ? "/admin/expenses" : null, icon: Wallet, label: t("expenses"), dimmed: !isAdmin },
+    { href: "/admin/analytics", icon: BarChart3, label: t("analytics") },
   ];
 
   const teamItems = [{ icon: Users, label: t("adminsAndRoles") }];
@@ -172,7 +172,15 @@ function SidebarContent({
             </p>
           )}
           {moneyItems.map((item) => (
-            <AdminNavItem key={item.label} href={null} icon={item.icon} label={item.label} active={false} collapsed={collapsed} dimmed />
+            <AdminNavItem
+              key={item.label}
+              href={item.href}
+              icon={item.icon}
+              label={item.label}
+              active={!!item.href && pathname.startsWith(item.href)}
+              collapsed={collapsed}
+              dimmed={item.dimmed}
+            />
           ))}
         </nav>
 

@@ -251,6 +251,29 @@
       "redemptions": "مرات الاستخدام",
       "redemptionCount": "{used} / {cap}",
       "redemptionCapOptional": "الحد الأقصى للاستخدام (اختياري)"
+    },
+    "dashboard": {
+      "welcomeNamed": "أهلاً بعودتك، {name}!",
+      "welcomeGeneric": "أهلاً بعودتك!",
+      "subline": "إليك آخر مستجدات اليوم.",
+      "todayOrders": "طلبات اليوم",
+      "todayOrdersSubtext": "طلب تم اليوم",
+      "pendingOrders": "الطلبات المعلقة",
+      "pendingOrdersSubtext": "بحاجة لمراجعتك",
+      "revenueThisMonth": "إيرادات هذا الشهر",
+      "trendUp": "+{pct}% مقارنة بالشهر الماضي",
+      "trendDown": "-{pct}% مقارنة بالشهر الماضي",
+      "trendFlat": "نفس الشهر الماضي",
+      "trendNoLastMonth": "لا توجد طلبات في الشهر الماضي للمقارنة",
+      "viewAllOrders": "عرض كل الطلبات",
+      "filterToday": "تصفية: اليوم",
+      "filterPending": "تصفية: معلقة",
+      "viewRevenue": "عرض الإيرادات",
+      "upcomingDeliveries": "التوصيلات القادمة",
+      "upcomingDeliveriesHint": "الأيام السبعة القادمة",
+      "viewAllOrdersLink": "عرض كل الطلبات ‹",
+      "noUpcomingDeliveries": "لا توجد توصيلات أو استلامات مجدولة خلال الأيام السبعة القادمة.",
+      "view": "عرض"
     }
   },
   "NavBar": {
