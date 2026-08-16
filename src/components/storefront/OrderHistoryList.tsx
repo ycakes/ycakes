@@ -1,7 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { OrderDetailModal } from "@/components/storefront/OrderDetailModal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { buildOrderWhatsAppUrl, CONTACT_INSTAGRAM_URL } from "@/lib/contact";
 import { cn } from "@/lib/utils";
 import type { OrderHistoryRow, OrderStatus } from "@/types/orders";
 
@@ -11,6 +17,72 @@ const STATUS_STYLE: Record<OrderStatus, string> = {
   completed: "bg-[rgba(33,140,33,0.15)] text-[#3e7d4c]",
   cancelled: "bg-[rgba(191,38,26,0.15)] text-[#c23b2e]",
 };
+
+function CancelOrderAction({ order }: { order: OrderHistoryRow }) {
+  const t = useTranslations("Profile");
+  const router = useRouter();
+  const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [error, setError] = useState(false);
+
+  if (order.status !== "pending") {
+    return (
+      <div className="flex flex-col gap-1.5 border-t border-border-default pt-2">
+        <p className="text-xs text-text-secondary">{t("contactToCancel")}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            render={<a href={buildOrderWhatsAppUrl(order.order_number)} target="_blank" rel="noopener noreferrer" />}
+            nativeButton={false}
+            variant="brand-ghost"
+            size="sm"
+          >
+            {t("messageOnWhatsApp")}
+          </Button>
+          <Button
+            render={<a href={CONTACT_INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" />}
+            nativeButton={false}
+            variant="brand-ghost"
+            size="sm"
+          >
+            {t("messageOnInstagram")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  async function handleCancel() {
+    setConfirming(false);
+    setCancelling(true);
+    setError(false);
+    const supabase = createClient();
+    const { error: rpcError } = await supabase.rpc("cancel_own_order", { p_order_id: order.id });
+    setCancelling(false);
+    if (rpcError) {
+      setError(true);
+      return;
+    }
+    router.refresh();
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <Button type="button" variant="destructive" size="sm" disabled={cancelling} onClick={() => setConfirming(true)}>
+        {t("cancelOrder")}
+      </Button>
+      {error && <p className="text-xs text-red-600">{t("cancelOrderFailed")}</p>}
+      <ConfirmDialog
+        open={confirming}
+        title={t("cancelOrderConfirmTitle")}
+        message={t("cancelOrderConfirmMessage")}
+        confirmLabel={t("cancelOrder")}
+        cancelLabel={t("cancel")}
+        onConfirm={handleCancel}
+        onCancel={() => setConfirming(false)}
+      />
+    </div>
+  );
+}
 
 export function OrderHistoryList({ orders }: { orders: OrderHistoryRow[] }) {
   const t = useTranslations("Profile");
@@ -54,6 +126,7 @@ export function OrderHistoryList({ orders }: { orders: OrderHistoryRow[] }) {
               </p>
               <OrderDetailModal orderId={order.id} />
             </div>
+            <CancelOrderAction order={order} />
           </div>
         );
       })}

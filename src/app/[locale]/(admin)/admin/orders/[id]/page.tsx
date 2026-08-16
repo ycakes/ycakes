@@ -1,7 +1,16 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/admin/requireAdmin";
-import { getCategoryById, getColors, getFlavorsForCategory, getShapes, getSizesWithTiers, getTiers, getToppers } from "@/lib/catalog/queries";
+import {
+  getCategoryById,
+  getColors,
+  getDeliveryAreas,
+  getFlavorsForCategory,
+  getShapes,
+  getSizesWithTiers,
+  getTiers,
+  getToppers,
+} from "@/lib/catalog/queries";
 import { OrderDetailContent } from "@/components/admin/orders/OrderDetailContent";
 import type { AdminOrderDetail, AdminOrderItemDetail } from "@/types/adminOrderDetail";
 
@@ -25,15 +34,16 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
   const profile = await requireStaff(locale);
   const supabase = await createClient();
 
-  const [{ data: order, error: orderError }, { data: items, error: itemsError }] = await Promise.all([
+  const [{ data: order, error: orderError }, { data: items, error: itemsError }, deliveryAreas] = await Promise.all([
     supabase
       .from("orders")
       .select(
-        "id, order_number, customer_id, guest_name, contact_phone, contact_phone_method, status, fulfillment_type, delivery_address, fulfillment_date, notes, subtotal_estimate, delivery_price, discount_amount, final_price, source, created_at, profiles(first_name, last_name), delivery_areas(name)",
+        "id, order_number, customer_id, guest_name, contact_phone, contact_phone_method, status, fulfillment_type, delivery_area_id, delivery_address, fulfillment_date, notes, subtotal_estimate, delivery_price, discount_amount, final_price, source, created_at, profiles(first_name, last_name), delivery_areas(name)",
       )
       .eq("id", id)
       .maybeSingle(),
     supabase.from("order_items").select(ORDER_ITEM_SELECT).eq("order_id", id).order("created_at"),
+    getDeliveryAreas(),
   ]);
 
   if (orderError) throw orderError;
@@ -80,6 +90,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
       role={profile.role}
       locale={locale as "en" | "ar"}
       catalogByCategoryId={catalogByCategoryId}
+      deliveryAreas={deliveryAreas}
     />
   );
 }

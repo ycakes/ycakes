@@ -44,6 +44,7 @@ export type AdminOrderDetail = {
   contact_phone_method: "call" | "whatsapp" | "both" | null;
   status: OrderStatus;
   fulfillment_type: FulfillmentType;
+  delivery_area_id: string | null;
   delivery_address: string | null;
   fulfillment_date: string;
   notes: string | null;

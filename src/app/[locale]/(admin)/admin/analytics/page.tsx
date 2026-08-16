@@ -359,6 +359,8 @@ export default async function AdminAnalyticsPage({
       mostOrdered,
       neverOrdered,
       period,
+      from: customFrom,
+      to: customTo,
     };
 
     exportButton = <CatalogPerformanceExportButton data={data} />;
@@ -440,6 +442,8 @@ export default async function AdminAnalyticsPage({
       accountOrders,
       topCustomers,
       period,
+      from: customFrom,
+      to: customTo,
     };
 
     exportButton = <CustomersExportButton data={data} />;
@@ -530,7 +534,7 @@ export default async function AdminAnalyticsPage({
       from={customFrom}
       to={customTo}
       locale={locale as "en" | "ar"}
-      showAllTimeChip={tab === "customers" || tab === "revenue" || tab === "orders" || tab === "catalog"}
+      showAllTimeChip={tab === "customers" || tab === "revenue" || tab === "orders" || tab === "catalog" || tab === "promo"}
       exportButton={exportButton}
     >
       {tabContent}

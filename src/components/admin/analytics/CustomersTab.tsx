@@ -23,6 +23,8 @@ export type CustomersData = {
   accountOrders: number;
   topCustomers: TopCustomerRow[];
   period: AnalyticsPeriod;
+  from: string | null;
+  to: string | null;
 };
 
 export function CustomersExportButton({ data }: { data: CustomersData }) {
@@ -68,7 +70,11 @@ export function CustomersTab({ data, locale }: { data: CustomersData; locale: "e
     <>
       <div>
         <Button
-          render={<Link href="/admin/analytics/customers" />}
+          render={
+            <Link
+              href={`/admin/analytics/customers?period=${data.period}${data.from ? `&from=${data.from}` : ""}${data.to ? `&to=${data.to}` : ""}`}
+            />
+          }
           nativeButton={false}
           variant="brand-secondary"
           size="xl"

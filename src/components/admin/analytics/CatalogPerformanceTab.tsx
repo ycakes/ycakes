@@ -31,6 +31,8 @@ export type CatalogPerformanceData = {
   mostOrdered: MostOrderedCakeRow[];
   neverOrdered: NeverOrderedCakeRow[];
   period: AnalyticsPeriod;
+  from: string | null;
+  to: string | null;
 };
 
 export function CatalogPerformanceExportButton({ data }: { data: CatalogPerformanceData }) {
@@ -154,7 +156,11 @@ export function CatalogPerformanceTab({ data, locale }: { data: CatalogPerforman
         )}
         <div>
           <Button
-            render={<Link href="/admin/analytics/catalog-detail" />}
+            render={
+              <Link
+                href={`/admin/analytics/catalog-detail?period=${data.period}${data.from ? `&from=${data.from}` : ""}${data.to ? `&to=${data.to}` : ""}`}
+              />
+            }
             nativeButton={false}
             variant="brand-secondary"
             size="xl"
