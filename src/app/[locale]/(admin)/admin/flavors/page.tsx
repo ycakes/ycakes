@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin/requireAdmin";
 import { FlavorsPageContent } from "@/components/admin/flavors/FlavorsPageContent";
 import type { Category, Flavor } from "@/types/catalog";
 
-export default async function AdminFlavorsPage() {
+export default async function AdminFlavorsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  await requireAdmin(locale);
   const supabase = await createClient();
   const [{ data, error }, { data: restrictions, error: restrictionsError }, { data: categories, error: categoriesError }] =
     await Promise.all([

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin/requireAdmin";
 import { ToppersPageContent } from "@/components/admin/toppers/ToppersPageContent";
 import type { Color, Topper } from "@/types/catalog";
 
@@ -9,7 +10,9 @@ type Row = Topper & {
   topper_colors: { color_id: string; colors: Color }[];
 };
 
-export default async function AdminToppersPage() {
+export default async function AdminToppersPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  await requireAdmin(locale);
   const supabase = await createClient();
 
   const [toppersRes, colorsRes] = await Promise.all([

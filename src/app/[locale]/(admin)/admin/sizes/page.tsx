@@ -1,12 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin/requireAdmin";
 import { SizesPageContent } from "@/components/admin/sizes/SizesPageContent";
 import type { Category, Size } from "@/types/catalog";
 
 export default async function AdminSizesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ category?: string }>;
 }) {
+  const { locale } = await params;
+  await requireAdmin(locale);
   const { category } = await searchParams;
   const supabase = await createClient();
 

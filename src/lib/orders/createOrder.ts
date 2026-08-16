@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/client";
+import type { ContactMethod } from "@/types/auth";
 import type { CartItem } from "@/types/cart";
 
 export type CreateOrderInput = {
   customerId: string | null;
   guestName: string | null;
-  guestPhone: string | null;
+  contactPhone: string;
+  contactPhoneMethod: ContactMethod;
   fulfillmentType: "pickup" | "delivery";
   deliveryAreaId: string | null;
   deliveryAddress: string;
@@ -54,7 +56,8 @@ export async function createOrder(input: CreateOrderInput): Promise<{ id: string
     .rpc("create_order", {
       p_customer_id: input.customerId,
       p_guest_name: input.guestName,
-      p_guest_phone: input.guestPhone,
+      p_contact_phone: input.contactPhone,
+      p_contact_phone_method: input.contactPhoneMethod,
       p_fulfillment_type: input.fulfillmentType,
       p_delivery_area_id: input.deliveryAreaId,
       p_delivery_address: input.deliveryAddress,

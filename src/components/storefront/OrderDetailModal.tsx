@@ -6,6 +6,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { ChevronDown, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ReferenceImageViewer } from "@/components/ui/reference-image-viewer";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { OrderDetail, OrderDetailItem } from "@/types/orders";
@@ -134,9 +135,7 @@ function OrderItemCard({ item }: { item: OrderDetailItem }) {
           {item.reference_image_url && (
             <div className="flex flex-col gap-1">
               <span className="text-text-secondary">{t("referenceImage")}</span>
-              <div className="relative h-32 w-full overflow-hidden rounded-xl bg-bg-surface">
-                <Image src={item.reference_image_url} alt="" fill sizes="320px" className="object-contain" />
-              </div>
+              <ReferenceImageViewer url={item.reference_image_url} size={140} />
             </div>
           )}
         </div>

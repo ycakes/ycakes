@@ -2,6 +2,8 @@ import type { ContactMethod } from "./auth";
 import type { Bilingual } from "./catalog";
 
 export type OrderStatus = "pending" | "confirmed" | "completed" | "cancelled";
+export type OrderSource = "website" | "phone" | "instagram" | "in_person";
+export type FulfillmentType = "delivery" | "pickup";
 
 export type OrderHistoryRow = {
   id: string;
@@ -71,4 +73,26 @@ export type OrderConfirmationSnapshot = {
   phoneMethod: ContactMethod;
   address: string;
   total: number;
+};
+
+// Admin Orders list row (Phase 6) — orders + the two joined bits its table
+// needs (customer name, delivery area name), not the full order detail
+// shape above.
+export type AdminOrderListRow = {
+  id: string;
+  order_number: string;
+  customer_id: string | null;
+  guest_name: string | null;
+  status: OrderStatus;
+  fulfillment_type: FulfillmentType;
+  delivery_address: string | null;
+  fulfillment_date: string;
+  subtotal_estimate: number;
+  delivery_price: number;
+  discount_amount: number;
+  final_price: number | null;
+  source: OrderSource;
+  created_at: string;
+  profiles: { first_name: string | null; last_name: string | null } | null;
+  delivery_areas: { name: Bilingual } | null;
 };

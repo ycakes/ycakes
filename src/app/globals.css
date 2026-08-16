@@ -13,6 +13,10 @@
   --font-script: var(--font-caveat);
   --color-brand-primary: var(--brand-primary);
   --color-brand-secondary: var(--brand-secondary);
+  --color-status-pending: var(--status-pending);
+  --color-status-confirmed: var(--status-confirmed);
+  --color-status-completed: var(--status-completed);
+  --color-status-cancelled: var(--status-cancelled);
   --color-bg-page: var(--bg-page);
   --color-bg-surface: var(--bg-surface);
   --color-bg-surface-alt: var(--bg-surface-alt);
@@ -72,6 +76,10 @@
   --text-on-brand: #ffffff;
   --text-on-brand-muted: #f6e3d3;
   --border-default: #ddd2c7;
+  --status-pending: #d98e1b;
+  --status-confirmed: #4a6fa5;
+  --status-completed: #3e7d4c;
+  --status-cancelled: #c23b2e;
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
