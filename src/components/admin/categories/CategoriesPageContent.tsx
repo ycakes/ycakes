@@ -178,17 +178,18 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <div className="flex items-center gap-3 px-3 text-[12px] font-semibold uppercase tracking-[0.48px] text-text-secondary">
-        <span className="w-4" />
-        <span className="w-9" />
-        <span className="flex-1">{t("category")}</span>
-        <span className="w-40 shrink-0">{t("subcategoriesCountHeader")}</span>
-        <span className="w-10 shrink-0" />
-        <span className="w-[68px] shrink-0">{t("actions")}</span>
-      </div>
+      <div className="flex flex-col gap-3 rounded-[24px] border border-border-default bg-bg-surface p-4">
+        <div className="flex items-center gap-3 px-3 text-[12px] font-semibold uppercase tracking-[0.48px] text-text-secondary">
+          <span className="w-4" />
+          <span className="w-9" />
+          <span className="flex-1">{t("category")}</span>
+          <span className="w-40 shrink-0">{t("subcategoriesCountHeader")}</span>
+          <span className="w-10 shrink-0" />
+          <span className="w-[68px] shrink-0">{t("actions")}</span>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        {topLevel.map((category) => {
+        <div className="flex flex-col gap-2">
+          {topLevel.map((category) => {
           const subs = subcategoriesOf(category.id);
           const expanded = expandedIds.has(category.id);
           return (
@@ -267,7 +268,8 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
               </button>
             </div>
           );
-        })}
+          })}
+        </div>
       </div>
       <CategoryFormDialog
         key={editing?.id ?? `new-${addKey}`}

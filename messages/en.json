@@ -10,7 +10,8 @@
   },
   "Admin": {
     "nav": {
-      "brand": "yCakes Admin",
+      "brand": "Ycakes Admin",
+      "goToHome": "Go to home page",
       "catalog": "Catalog",
       "cakes": "Cakes",
       "categories": "Categories",
@@ -100,6 +101,8 @@
       "moveUp": "Move up",
       "moveDown": "Move down",
       "removeFromTrending": "Remove from Trending",
+      "hideFromHome": "Hide from Home",
+      "showOnHome": "Show on Home",
       "addCake": "Add Cake",
       "addCategory": "Add Category",
       "addSize": "Add Size",
@@ -128,6 +131,7 @@
     "closeMenu": "Close menu",
     "profile": "Account",
     "profileLink": "Profile",
+    "dashboard": "Dashboard",
     "logOut": "Log Out"
   },
   "ContactModal": {

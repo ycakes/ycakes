@@ -11,6 +11,7 @@
   "Admin": {
     "nav": {
       "brand": "لوحة تحكم واي كيكس",
+      "goToHome": "الذهاب إلى الصفحة الرئيسية",
       "catalog": "الكتالوج",
       "cakes": "الكيكات",
       "categories": "الفئات",
@@ -100,6 +101,8 @@
       "moveUp": "تحريك لأعلى",
       "moveDown": "تحريك لأسفل",
       "removeFromTrending": "إزالة من الرائجة",
+      "hideFromHome": "إخفاء من الرئيسية",
+      "showOnHome": "إظهار في الرئيسية",
       "addCake": "إضافة كيكة",
       "addCategory": "إضافة فئة",
       "addSize": "إضافة حجم",
@@ -128,6 +131,7 @@
     "closeMenu": "إغلاق القائمة",
     "profile": "الحساب",
     "profileLink": "الملف الشخصي",
+    "dashboard": "لوحة التحكم",
     "logOut": "تسجيل الخروج"
   },
   "ContactModal": {

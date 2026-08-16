@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ColorPicker } from "@/components/admin/ColorPicker";
 
 export type ColorFormValue = {
   id?: string;
@@ -75,43 +76,41 @@ export function ColorFormDialog({
               <span dir="ltr">{hex}</span>
 
               {pickerOpen && (
-                <div className="absolute start-0 top-full z-10 mt-2 flex flex-col gap-3 rounded-2xl border border-border-default bg-bg-surface p-4 shadow-lg">
-                  <input
-                    type="color"
-                    value={draftHex}
-                    onChange={(e) => setDraftHex(e.target.value)}
-                    className="h-24 w-40 rounded-lg border-[1.5px] border-border-default"
-                  />
-                  <input
-                    dir="ltr"
-                    value={draftHex}
-                    onChange={(e) => setDraftHex(e.target.value)}
-                    className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2 text-sm"
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="brand-primary"
-                      size="sm"
-                      className="flex-1 justify-center"
-                      onClick={() => {
-                        setHex(draftHex);
-                        setPickerOpen(false);
-                      }}
-                    >
-                      {t("confirmColor")}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="brand-ghost"
-                      size="sm"
-                      className="flex-1 justify-center bg-bg-surface"
-                      onClick={() => setPickerOpen(false)}
-                    >
-                      {t("cancel")}
-                    </Button>
+                <>
+                  <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setPickerOpen(false)} aria-hidden="true" />
+                  <div className="fixed left-1/2 top-1/2 z-50 flex w-[92vw] max-w-[320px] -translate-x-1/2 -translate-y-1/2 flex-col gap-3 rounded-2xl border border-border-default bg-bg-surface p-4 shadow-lg">
+                    <ColorPicker value={draftHex} onChange={setDraftHex} />
+                    <input
+                      dir="ltr"
+                      value={draftHex}
+                      onChange={(e) => setDraftHex(e.target.value)}
+                      className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2 text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="brand-primary"
+                        size="sm"
+                        className="flex-1 justify-center"
+                        onClick={() => {
+                          setHex(draftHex);
+                          setPickerOpen(false);
+                        }}
+                      >
+                        {t("confirmColor")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="brand-ghost"
+                        size="sm"
+                        className="flex-1 justify-center bg-bg-surface"
+                        onClick={() => setPickerOpen(false)}
+                      >
+                        {t("cancel")}
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
           </div>

@@ -1,18 +1,27 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { HeroSection } from "@/components/storefront/HeroSection";
 import { CategoryCard } from "@/components/storefront/CategoryCard";
-import { ProductCard } from "@/components/storefront/ProductCard";
 import { Divider } from "@/components/storefront/Divider";
 import { Footer } from "@/components/layout/Footer";
-import { getTopLevelCategories, getTrendingCakesByCategory } from "@/lib/catalog/queries";
+import { TrendingCarousel } from "@/components/storefront/TrendingCarousel";
+import { getTopLevelCategories, getTrendingCakesByCategory, getTrendingCategoryOrder } from "@/lib/catalog/queries";
 
 export default async function HomePage() {
   const t = await getTranslations("Home");
   const locale = (await getLocale()) as "en" | "ar";
-  const [categories, trendingByCategory] = await Promise.all([
+  const [categories, trendingByCategory, trendingOrder] = await Promise.all([
     getTopLevelCategories(),
     getTrendingCakesByCategory(4),
+    getTrendingCategoryOrder(),
   ]);
+
+  const trendingOrderById = new Map(trendingOrder.map((c) => [c.id, c]));
+  const trendingCategories = categories
+    .filter((category) => trendingOrderById.get(category.id)?.show_trending !== false)
+    .sort(
+      (a, b) =>
+        (trendingOrderById.get(a.id)?.trending_sort_order ?? 0) - (trendingOrderById.get(b.id)?.trending_sort_order ?? 0),
+    );
 
   return (
     <main className="flex flex-col bg-bg-surface-alt">
@@ -34,7 +43,7 @@ export default async function HomePage() {
             <CategoryCard
               key={category.id}
               category={category}
-              subtitle={t(`categorySubtitle.${category.slug}` as never)}
+              subtitle={t.has(`categorySubtitle.${category.slug}` as never) ? t(`categorySubtitle.${category.slug}` as never) : ""}
               priority={index < 3}
             />
           ))}
@@ -50,7 +59,7 @@ export default async function HomePage() {
           <div className="h-[3px] w-16 rounded-full bg-brand-secondary" />
         </div>
         <div className="flex w-full max-w-[1352px] flex-col gap-10">
-          {categories.map((category, categoryIndex) => {
+          {trendingCategories.map((category, categoryIndex) => {
             const cakes = trendingByCategory[category.slug] ?? [];
             if (cakes.length === 0) return null;
             return (
@@ -58,11 +67,7 @@ export default async function HomePage() {
                 <h3 className="font-heading text-2xl font-bold text-brand-primary">
                   {category.name[locale]}
                 </h3>
-                <div className="flex gap-6 overflow-x-auto pb-2">
-                  {cakes.map((cake, cakeIndex) => (
-                    <ProductCard key={cake.id} cake={cake} priority={categoryIndex === 0 && cakeIndex < 3} />
-                  ))}
-                </div>
+                <TrendingCarousel cakes={cakes} priority={categoryIndex === 0} />
               </div>
             );
           })}

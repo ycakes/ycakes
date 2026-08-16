@@ -457,7 +457,7 @@ export function CakeCustomizer({
 
       <Section label={t("referenceImage")}>
         {referenceImageUrl ? (
-          <div className="relative flex h-[140px] w-[200px] items-center justify-center overflow-hidden rounded-2xl border-[1.5px] border-border-default bg-bg-page">
+          <div className="relative flex h-[140px] w-[200px] items-center justify-center overflow-hidden rounded-2xl border-[1.5px] border-border-default bg-bg-surface">
             {/* eslint-disable-next-line @next/next/no-img-element -- blob: object URL, next/image can't render it */}
             <img src={referenceImageUrl} alt="" className="size-full object-contain" />
             <button

@@ -11,24 +11,28 @@ import type {
   Topper,
 } from "@/types/catalog";
 
-const TOP_LEVEL_SLUGS = [
-  "birthday",
-  "wedding",
-  "graduation",
-  "bento",
-  "custom",
-  "candy-corner",
-] as const;
-
 export async function getTopLevelCategories(): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
     .select("id, parent_id, name, slug, sort_order, image_url")
     .is("parent_id", null)
-    .in("slug", TOP_LEVEL_SLUGS)
     .eq("active", true)
     .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
+/** Trending-row visibility/order for top-level categories, managed from the admin Trending Cakes page. */
+export async function getTrendingCategoryOrder(): Promise<
+  { id: string; show_trending: boolean; trending_sort_order: number }[]
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, show_trending, trending_sort_order")
+    .is("parent_id", null);
 
   if (error) throw error;
   return data;
@@ -106,7 +110,7 @@ export async function getTrendingCakesByCategory(
   return result;
 }
 
-export async function getCakesByCategorySlug(slug: string): Promise<Cake[]> {
+export async function getCakesByCategorySlug(slug: string, subcategoryId?: string): Promise<Cake[]> {
   const supabase = await createClient();
   const category = await getCategoryBySlug(slug);
   if (!category) return [];
@@ -114,7 +118,9 @@ export async function getCakesByCategorySlug(slug: string): Promise<Cake[]> {
   let categoryIds = [category.id];
   if (category.parent_id === null) {
     const subcategories = await getSubcategories(category.id);
-    if (subcategories.length > 0) {
+    if (subcategoryId && subcategories.some((s) => s.id === subcategoryId)) {
+      categoryIds = [subcategoryId];
+    } else if (subcategories.length > 0) {
       categoryIds = subcategories.map((s) => s.id);
     }
   }

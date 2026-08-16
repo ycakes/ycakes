@@ -13,6 +13,8 @@ export function ShopBrowse({
   locale,
   categories,
   activeSlug,
+  subcategories = [],
+  activeSubcategoryId = null,
   breadcrumbLabel,
   pageTitle,
   pageSubtitle,
@@ -27,6 +29,8 @@ export function ShopBrowse({
   locale: "en" | "ar";
   categories: Category[];
   activeSlug: string | null;
+  subcategories?: Category[];
+  activeSubcategoryId?: string | null;
   breadcrumbLabel: string;
   pageTitle: string;
   pageSubtitle: string;
@@ -70,6 +74,19 @@ export function ShopBrowse({
             />
           ))}
         </div>
+        {subcategories.length > 0 && (
+          <div className="flex flex-wrap gap-2 ps-4">
+            <FilterChip href={basePath} label={filterAllLabel} active={!activeSubcategoryId} />
+            {subcategories.map((sub) => (
+              <FilterChip
+                key={sub.id}
+                href={`${basePath}?subcategory=${sub.id}`}
+                label={sub.name[locale]}
+                active={activeSubcategoryId === sub.id}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-10 px-6 pb-16 md:px-[100px]">
@@ -82,7 +99,12 @@ export function ShopBrowse({
             ))}
           </div>
         )}
-        <Pagination basePath={basePath} currentPage={page} totalPages={totalPages} />
+        <Pagination
+          basePath={basePath}
+          currentPage={page}
+          totalPages={totalPages}
+          extraParams={activeSubcategoryId ? { subcategory: activeSubcategoryId } : undefined}
+        />
       </div>
 
       <Divider />

@@ -25,7 +25,7 @@ export function NavBar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const cartCount = useCartCount();
-  const { session } = useSession();
+  const { session, isAdmin } = useSession();
   const otherLocale = locale === "en" ? "ar" : "en";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -129,6 +129,14 @@ export function NavBar({ className }: { className?: string }) {
                     >
                       {t("profileLink")}
                     </Menu.LinkItem>
+                    {isAdmin && (
+                      <Menu.LinkItem
+                        render={<Link href="/admin" />}
+                        className="block w-full cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-center text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"
+                      >
+                        {t("dashboard")}
+                      </Menu.LinkItem>
+                    )}
                     <Menu.Item
                       onClick={handleLogOut}
                       className="block w-full cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-center text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"

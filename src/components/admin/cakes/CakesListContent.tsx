@@ -46,10 +46,22 @@ export function CakesListContent({
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [rows, setRows] = useState(cakes);
+  const [prevCakes, setPrevCakes] = useState(cakes);
   const [error, setError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState(search);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
+
+  // Resync to the server-provided rows whenever the URL-driven query (filter/
+  // sort/page/search) changes, without needing to remount the whole
+  // component — a remount (via a changing `key`) would drop input focus
+  // every time the debounced search updates the URL. Adjusting state during
+  // render (React's recommended pattern) instead of in an effect avoids an
+  // extra render pass.
+  if (cakes !== prevCakes) {
+    setPrevCakes(cakes);
+    setRows(cakes);
+  }
 
   async function handleDelete(id: string) {
     setError(null);

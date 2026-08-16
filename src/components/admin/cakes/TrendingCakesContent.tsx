@@ -2,26 +2,59 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, ArrowUp, ArrowDown, X } from "lucide-react";
+import { ArrowLeft, ArrowUp, ArrowDown, X, Eye, EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Cake, Category } from "@/types/catalog";
 
 type Row = Cake & { active: boolean };
+type CategoryRow = Category & { show_trending: boolean; trending_sort_order: number };
 
-export function TrendingCakesContent({ categories, cakes }: { categories: Category[]; cakes: Row[] }) {
+export function TrendingCakesContent({ categories, cakes }: { categories: CategoryRow[]; cakes: Row[] }) {
   const t = useTranslations("Admin.table");
   const [rows, setRows] = useState(cakes);
+  const [categoryRows, setCategoryRows] = useState(categories);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
-  const topLevel = categories.filter((c) => c.parent_id === null);
+  const topLevel = [...categoryRows.filter((c) => c.parent_id === null)].sort(
+    (a, b) => a.trending_sort_order - b.trending_sort_order,
+  );
   const candyCorner = topLevel.find((c) => c.slug === "candy-corner");
-  const subcategoryIds = candyCorner ? categories.filter((c) => c.parent_id === candyCorner.id).map((c) => c.id) : [];
+  const subcategoryIds = candyCorner ? categoryRows.filter((c) => c.parent_id === candyCorner.id).map((c) => c.id) : [];
 
   function groupCategoryIds(category: Category): string[] {
     return category.slug === "candy-corner" ? subcategoryIds : [category.id];
+  }
+
+  async function toggleShowTrending(id: string, showTrending: boolean) {
+    setError(null);
+    const { error: updateError } = await supabase.from("categories").update({ show_trending: showTrending }).eq("id", id);
+    if (updateError) {
+      setError(t("saveFailed"));
+      return;
+    }
+    setCategoryRows((prev) => prev.map((c) => (c.id === id ? { ...c, show_trending: showTrending } : c)));
+  }
+
+  async function swapCategoryOrder(a: CategoryRow, b: CategoryRow) {
+    setError(null);
+    const [{ error: err1 }, { error: err2 }] = await Promise.all([
+      supabase.from("categories").update({ trending_sort_order: b.trending_sort_order }).eq("id", a.id),
+      supabase.from("categories").update({ trending_sort_order: a.trending_sort_order }).eq("id", b.id),
+    ]);
+    if (err1 || err2) {
+      setError(t("saveFailed"));
+      return;
+    }
+    setCategoryRows((prev) =>
+      prev.map((c) => {
+        if (c.id === a.id) return { ...c, trending_sort_order: b.trending_sort_order };
+        if (c.id === b.id) return { ...c, trending_sort_order: a.trending_sort_order };
+        return c;
+      }),
+    );
   }
 
   async function setFeatured(id: string, featured: boolean) {
@@ -66,15 +99,51 @@ export function TrendingCakesContent({ categories, cakes }: { categories: Catego
       <p className="text-sm text-text-secondary">{t("trendingCakesHelper")}</p>
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {topLevel.map((category) => {
+      {topLevel.map((category, categoryIndex) => {
         const ids = new Set(groupCategoryIds(category));
         const groupCakes = rows.filter((r) => ids.has(r.category_id));
         const featuredCakes = groupCakes.filter((r) => r.featured).sort((a, b) => a.sort_order - b.sort_order);
         const availableCakes = groupCakes.filter((r) => !r.featured);
 
         return (
-          <div key={category.id} className="flex flex-col gap-3 rounded-3xl border border-border-default bg-bg-surface p-5">
-            <h2 className="font-heading text-lg font-semibold text-text-primary">{category.name.en}</h2>
+          <div
+            key={category.id}
+            className={`flex flex-col gap-3 rounded-3xl border border-border-default bg-bg-surface p-5 ${
+              category.show_trending ? "" : "opacity-60"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-heading text-lg font-semibold text-text-primary">{category.name.en}</h2>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={categoryIndex === 0}
+                  onClick={() => swapCategoryOrder(category, topLevel[categoryIndex - 1])}
+                  className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-surface-alt disabled:opacity-30"
+                  aria-label={t("moveUp")}
+                >
+                  <ArrowUp className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  disabled={categoryIndex === topLevel.length - 1}
+                  onClick={() => swapCategoryOrder(category, topLevel[categoryIndex + 1])}
+                  className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-surface-alt disabled:opacity-30"
+                  aria-label={t("moveDown")}
+                >
+                  <ArrowDown className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleShowTrending(category.id, !category.show_trending)}
+                  className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-text-secondary hover:bg-bg-surface-alt"
+                  aria-label={category.show_trending ? t("hideFromHome") : t("showOnHome")}
+                >
+                  {category.show_trending ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                  {category.show_trending ? t("hideFromHome") : t("showOnHome")}
+                </button>
+              </div>
+            </div>
             {featuredCakes.length === 0 ? (
               <p className="text-sm text-text-secondary">{t("noTrendingCakes")}</p>
             ) : (
