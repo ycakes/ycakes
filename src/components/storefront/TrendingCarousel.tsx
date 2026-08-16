@@ -5,16 +5,20 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import type { Cake } from "@/types/catalog";
 
-// One ProductCard's width (340px) + the track's gap-6 (24px) — nudging by
-// exactly this amount, combined with the track's scroll-snap, always lands
-// on a full card instead of stopping mid-card.
-const NUDGE_PX = 364;
+const FALLBACK_NUDGE_PX = 364;
 
 export function TrendingCarousel({ cakes, priority }: { cakes: Cake[]; priority?: boolean }) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   function nudge(direction: 1 | -1) {
-    trackRef.current?.scrollBy({ left: direction * NUDGE_PX, behavior: "smooth" });
+    const track = trackRef.current;
+    if (!track) return;
+    // Card width is fluid (see ProductCard's className below), so the step
+    // is measured off the actual rendered card rather than a fixed pixel
+    // value — combined with scroll-snap this always lands on a full card.
+    const firstCard = track.firstElementChild as HTMLElement | null;
+    const step = firstCard ? firstCard.getBoundingClientRect().width + 24 : FALLBACK_NUDGE_PX;
+    track.scrollBy({ left: direction * step, behavior: "smooth" });
   }
 
   return (
@@ -24,7 +28,12 @@ export function TrendingCarousel({ cakes, priority }: { cakes: Cake[]; priority?
         className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth scroll-px-1 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {cakes.map((cake, index) => (
-          <ProductCard key={cake.id} cake={cake} priority={priority && index < 3} />
+          <ProductCard
+            key={cake.id}
+            cake={cake}
+            priority={priority && index < 3}
+            className="w-[clamp(220px,calc((100%_-_72px)/4),340px)]"
+          />
         ))}
       </div>
       {cakes.length > 1 && (
