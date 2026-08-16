@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Eye, EyeOff, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { CakeItemFields } from "@/components/admin/orders/CakeItemFields";
 import { ReferenceImageViewer } from "@/components/ui/reference-image-viewer";
 import { orderItemToFieldsValue, buildUpdateOrderItemParams } from "@/lib/admin/orderItemFields";
@@ -16,12 +17,11 @@ import type { CakeItemFieldsValue } from "@/types/adminCakeItem";
 
 type SizeWithTiers = Size & { tierIds: string[] };
 
-// Admin (canEdit) view: expanding a line item goes straight into the
-// editable form — no separate "Edit" click first. Earlier revisions had a
-// two-step expand-then-edit flow that repeatedly confused the owner into
-// thinking the fields weren't editable at all, since the default expanded
-// state was read-only. Accountants (canEdit=false) still only ever see the
-// read-only detail view, since they have no write access to order_items.
+// Two separate, always-visible controls: "View Details" (Eye icon) opens the
+// read-only Cake Details panel and is available to both admin and
+// accountant; "Edit" (Pencil icon) opens the editable form directly and is
+// admin-only (canEdit), since accountants have no write access to
+// order_items. Only one panel mode is open at a time.
 export function OrderLineItem({
   item,
   locale,
@@ -45,7 +45,7 @@ export function OrderLineItem({
   const tOrders = useTranslations("Admin.orders");
   const tCommon = useTranslations("Common");
   const router = useRouter();
-  const [expanded, setExpanded] = useState(false);
+  const [mode, setMode] = useState<"closed" | "view" | "edit">("closed");
   const [draft, setDraft] = useState<CakeItemFieldsValue | null>(null);
   const [priceDraft, setPriceDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -68,16 +68,19 @@ export function OrderLineItem({
   if (shapeName) summaryParts.push(shapeName);
   summaryParts.push(t("qty", { count: item.quantity }));
 
-  function toggleExpanded() {
-    setExpanded((prev) => {
-      const next = !prev;
-      if (next && canEdit) {
-        setDraft(orderItemToFieldsValue(item));
-        setPriceDraft(String(item.final_price ?? item.line_estimate));
-        setError(null);
-        setSaved(false);
-      }
-      return next;
+  function toggleView() {
+    setMode((prev) => (prev === "view" ? "closed" : "view"));
+  }
+
+  function toggleEdit() {
+    if (!canEdit) return;
+    setMode((prev) => {
+      if (prev === "edit") return "closed";
+      setDraft(orderItemToFieldsValue(item));
+      setPriceDraft(String(item.final_price ?? item.line_estimate));
+      setError(null);
+      setSaved(false);
+      return "edit";
     });
   }
 
@@ -121,23 +124,41 @@ export function OrderLineItem({
         <p className="shrink-0 text-[15px] font-semibold text-text-primary">
           {tCommon("egpPrice", { amount: item.final_price ?? item.line_estimate })}
         </p>
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2">
           {saved && <span className="text-[13px] font-semibold text-status-completed">{tOrders("itemSaved")}</span>}
-          <button
+          <Button
             type="button"
-            onClick={toggleExpanded}
-            aria-label={expanded ? tOrders("collapse") : canEdit ? tOrders("edit") : tOrders("expand")}
-            className="flex items-center gap-1 text-[13px] font-semibold text-brand-primary"
+            variant="brand-ghost"
+            size="sm"
+            onClick={toggleView}
+            aria-pressed={mode === "view"}
+            className={cn("gap-1.5 bg-bg-surface", mode === "view" && "bg-bg-surface-alt")}
           >
-            {!expanded && canEdit && <span>{tOrders("edit")}</span>}
-            {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-          </button>
+            {mode === "view" ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            {tOrders("viewDetails")}
+          </Button>
+          {canEdit && (
+            <Button
+              type="button"
+              variant="brand-ghost"
+              size="sm"
+              onClick={toggleEdit}
+              aria-pressed={mode === "edit"}
+              className={cn(
+                "gap-1.5 border-brand-primary bg-brand-primary/5 text-brand-primary",
+                mode === "edit" && "bg-brand-primary/15",
+              )}
+            >
+              <Pencil className="size-3.5" />
+              {tOrders("edit")}
+            </Button>
+          )}
         </div>
       </div>
 
-      {expanded && (
+      {mode !== "closed" && (
         <div className="flex w-full flex-col gap-4 rounded-2xl bg-bg-subtle p-4">
-          {canEdit && draft ? (
+          {mode === "edit" && canEdit && draft ? (
             <>
               <label className="flex max-w-[220px] flex-col gap-1">
                 <span className="text-[13px] font-semibold text-text-primary">{tOrders("itemPrice")}</span>
@@ -171,7 +192,7 @@ export function OrderLineItem({
                   variant="brand-ghost"
                   size="sm"
                   disabled={saving}
-                  onClick={() => setExpanded(false)}
+                  onClick={() => setMode("closed")}
                   className="flex-1 justify-center bg-bg-surface"
                 >
                   {tOrders("cancel")}
