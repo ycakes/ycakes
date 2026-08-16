@@ -10,6 +10,7 @@ import { ImageUploader, type UploadedImage } from "@/components/admin/ImageUploa
 import { Link, useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { deleteFromCloudinary } from "@/lib/admin/cloudinaryUpload";
+import { cn } from "@/lib/utils";
 import type { Cake, CakeImage, Category } from "@/types/catalog";
 
 type CakeFormValue = Pick<Cake, "id" | "category_id" | "name" | "description" | "base_price" | "featured" | "allow_fake"> & {
@@ -53,6 +54,8 @@ export function CakeForm({
   const [error, setError] = useState<string | null>(null);
 
   const isCandyCorner = topLevel.find((c) => c.id === topLevelId)?.slug === "candy-corner";
+  const isBento = topLevel.find((c) => c.id === topLevelId)?.slug === "bento";
+  const fakeCakeDisabled = isCandyCorner || isBento;
   const finalCategoryId = isCandyCorner && subcategoryId ? subcategoryId : topLevelId;
 
   async function handleSubmit() {
@@ -66,7 +69,7 @@ export function CakeForm({
         base_price: Number(basePrice) || 0,
         featured,
         active,
-        allow_fake: allowFake,
+        allow_fake: fakeCakeDisabled ? false : allowFake,
         ...(images.length > 0 && cakeImages.length === 0 ? { primary_image_url: null } : {}),
       };
 
@@ -128,7 +131,7 @@ export function CakeForm({
         {t("back")}
       </Link>
 
-      <h1 className="font-heading text-2xl font-bold text-text-primary">{cake ? t("edit") : t("add")}</h1>
+      <h1 className="font-heading text-2xl font-bold text-brand-primary">{cake ? t("edit") : t("addCake")}</h1>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
@@ -155,7 +158,7 @@ export function CakeForm({
           <textarea dir="rtl" value={descriptionAr} onChange={(e) => setDescriptionAr(e.target.value)} rows={3} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
         </label>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <label className="flex flex-1 flex-col gap-1 text-[13px] font-medium text-text-primary">
             {t("category")}
             <Select
@@ -166,19 +169,23 @@ export function CakeForm({
               }}
               items={topLevel.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="h-11 w-full bg-bg-surface text-[15px]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                {topLevel.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
+              <SelectContent className="min-w-[var(--anchor-width)] bg-bg-surface" alignItemWithTrigger={false}>
+                {topLevel.map((category, index) => (
+                  <SelectItem
+                    key={category.id}
+                    value={category.id}
+                    className={cn("py-2.5 text-[15px]", index > 0 && "border-t border-border-default")}
+                  >
                     {category.name.en}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </label>
-          <label className="flex w-[200px] flex-col gap-1 text-[13px] font-medium text-text-primary">
+          <label className="flex w-full flex-col gap-1 text-[13px] font-medium text-text-primary sm:w-[200px]">
             {t("priceModifier")}
             <input type="number" step="0.01" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
           </label>
@@ -192,12 +199,16 @@ export function CakeForm({
               onValueChange={(value) => setSubcategoryId(value ?? "")}
               items={subcategories.map((sub) => ({ value: sub.id, label: `${sub.name.en} / ${sub.name.ar}` }))}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="h-11 w-full bg-bg-surface text-[15px]">
                 <SelectValue placeholder={t("selectSubcategory")} />
               </SelectTrigger>
-              <SelectContent>
-                {subcategories.map((sub) => (
-                  <SelectItem key={sub.id} value={sub.id}>
+              <SelectContent className="min-w-[var(--anchor-width)] bg-bg-surface" alignItemWithTrigger={false}>
+                {subcategories.map((sub, index) => (
+                  <SelectItem
+                    key={sub.id}
+                    value={sub.id}
+                    className={cn("py-2.5 text-[15px]", index > 0 && "border-t border-border-default")}
+                  >
                     {sub.name.en}
                   </SelectItem>
                 ))}
@@ -222,15 +233,17 @@ export function CakeForm({
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium text-text-primary">{t("allowFake")}</span>
-              <span className="text-xs text-text-secondary">{t("allowFakeHelper")}</span>
+              <span className="text-xs text-text-secondary">
+                {fakeCakeDisabled ? t("notAvailableForCategory") : t("allowFakeHelper")}
+              </span>
             </div>
-            <Switch checked={allowFake} onCheckedChange={setAllowFake} />
+            <Switch checked={!fakeCakeDisabled && allowFake} onCheckedChange={setAllowFake} disabled={fakeCakeDisabled} />
           </div>
         </div>
       </div>
 
       <div className="mt-2 flex gap-2">
-        <Button type="button" variant="brand-secondary" onClick={() => router.push("/admin/cakes")}>
+        <Button type="button" variant="brand-ghost" className="bg-bg-surface" onClick={() => router.push("/admin/cakes")}>
           {t("cancel")}
         </Button>
         <Button type="button" variant="brand-primary" disabled={saving} onClick={handleSubmit}>

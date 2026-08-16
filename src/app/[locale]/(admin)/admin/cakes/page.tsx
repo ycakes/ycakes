@@ -6,9 +6,9 @@ const PAGE_SIZE = 20;
 export default async function AdminCakesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; subcategory?: string; sort?: string; dir?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; subcategory?: string; sort?: string; dir?: string; page?: string; search?: string }>;
 }) {
-  const { category, subcategory, sort, dir, page } = await searchParams;
+  const { category, subcategory, sort, dir, page, search } = await searchParams;
   const supabase = await createClient();
 
   const { data: categories, error: categoriesError } = await supabase
@@ -39,8 +39,16 @@ export default async function AdminCakesPage({
   const sortColumn = sort === "price" ? "base_price" : sort === "name" ? "name" : "sort_order";
   query = query.order(sortColumn, { ascending: dir !== "desc" });
 
-  const { data: cakes, error: cakesError } = await query;
+  const { data: allCakes, error: cakesError } = await query;
   if (cakesError) throw cakesError;
+
+  const needle = search?.trim().toLowerCase();
+  const cakes = needle
+    ? allCakes.filter((cake) => {
+        const name = cake.name as { en?: string; ar?: string };
+        return name.en?.toLowerCase().includes(needle) || name.ar?.toLowerCase().includes(needle);
+      })
+    : allCakes;
 
   const currentPage = Math.max(1, Number(page) || 1);
   const totalPages = Math.max(1, Math.ceil(cakes.length / PAGE_SIZE));
@@ -48,7 +56,7 @@ export default async function AdminCakesPage({
 
   return (
     <CakesListContent
-      key={`${category ?? ""}|${subcategory ?? ""}|${sort ?? ""}|${dir ?? ""}|${currentPage}`}
+      key={`${category ?? ""}|${subcategory ?? ""}|${sort ?? ""}|${dir ?? ""}|${currentPage}|${search ?? ""}`}
       topLevel={topLevel}
       subcategories={subcategories}
       activeCategory={category ?? null}
@@ -59,6 +67,7 @@ export default async function AdminCakesPage({
       dir={(dir as "asc" | "desc") ?? "asc"}
       currentPage={currentPage}
       totalPages={totalPages}
+      search={search ?? ""}
     />
   );
 }

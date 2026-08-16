@@ -27,6 +27,7 @@ export async function getTopLevelCategories(): Promise<Category[]> {
     .select("id, parent_id, name, slug, sort_order, image_url")
     .is("parent_id", null)
     .in("slug", TOP_LEVEL_SLUGS)
+    .eq("active", true)
     .order("sort_order");
 
   if (error) throw error;
@@ -39,6 +40,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
     .from("categories")
     .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("slug", slug)
+    .eq("active", true)
     .maybeSingle();
 
   if (error) throw error;
@@ -51,6 +53,7 @@ export async function getSubcategories(parentId: string): Promise<Category[]> {
     .from("categories")
     .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("parent_id", parentId)
+    .eq("active", true)
     .order("sort_order");
 
   if (error) throw error;
@@ -157,6 +160,7 @@ export async function getCategoryById(id: string): Promise<Category | null> {
     .from("categories")
     .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("id", id)
+    .eq("active", true)
     .maybeSingle();
 
   if (error) throw error;

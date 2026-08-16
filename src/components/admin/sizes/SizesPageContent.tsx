@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { SizeFormDialog, type SizeFormValue } from "./SizeFormDialog";
 import type { Category, Size } from "@/types/catalog";
 
@@ -125,19 +126,20 @@ export function SizesPageContent({
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-2xl font-bold text-text-primary">{t("sizes")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-heading text-2xl font-bold text-brand-primary">{t("sizes")}</h1>
         <Button
           type="button"
           variant="brand-primary"
           size="xl"
+          className="px-5 py-3 text-base"
           disabled={!selectedCategoryId}
           onClick={() => {
             setEditing(null);
             setAddKey((k) => k + 1);
           }}
         >
-          {t("add")}
+          {t("addSize")}
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -148,15 +150,15 @@ export function SizesPageContent({
         }}
         items={categories.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
       >
-        <SelectTrigger className="h-11 w-full min-w-[260px] max-w-md text-[15px]">
+        <SelectTrigger className="h-11 w-full min-w-[260px] max-w-md bg-bg-surface text-[15px]">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="min-w-[var(--anchor-width)]">
+        <SelectContent className="min-w-[var(--anchor-width)] bg-bg-surface" alignItemWithTrigger={false}>
           {categories.map((category, index) => (
             <SelectItem
               key={category.id}
               value={category.id}
-              className={index > 0 ? "border-t border-border-default" : undefined}
+              className={cn("py-2.5 text-[15px]", index > 0 && "border-t border-border-default")}
             >
               {category.name.en} / {category.name.ar}
             </SelectItem>

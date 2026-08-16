@@ -4,8 +4,9 @@
     "description": "كيكات يدوية، تُصنع حسب الطلب في القاهرة."
   },
   "AdminPage": {
-    "title": "لوحة التحكم",
-    "description": "قريباً."
+    "titleNamed": "أهلاً بعودتك، {name}!",
+    "titleGeneric": "أهلاً بعودتك!",
+    "description": "هذه لوحة تحكمك — اختر قسمًا من الشريط الجانبي لإدارة الكيكات والكتالوج والأعمال."
   },
   "Admin": {
     "nav": {
@@ -98,7 +99,17 @@
       "addToTrending": "إضافة كيكة إلى الرائجة…",
       "moveUp": "تحريك لأعلى",
       "moveDown": "تحريك لأسفل",
-      "removeFromTrending": "إزالة من الرائجة"
+      "removeFromTrending": "إزالة من الرائجة",
+      "addCake": "إضافة كيكة",
+      "addCategory": "إضافة فئة",
+      "addSize": "إضافة حجم",
+      "addFlavor": "إضافة نكهة",
+      "addColor": "إضافة لون",
+      "addTopper": "إضافة إضافة",
+      "searchPlaceholder": "ابحث عن الكيكات بالاسم (إنجليزي أو عربي)…",
+      "noSearchResults": "لا توجد كيكات تطابق بحثك.",
+      "confirmColor": "تأكيد",
+      "notAvailableForCategory": "غير متاح لهذه الفئة"
     },
     "imageUploader": {
       "upload": "رفع صورة",

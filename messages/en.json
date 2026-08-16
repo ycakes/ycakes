@@ -4,8 +4,9 @@
     "description": "Handmade cakes, made to order in Cairo."
   },
   "AdminPage": {
-    "title": "Admin dashboard",
-    "description": "Coming soon."
+    "titleNamed": "Welcome back, {name}!",
+    "titleGeneric": "Welcome back!",
+    "description": "Here's your dashboard — pick a section from the sidebar to manage your cakes, catalog, and business."
   },
   "Admin": {
     "nav": {
@@ -98,7 +99,17 @@
       "addToTrending": "Add a cake to Trending…",
       "moveUp": "Move up",
       "moveDown": "Move down",
-      "removeFromTrending": "Remove from Trending"
+      "removeFromTrending": "Remove from Trending",
+      "addCake": "Add Cake",
+      "addCategory": "Add Category",
+      "addSize": "Add Size",
+      "addFlavor": "Add Flavor",
+      "addColor": "Add Color",
+      "addTopper": "Add Topper",
+      "searchPlaceholder": "Search cakes by name (English or Arabic)…",
+      "noSearchResults": "No cakes match your search.",
+      "confirmColor": "Confirm",
+      "notAvailableForCategory": "Not available for this category"
     },
     "imageUploader": {
       "upload": "Upload",

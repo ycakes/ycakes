@@ -27,6 +27,8 @@ export function ColorFormDialog({
   const [nameEn, setNameEn] = useState(initialValue?.name_en ?? "");
   const [nameAr, setNameAr] = useState(initialValue?.name_ar ?? "");
   const [hex, setHex] = useState(initialValue?.hex_code ?? "#000000");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [draftHex, setDraftHex] = useState(hex);
 
   return (
     <Dialog.Root
@@ -59,10 +61,59 @@ export function ColorFormDialog({
                 className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm"
               />
             </label>
-            <label className="flex items-center gap-3 text-[13px] font-medium text-text-primary">
-              <input type="color" value={hex} onChange={(e) => setHex(e.target.value)} className="size-9 rounded-lg border-[1.5px] border-border-default" />
+            <div className="relative flex items-center gap-3 text-[13px] font-medium text-text-primary">
+              <button
+                type="button"
+                onClick={() => {
+                  setDraftHex(hex);
+                  setPickerOpen(true);
+                }}
+                className="size-9 shrink-0 rounded-lg border-[1.5px] border-border-default"
+                style={{ backgroundColor: hex }}
+                aria-label={t("hex")}
+              />
               <span dir="ltr">{hex}</span>
-            </label>
+
+              {pickerOpen && (
+                <div className="absolute start-0 top-full z-10 mt-2 flex flex-col gap-3 rounded-2xl border border-border-default bg-bg-surface p-4 shadow-lg">
+                  <input
+                    type="color"
+                    value={draftHex}
+                    onChange={(e) => setDraftHex(e.target.value)}
+                    className="h-24 w-40 rounded-lg border-[1.5px] border-border-default"
+                  />
+                  <input
+                    dir="ltr"
+                    value={draftHex}
+                    onChange={(e) => setDraftHex(e.target.value)}
+                    className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2 text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="brand-primary"
+                      size="sm"
+                      className="flex-1 justify-center"
+                      onClick={() => {
+                        setHex(draftHex);
+                        setPickerOpen(false);
+                      }}
+                    >
+                      {t("confirmColor")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="brand-ghost"
+                      size="sm"
+                      className="flex-1 justify-center bg-bg-surface"
+                      onClick={() => setPickerOpen(false)}
+                    >
+                      {t("cancel")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className="mt-5 flex gap-2">
             <Button

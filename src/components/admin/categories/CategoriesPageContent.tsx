@@ -160,19 +160,20 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-2xl font-bold text-text-primary">{t("categories")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-heading text-2xl font-bold text-brand-primary">{t("categories")}</h1>
         <Button
           type="button"
           variant="brand-primary"
           size="xl"
+          className="px-5 py-3 text-base"
           onClick={() => {
             setEditing(null);
             setAddingSubcategoryUnderId(null);
             setAddKey((k) => k + 1);
           }}
         >
-          {t("add")}
+          {t("addCategory")}
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}

@@ -62,7 +62,7 @@ export function TrendingCakesContent({ categories, cakes }: { categories: Catego
         <ArrowLeft className="size-4 rtl:rotate-180" />
         {t("back")}
       </Link>
-      <h1 className="font-heading text-2xl font-bold text-text-primary">{t("trendingCakes")}</h1>
+      <h1 className="font-heading text-2xl font-bold text-brand-primary">{t("trendingCakes")}</h1>
       <p className="text-sm text-text-secondary">{t("trendingCakesHelper")}</p>
       {error && <p className="text-sm text-destructive">{error}</p>}
 

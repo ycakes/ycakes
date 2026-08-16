@@ -19,6 +19,7 @@ import {
   ChevronsRight,
   LogOut,
   User,
+  X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, Link } from "@/i18n/navigation";
@@ -27,7 +28,15 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-export function AdminSidebarNav({ adminName }: { adminName?: string }) {
+export function AdminSidebarNav({
+  adminName,
+  mobileOpen = false,
+  onCloseMobile,
+}: {
+  adminName?: string;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}) {
   const t = useTranslations("Admin.nav");
   const locale = useLocale();
   const pathname = usePathname();
@@ -62,145 +71,164 @@ export function AdminSidebarNav({ adminName }: { adminName?: string }) {
   const initial = adminName ? adminName.trim().charAt(0).toUpperCase() : null;
 
   return (
-    <aside
-      className={cn(
-        "flex h-full shrink-0 flex-col border-e border-border-default bg-bg-surface transition-[width] duration-200",
-        collapsed ? "w-[76px]" : "w-[240px]",
+    <>
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={onCloseMobile}
+          aria-hidden="true"
+        />
       )}
-    >
-      <div className="flex h-[64px] shrink-0 items-center justify-between border-b border-border-default pe-[16px] ps-[20px]">
-        {!collapsed && (
-          <span className="truncate font-heading text-[18px] font-semibold text-brand-primary">
-            {t("brand")}
-          </span>
+      <aside
+        className={cn(
+          "fixed inset-y-0 start-0 z-50 flex h-full w-[240px] shrink-0 flex-col border-e border-border-default bg-bg-surface transition-transform duration-200",
+          "lg:static lg:z-auto lg:translate-x-0 lg:transition-[width]",
+          mobileOpen ? "translate-x-0" : "rtl:translate-x-full ltr:-translate-x-full",
+          collapsed ? "lg:w-[76px]" : "lg:w-[240px]",
         )}
-        <button
-          type="button"
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={t("toggleSidebar")}
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-surface-alt"
-        >
-          {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
-        </button>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-[20px] overflow-y-auto p-[16px]">
-        <nav className="flex flex-col gap-1">
+      >
+        <div className="flex h-[64px] shrink-0 items-center justify-between border-b border-border-default pe-[16px] ps-[20px]">
           {!collapsed && (
-            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
-              {t("catalog")}
-            </p>
-          )}
-          {catalogItems.map((item) => (
-            <AdminNavItem
-              key={item.href}
-              href={item.href}
-              icon={item.icon}
-              label={item.label}
-              active={pathname.startsWith(item.href)}
-              collapsed={collapsed}
-            />
-          ))}
-        </nav>
-
-        <nav className="flex flex-col gap-1">
-          {!collapsed && (
-            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
-              {t("orders")}
-            </p>
-          )}
-          {ordersItems.map((item) => (
-            <AdminNavItem
-              key={item.label}
-              href={null}
-              icon={item.icon}
-              label={item.label}
-              active={false}
-              collapsed={collapsed}
-            />
-          ))}
-        </nav>
-
-        <nav className="flex flex-col gap-1">
-          {!collapsed && (
-            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
-              {t("money")}
-            </p>
-          )}
-          {moneyItems.map((item) => (
-            <AdminNavItem
-              key={item.label}
-              href={null}
-              icon={item.icon}
-              label={item.label}
-              active={false}
-              collapsed={collapsed}
-              dimmed
-            />
-          ))}
-        </nav>
-
-        <nav className="flex flex-col gap-1">
-          {!collapsed && (
-            <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
-              {t("team")}
-            </p>
-          )}
-          {teamItems.map((item) => (
-            <AdminNavItem
-              key={item.label}
-              href={null}
-              icon={item.icon}
-              label={item.label}
-              active={false}
-              collapsed={collapsed}
-              dimmed
-            />
-          ))}
-        </nav>
-      </div>
-
-      <div className="flex h-[64px] shrink-0 items-center justify-between border-t border-border-default bg-bg-subtle px-[16px]">
-        <div className="flex min-w-0 items-center gap-[8px]">
-          <span className="flex size-[32px] shrink-0 items-center justify-center rounded-full bg-bg-surface-alt text-text-primary">
-            {initial ? (
-              <span className="text-[13px] font-semibold">{initial}</span>
-            ) : (
-              <User className="size-4" />
-            )}
-          </span>
-          {!collapsed && (
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate font-sans text-[13px] font-medium text-text-primary">
-                {displayName}
-              </span>
-              <span className="truncate font-sans text-[11px] text-text-secondary">{t("role")}</span>
+            <span className="truncate font-heading text-[18px] font-semibold text-brand-primary">
+              {t("brand")}
             </span>
           )}
-        </div>
-        <div className="flex shrink-0 items-center gap-[4px]">
-          <Link
-            href={pathname}
-            locale={otherLocale}
-            aria-label={t("switchLanguage")}
-            className="flex size-8 items-center justify-center rounded-lg text-[12px] font-semibold text-text-secondary hover:bg-bg-surface-alt"
-          >
-            {otherLocale.toUpperCase()}
-          </Link>
           <button
             type="button"
-            onClick={async () => {
-              await createClient().auth.signOut();
-              router.push("/");
-            }}
-            aria-label={t("logOut")}
-            title={t("logOut")}
-            className="flex size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-surface-alt"
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={t("toggleSidebar")}
+            className="hidden size-8 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-surface-alt lg:flex"
           >
-            <LogOut className="size-4" />
+            {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
+          </button>
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            aria-label={t("toggleSidebar")}
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-surface-alt lg:hidden"
+          >
+            <X className="size-4" />
           </button>
         </div>
-      </div>
-    </aside>
+
+        <div className="flex flex-1 flex-col gap-[20px] overflow-y-auto p-[16px]">
+          <nav className="flex flex-col gap-1" onClick={onCloseMobile}>
+            {!collapsed && (
+              <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+                {t("catalog")}
+              </p>
+            )}
+            {catalogItems.map((item) => (
+              <AdminNavItem
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={pathname.startsWith(item.href)}
+                collapsed={collapsed}
+              />
+            ))}
+          </nav>
+
+          <nav className="flex flex-col gap-1">
+            {!collapsed && (
+              <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+                {t("orders")}
+              </p>
+            )}
+            {ordersItems.map((item) => (
+              <AdminNavItem
+                key={item.label}
+                href={null}
+                icon={item.icon}
+                label={item.label}
+                active={false}
+                collapsed={collapsed}
+              />
+            ))}
+          </nav>
+
+          <nav className="flex flex-col gap-1">
+            {!collapsed && (
+              <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+                {t("money")}
+              </p>
+            )}
+            {moneyItems.map((item) => (
+              <AdminNavItem
+                key={item.label}
+                href={null}
+                icon={item.icon}
+                label={item.label}
+                active={false}
+                collapsed={collapsed}
+                dimmed
+              />
+            ))}
+          </nav>
+
+          <nav className="flex flex-col gap-1">
+            {!collapsed && (
+              <p className="px-[12px] pb-1 text-[11px] font-semibold uppercase tracking-[0.44px] text-text-secondary">
+                {t("team")}
+              </p>
+            )}
+            {teamItems.map((item) => (
+              <AdminNavItem
+                key={item.label}
+                href={null}
+                icon={item.icon}
+                label={item.label}
+                active={false}
+                collapsed={collapsed}
+                dimmed
+              />
+            ))}
+          </nav>
+        </div>
+
+        <div className="flex h-[64px] shrink-0 items-center justify-between border-t border-border-default bg-bg-subtle px-[16px]">
+          <div className="flex min-w-0 items-center gap-[8px]">
+            <span className="flex size-[32px] shrink-0 items-center justify-center rounded-full bg-bg-surface-alt text-text-primary">
+              {initial ? (
+                <span className="text-[13px] font-semibold">{initial}</span>
+              ) : (
+                <User className="size-4" />
+              )}
+            </span>
+            {!collapsed && (
+              <span className="flex min-w-0 flex-col">
+                <span className="truncate font-sans text-[13px] font-medium text-text-primary">
+                  {displayName}
+                </span>
+                <span className="truncate font-sans text-[11px] text-text-secondary">{t("role")}</span>
+              </span>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-[4px]">
+            <Link
+              href={pathname}
+              locale={otherLocale}
+              aria-label={t("switchLanguage")}
+              className="flex size-8 items-center justify-center rounded-lg text-[12px] font-semibold text-text-secondary hover:bg-bg-surface-alt"
+            >
+              {otherLocale.toUpperCase()}
+            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                await createClient().auth.signOut();
+                router.push("/");
+              }}
+              aria-label={t("logOut")}
+              title={t("logOut")}
+              className="flex size-8 items-center justify-center rounded-lg text-text-secondary hover:bg-bg-surface-alt"
+            >
+              <LogOut className="size-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
