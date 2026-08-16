@@ -5,14 +5,21 @@ export function Pagination({
   basePath,
   currentPage,
   totalPages,
+  extraParams,
 }: {
   basePath: string;
   currentPage: number;
   totalPages: number;
+  extraParams?: Record<string, string>;
 }) {
   if (totalPages <= 1) return null;
 
-  const pageHref = (page: number) => (page === 1 ? basePath : `${basePath}?page=${page}`);
+  const pageHref = (page: number) => {
+    const params = new URLSearchParams(extraParams);
+    if (page !== 1) params.set("page", String(page));
+    const query = params.toString();
+    return query ? `${basePath}?${query}` : basePath;
+  };
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 

@@ -1,0 +1,255 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ImageUploader, type UploadedImage } from "@/components/admin/ImageUploader";
+import { Link, useRouter } from "@/i18n/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { deleteFromCloudinary } from "@/lib/admin/cloudinaryUpload";
+import { cn } from "@/lib/utils";
+import type { Cake, CakeImage, Category } from "@/types/catalog";
+
+type CakeFormValue = Pick<Cake, "id" | "category_id" | "name" | "description" | "base_price" | "featured" | "allow_fake"> & {
+  active: boolean;
+};
+
+export function CakeForm({
+  categories,
+  cake,
+  images,
+}: {
+  categories: Category[];
+  cake: CakeFormValue | null;
+  images: CakeImage[];
+}) {
+  const t = useTranslations("Admin.table");
+  const router = useRouter();
+  const supabase = createClient();
+
+  const topLevel = categories.filter((c) => c.parent_id === null);
+  const candyCorner = topLevel.find((c) => c.slug === "candy-corner");
+  const subcategories = candyCorner ? categories.filter((c) => c.parent_id === candyCorner.id) : [];
+  const initialCategory = cake ? categories.find((c) => c.id === cake.category_id) : null;
+  const initialTopLevelId = initialCategory?.parent_id ?? initialCategory?.id ?? topLevel[0]?.id ?? "";
+  const initialSubcategoryId = initialCategory?.parent_id ? initialCategory.id : "";
+
+  const [nameEn, setNameEn] = useState(cake?.name.en ?? "");
+  const [nameAr, setNameAr] = useState(cake?.name.ar ?? "");
+  const [descriptionEn, setDescriptionEn] = useState(cake?.description?.en ?? "");
+  const [descriptionAr, setDescriptionAr] = useState(cake?.description?.ar ?? "");
+  const [basePrice, setBasePrice] = useState(String(cake?.base_price ?? 0));
+  const [topLevelId, setTopLevelId] = useState(initialTopLevelId);
+  const [subcategoryId, setSubcategoryId] = useState(initialSubcategoryId);
+  const [featured, setFeatured] = useState(cake?.featured ?? false);
+  const [active, setActive] = useState(cake?.active ?? true);
+  const [allowFake, setAllowFake] = useState(cake?.allow_fake ?? true);
+  const [cakeImages, setCakeImages] = useState<UploadedImage[]>(
+    images.map((img) => ({ url: img.url, publicId: img.public_id, sort_order: img.sort_order, is_primary: img.is_primary })),
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isCandyCorner = topLevel.find((c) => c.id === topLevelId)?.slug === "candy-corner";
+  const isBento = topLevel.find((c) => c.id === topLevelId)?.slug === "bento";
+  const fakeCakeDisabled = isCandyCorner || isBento;
+  const finalCategoryId = isCandyCorner && subcategoryId ? subcategoryId : topLevelId;
+
+  async function handleSubmit() {
+    setError(null);
+    setSaving(true);
+    try {
+      const payload = {
+        category_id: finalCategoryId,
+        name: { en: nameEn, ar: nameAr },
+        description: descriptionEn || descriptionAr ? { en: descriptionEn, ar: descriptionAr } : null,
+        base_price: Number(basePrice) || 0,
+        featured,
+        active,
+        allow_fake: fakeCakeDisabled ? false : allowFake,
+        ...(images.length > 0 && cakeImages.length === 0 ? { primary_image_url: null } : {}),
+      };
+
+      let cakeId = cake?.id;
+      if (cakeId) {
+        const { error: updateError } = await supabase.from("cakes").update(payload).eq("id", cakeId);
+        if (updateError) {
+          setError(t("saveFailed"));
+          return;
+        }
+        const { error: deleteError } = await supabase.from("cake_images").delete().eq("cake_id", cakeId);
+        if (deleteError) {
+          setError(t("saveFailed"));
+          return;
+        }
+      } else {
+        const { data, error: insertError } = await supabase.from("cakes").insert(payload).select("id").single();
+        if (insertError) {
+          setError(t("saveFailed"));
+          return;
+        }
+        cakeId = data.id;
+      }
+
+      if (cakeImages.length > 0) {
+        const { error: imagesError } = await supabase.from("cake_images").insert(
+          cakeImages.map((img) => ({
+            cake_id: cakeId,
+            url: img.url,
+            public_id: img.publicId,
+            sort_order: img.sort_order,
+            is_primary: img.is_primary,
+          })),
+        );
+        if (imagesError) {
+          setError(t("saveFailed"));
+          return;
+        }
+      }
+
+      // Clean up Cloudinary assets for any images that were removed from this cake.
+      const keptPublicIds = new Set(cakeImages.map((img) => img.publicId));
+      const removedPublicIds = images.map((img) => img.public_id).filter((id): id is string => !!id && !keptPublicIds.has(id));
+      await Promise.all(removedPublicIds.map((id) => deleteFromCloudinary(id)));
+
+      router.push("/admin/cakes");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="flex max-w-4xl flex-col gap-4 p-6">
+      <Link
+        href="/admin/cakes"
+        className="flex w-fit items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary"
+      >
+        <ArrowLeft className="size-4 rtl:rotate-180" />
+        {t("back")}
+      </Link>
+
+      <h1 className="font-heading text-2xl font-bold text-brand-primary">{cake ? t("edit") : t("addCake")}</h1>
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <div className="flex flex-col gap-2 rounded-3xl border border-border-default bg-bg-surface p-5">
+        <span className="text-[16px] font-heading font-semibold text-text-primary">{t("images")}</span>
+        <ImageUploader images={cakeImages} onChange={setCakeImages} folder="cakes" multiple />
+      </div>
+
+      <div className="flex flex-col gap-4 rounded-3xl border border-border-default bg-bg-surface p-6">
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("nameEn")}
+          <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("nameAr")}
+          <input dir="rtl" value={nameAr} onChange={(e) => setNameAr(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("descriptionEn")}
+          <textarea value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={3} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+        <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+          {t("descriptionAr")}
+          <textarea dir="rtl" value={descriptionAr} onChange={(e) => setDescriptionAr(e.target.value)} rows={3} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+        </label>
+
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <label className="flex flex-1 flex-col gap-1 text-[13px] font-medium text-text-primary">
+            {t("category")}
+            <Select
+              value={topLevelId}
+              onValueChange={(value) => {
+                setTopLevelId(value ?? "");
+                setSubcategoryId("");
+              }}
+              items={topLevel.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
+            >
+              <SelectTrigger className="h-11 w-full bg-bg-surface text-[15px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="min-w-[var(--anchor-width)] bg-bg-surface" alignItemWithTrigger={false}>
+                {topLevel.map((category, index) => (
+                  <SelectItem
+                    key={category.id}
+                    value={category.id}
+                    className={cn("py-2.5 text-[15px]", index > 0 && "border-t border-border-default")}
+                  >
+                    {category.name.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+          <label className="flex w-full flex-col gap-1 text-[13px] font-medium text-text-primary sm:w-[200px]">
+            {t("priceModifier")}
+            <input type="number" step="0.01" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm" />
+          </label>
+        </div>
+
+        {isCandyCorner && (
+          <label className="flex flex-col gap-1 text-[13px] font-medium text-text-primary">
+            {t("subcategory")}
+            <Select
+              value={subcategoryId}
+              onValueChange={(value) => setSubcategoryId(value ?? "")}
+              items={subcategories.map((sub) => ({ value: sub.id, label: `${sub.name.en} / ${sub.name.ar}` }))}
+            >
+              <SelectTrigger className="h-11 w-full bg-bg-surface text-[15px]">
+                <SelectValue placeholder={t("selectSubcategory")} />
+              </SelectTrigger>
+              <SelectContent className="min-w-[var(--anchor-width)] bg-bg-surface" alignItemWithTrigger={false}>
+                {subcategories.map((sub, index) => (
+                  <SelectItem
+                    key={sub.id}
+                    value={sub.id}
+                    className={cn("py-2.5 text-[15px]", index > 0 && "border-t border-border-default")}
+                  >
+                    {sub.name.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+        )}
+
+        <label className="flex items-center gap-2 text-[13px] font-medium text-text-primary">
+          <Switch checked={featured} onCheckedChange={setFeatured} />
+          {t("featured")}
+        </label>
+
+        <div className="flex flex-col gap-3 border-t border-border-default pt-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-text-primary">{t("active")}</span>
+              <span className="text-xs text-text-secondary">{t("activeHelper")}</span>
+            </div>
+            <Switch checked={active} onCheckedChange={setActive} />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-text-primary">{t("allowFake")}</span>
+              <span className="text-xs text-text-secondary">
+                {fakeCakeDisabled ? t("notAvailableForCategory") : t("allowFakeHelper")}
+              </span>
+            </div>
+            <Switch checked={!fakeCakeDisabled && allowFake} onCheckedChange={setAllowFake} disabled={fakeCakeDisabled} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 flex gap-2">
+        <Button type="button" variant="brand-ghost" className="bg-bg-surface" onClick={() => router.push("/admin/cakes")}>
+          {t("cancel")}
+        </Button>
+        <Button type="button" variant="brand-primary" disabled={saving} onClick={handleSubmit}>
+          {t("save")}
+        </Button>
+      </div>
+    </div>
+  );
+}

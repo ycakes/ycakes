@@ -16,6 +16,7 @@
   --color-bg-page: var(--bg-page);
   --color-bg-surface: var(--bg-surface);
   --color-bg-surface-alt: var(--bg-surface-alt);
+  --color-bg-subtle: var(--bg-subtle);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-on-brand: var(--text-on-brand);
@@ -65,6 +66,7 @@
   --bg-page: #f6e3d2;
   --bg-surface: #ffffff;
   --bg-surface-alt: #f6e3d2;
+  --bg-subtle: #fdfaf5;
   --text-primary: #2b1e19;
   --text-secondary: #6b5c54;
   --text-on-brand: #ffffff;

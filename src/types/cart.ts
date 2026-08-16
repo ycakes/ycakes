@@ -24,6 +24,7 @@ export type CartItem = {
   fakeShapeId: string | null;
   fakeShapeName: string | null;
   referenceImageUrl: string | null;
+  referenceImagePublicId: string | null;
 
   // Shared fields
   shapeId: string | null;

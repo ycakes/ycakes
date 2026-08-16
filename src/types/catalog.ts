@@ -9,6 +9,7 @@ export type Category = {
   name: Bilingual;
   slug: string;
   sort_order: number;
+  image_url: string | null;
 };
 
 export type Cake = {
@@ -19,7 +20,17 @@ export type Cake = {
   base_price: number;
   primary_image_url: string | null;
   featured: boolean;
+  allow_fake: boolean;
   sort_order: number;
+};
+
+export type CakeImage = {
+  id: string;
+  cake_id: string;
+  url: string;
+  sort_order: number;
+  is_primary: boolean;
+  public_id: string | null;
 };
 
 export type Size = {
@@ -61,10 +72,19 @@ export type Topper = {
   name: Bilingual;
   price_modifier: number;
   has_color_variants: boolean;
+  image_url: string | null;
 };
 
 export type DeliveryArea = {
   id: string;
   name: Bilingual;
   price: number;
+};
+
+export type PromoCode = {
+  id: string;
+  code: string;
+  discount_type: "fixed" | "percentage";
+  discount_value: number;
+  min_order_amount: number | null;
 };

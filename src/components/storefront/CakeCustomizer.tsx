@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { Dialog } from "@base-ui/react/dialog";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { useCartStore } from "@/store/cart";
 import { SelectChip } from "@/components/storefront/SelectChip";
 import { ColorSwatch } from "@/components/storefront/ColorSwatch";
@@ -11,6 +13,8 @@ import { InputField } from "@/components/storefront/InputField";
 import { QuantityStepper } from "@/components/storefront/QuantityStepper";
 import { SizeQuantityInput } from "@/components/storefront/SizeQuantityInput";
 import { Button } from "@/components/ui/button";
+import { getEditCartItem, clearEditCartItem } from "@/lib/cart/editItem";
+import { uploadReferenceImage, ReferenceImageUploadError } from "@/lib/customer/cloudinaryUpload";
 import type { Cake, Color, Flavor, Shape, Size, Tier, Topper } from "@/types/catalog";
 import type { CartItem } from "@/types/cart";
 
@@ -43,7 +47,6 @@ export function CakeCustomizer({
 }) {
   const t = useTranslations("CakeDetail");
   const tCommon = useTranslations("Common");
-  const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
 
   const sizeUnit = sizes[0]?.unit ?? "servings";
@@ -63,6 +66,9 @@ export function CakeCustomizer({
   const [fakeSizeCm, setFakeSizeCm] = useState("");
   const [fakeShapeId, setFakeShapeId] = useState<string | null>(null);
   const [referenceImageUrl, setReferenceImageUrl] = useState<string | null>(null);
+  const [referenceImagePublicId, setReferenceImagePublicId] = useState<string | null>(null);
+  const [referenceImageUploading, setReferenceImageUploading] = useState(false);
+  const [referenceImageError, setReferenceImageError] = useState<string | null>(null);
 
   // Shared fields
   const [colorIds, setColorIds] = useState<string[]>([]);
@@ -73,6 +79,47 @@ export function CakeCustomizer({
   const [textOnBoard, setTextOnBoard] = useState("");
   const [notes, setNotes] = useState("");
   const [quantity, setQuantity] = useState(1);
+
+  const [addedModalOpen, setAddedModalOpen] = useState(false);
+
+  // Pre-fill from a cart item being edited (Cart's Edit button stashes it
+  // in sessionStorage before navigating here — see src/lib/cart/editItem.ts).
+  // Editing never touches the original cart row; it only pre-fills the form
+  // so "Add to Cart" below creates a separate new item, per the owner's
+  // decision that the old one stays until removed manually.
+  useEffect(() => {
+    const item = getEditCartItem();
+    if (!item || item.cakeId !== cake.id) return;
+    clearEditCartItem();
+
+    /* eslint-disable react-hooks/set-state-in-effect -- one-time form
+       pre-fill from a client-only sessionStorage read, not something a
+       lazy useState initializer can do without an SSR/hydration mismatch
+       (same reasoning as Order Confirmation's snapshot read). */
+    setCakeType(item.isFake ? "fake" : "normal");
+    if (item.isFake) {
+      setFakeSizeCm(item.fakeSizeCm != null ? String(item.fakeSizeCm) : "");
+      setFakeShapeId(item.fakeShapeId);
+      setReferenceImageUrl(item.referenceImageUrl);
+      setReferenceImagePublicId(item.referenceImagePublicId);
+    } else {
+      setSizeId(item.sizeId);
+      setTierId(item.tierId);
+      setFlavorId(item.flavorIds[0] ?? null);
+      setFiftyFifty(item.isFiftyFifty);
+      setSecondFlavorId(item.isFiftyFifty ? (item.flavorIds[1] ?? null) : null);
+      setShapeId(item.shapeId);
+    }
+    setColorIds(item.colorIds);
+    setColorArrangementNotes(item.colorArrangementNotes ?? "");
+    setTopperId(item.topperId);
+    setTopperColorId(item.topperColorId);
+    setTextOnCake(item.textOnCake);
+    setTextOnBoard(item.textOnBoard);
+    setNotes(item.notes);
+    setQuantity(item.quantity);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [cake.id]);
 
   const selectedSize = sizes.find((s) => s.id === sizeId);
   const availableTiers = selectedSize
@@ -150,6 +197,10 @@ export function CakeCustomizer({
       : ["fakeSize", "color", "colorArrangement", "fakeShape"];
 
   function handleAddToCart() {
+    if (referenceImageUploading) {
+      document.getElementById("section-referenceImage")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if (!isValid) {
       setSubmitted(true);
       const firstErrorKey = fieldOrder.find((key) => errors[key]);
@@ -192,6 +243,7 @@ export function CakeCustomizer({
       fakeShapeId: cakeType === "fake" ? fakeShapeId : null,
       fakeShapeName: cakeType === "fake" ? (selectedFakeShape?.name[locale] ?? null) : null,
       referenceImageUrl: cakeType === "fake" ? referenceImageUrl : null,
+      referenceImagePublicId: cakeType === "fake" ? referenceImagePublicId : null,
       shapeId: cakeType === "normal" ? shapeId : null,
       shapeName: cakeType === "normal" ? (shapes.find((s) => s.id === shapeId)?.name[locale] ?? null) : null,
       colorIds,
@@ -210,7 +262,7 @@ export function CakeCustomizer({
     };
 
     addItem(item);
-    router.push("/cart");
+    setAddedModalOpen(true);
   }
 
   return (
@@ -414,14 +466,16 @@ export function CakeCustomizer({
         </div>
       </Section>
 
-      <Section label={t("referenceImage")}>
+      <Section id="section-referenceImage" label={t("referenceImage")} error={referenceImageError ?? undefined}>
         {referenceImageUrl ? (
           <div className="relative flex h-[140px] w-[200px] items-center justify-center overflow-hidden rounded-2xl border-[1.5px] border-border-default bg-bg-page">
-            {/* eslint-disable-next-line @next/next/no-img-element -- blob: object URL, next/image can't render it */}
-            <img src={referenceImageUrl} alt="" className="size-full object-contain" />
+            <Image src={referenceImageUrl} alt="" fill sizes="200px" className="object-contain" />
             <button
               type="button"
-              onClick={() => setReferenceImageUrl(null)}
+              onClick={() => {
+                setReferenceImageUrl(null);
+                setReferenceImagePublicId(null);
+              }}
               aria-label={t("removeReferenceImage")}
               className="absolute end-2 top-2 flex size-6 items-center justify-center rounded-full bg-brand-primary text-xs font-bold text-text-on-brand"
             >
@@ -429,17 +483,43 @@ export function CakeCustomizer({
             </button>
           </div>
         ) : (
-          <label className="flex h-[140px] w-[200px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-border-default bg-bg-page text-center">
+          <label className="flex h-[140px] w-[200px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-white bg-bg-surface text-center">
             <input
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => {
+              disabled={referenceImageUploading}
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
-                if (file) setReferenceImageUrl(URL.createObjectURL(file));
+                e.target.value = "";
+                if (!file) return;
+                setReferenceImageError(null);
+                setReferenceImageUploading(true);
+                try {
+                  const { url, publicId } = await uploadReferenceImage(file);
+                  setReferenceImageUrl(url);
+                  setReferenceImagePublicId(publicId);
+                } catch (err) {
+                  const reason = err instanceof ReferenceImageUploadError ? err.reason : "uploadFailed";
+                  setReferenceImageError(
+                    t(
+                      reason === "invalidType"
+                        ? "referenceImageInvalidType"
+                        : reason === "tooLarge"
+                          ? "referenceImageTooLarge"
+                          : reason === "rateLimited"
+                            ? "referenceImageRateLimited"
+                            : "referenceImageUploadFailed",
+                    ),
+                  );
+                } finally {
+                  setReferenceImageUploading(false);
+                }
               }}
             />
-            <p className="w-40 text-xs text-text-secondary">{t("uploadPrompt")}</p>
+            <p className="w-40 text-xs text-text-secondary">
+              {referenceImageUploading ? t("uploadingReference") : t("uploadPrompt")}
+            </p>
           </label>
         )}
       </Section>
@@ -461,6 +541,7 @@ export function CakeCustomizer({
                 label={topper.name[locale]}
                 selected={topperId === topper.id}
                 onSelect={() => setTopperId(topper.id)}
+                imageSrc={topper.image_url}
               />
             ))}
           </div>
@@ -515,6 +596,32 @@ export function CakeCustomizer({
             : t("addToCart")}
         </Button>
       </div>
+
+      <Dialog.Root open={addedModalOpen} onOpenChange={setAddedModalOpen}>
+        <Dialog.Portal>
+          <Dialog.Backdrop className="fixed inset-0 z-40 bg-black/40" />
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-bg-surface p-6 text-center shadow-lg">
+            <Dialog.Title className="font-heading text-xl font-semibold text-brand-primary">
+              {t("addedToCartTitle")}
+            </Dialog.Title>
+            <p className="mt-1 text-sm text-text-secondary">{t("addedToCartBody")}</p>
+            <div className="mt-4 flex flex-col gap-2">
+              <Button
+                render={<Link href="/cart" />}
+                nativeButton={false}
+                variant="brand-primary"
+                size="xl"
+                className="w-full justify-center"
+              >
+                {t("goToCart")}
+              </Button>
+              <Dialog.Close render={<Button variant="brand-ghost" size="xl" className="w-full justify-center" />}>
+                {t("continueShopping")}
+              </Dialog.Close>
+            </div>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }

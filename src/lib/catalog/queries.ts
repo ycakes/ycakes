@@ -11,23 +11,28 @@ import type {
   Topper,
 } from "@/types/catalog";
 
-const TOP_LEVEL_SLUGS = [
-  "birthday",
-  "wedding",
-  "graduation",
-  "bento",
-  "custom",
-  "candy-corner",
-] as const;
-
 export async function getTopLevelCategories(): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .is("parent_id", null)
-    .in("slug", TOP_LEVEL_SLUGS)
+    .eq("active", true)
     .order("sort_order");
+
+  if (error) throw error;
+  return data;
+}
+
+/** Trending-row visibility/order for top-level categories, managed from the admin Trending Cakes page. */
+export async function getTrendingCategoryOrder(): Promise<
+  { id: string; show_trending: boolean; trending_sort_order: number }[]
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, show_trending, trending_sort_order")
+    .is("parent_id", null);
 
   if (error) throw error;
   return data;
@@ -37,8 +42,9 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("slug", slug)
+    .eq("active", true)
     .maybeSingle();
 
   if (error) throw error;
@@ -49,8 +55,9 @@ export async function getSubcategories(parentId: string): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("parent_id", parentId)
+    .eq("active", true)
     .order("sort_order");
 
   if (error) throw error;
@@ -77,9 +84,10 @@ export async function getTrendingCakesByCategory(
       }
       const { data, error } = await supabase
         .from("cakes")
-        .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+        .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
         .in("category_id", subIds)
         .eq("active", true)
+        .eq("featured", true)
         .order("sort_order")
         .limit(limit);
       if (error) throw error;
@@ -89,9 +97,10 @@ export async function getTrendingCakesByCategory(
 
     const { data, error } = await supabase
       .from("cakes")
-      .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+      .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
       .eq("category_id", category.id)
       .eq("active", true)
+      .eq("featured", true)
       .order("sort_order")
       .limit(limit);
     if (error) throw error;
@@ -101,7 +110,7 @@ export async function getTrendingCakesByCategory(
   return result;
 }
 
-export async function getCakesByCategorySlug(slug: string): Promise<Cake[]> {
+export async function getCakesByCategorySlug(slug: string, subcategoryId?: string): Promise<Cake[]> {
   const supabase = await createClient();
   const category = await getCategoryBySlug(slug);
   if (!category) return [];
@@ -109,14 +118,16 @@ export async function getCakesByCategorySlug(slug: string): Promise<Cake[]> {
   let categoryIds = [category.id];
   if (category.parent_id === null) {
     const subcategories = await getSubcategories(category.id);
-    if (subcategories.length > 0) {
+    if (subcategoryId && subcategories.some((s) => s.id === subcategoryId)) {
+      categoryIds = [subcategoryId];
+    } else if (subcategories.length > 0) {
       categoryIds = subcategories.map((s) => s.id);
     }
   }
 
   const { data, error } = await supabase
     .from("cakes")
-    .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+    .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
     .in("category_id", categoryIds)
     .eq("active", true)
     .order("sort_order");
@@ -129,7 +140,7 @@ export async function getAllCakes(): Promise<Cake[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("cakes")
-    .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+    .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
     .eq("active", true)
     .order("sort_order");
 
@@ -141,7 +152,7 @@ export async function getCakeById(id: string): Promise<Cake | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("cakes")
-    .select("id, category_id, name, description, base_price, primary_image_url, featured, sort_order")
+    .select("id, category_id, name, description, base_price, primary_image_url, featured, allow_fake, sort_order")
     .eq("id", id)
     .maybeSingle();
 
@@ -153,8 +164,9 @@ export async function getCategoryById(id: string): Promise<Category | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")
-    .select("id, parent_id, name, slug, sort_order")
+    .select("id, parent_id, name, slug, sort_order, image_url")
     .eq("id", id)
+    .eq("active", true)
     .maybeSingle();
 
   if (error) throw error;
@@ -267,7 +279,7 @@ export async function getToppers(): Promise<Topper[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("toppers")
-    .select("id, name, price_modifier, has_color_variants")
+    .select("id, name, price_modifier, has_color_variants, image_url")
     .eq("active", true)
     .order("sort_order");
 

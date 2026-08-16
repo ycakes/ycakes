@@ -31,10 +31,10 @@ export default function LoginPage() {
     setSubmitting(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setSubmitting(false);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
+      setSubmitting(false);
       if (error.message.toLowerCase().includes("email not confirmed")) {
         setErrorMessage(t("errorEmailNotConfirmed"));
       } else if (error.message.toLowerCase().includes("invalid")) {
@@ -45,7 +45,14 @@ export default function LoginPage() {
       return;
     }
 
-    router.replace("/");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    setSubmitting(false);
+
+    router.replace(profile?.role === "admin" ? "/admin" : "/");
     router.refresh();
   }
 

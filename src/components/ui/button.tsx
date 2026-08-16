@@ -22,6 +22,8 @@ const buttonVariants = cva(
           "rounded-full bg-brand-primary text-text-on-brand font-semibold hover:bg-brand-primary/90",
         "brand-ghost":
           "rounded-full border-[1.5px] border-border-default bg-transparent text-text-primary font-semibold hover:bg-bg-surface-alt",
+        "brand-secondary":
+          "rounded-full bg-brand-secondary text-[#341004] font-semibold hover:bg-brand-secondary/90",
       },
       size: {
         default:

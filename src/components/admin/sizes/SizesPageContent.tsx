@@ -1,0 +1,179 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { AdminTable, type AdminTableColumn } from "@/components/admin/AdminTable";
+import { RowActions } from "@/components/admin/RowActions";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from "@/i18n/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { SizeFormDialog, type SizeFormValue } from "./SizeFormDialog";
+import type { Category, Size } from "@/types/catalog";
+
+type Row = Size & { active: boolean };
+
+export function SizesPageContent({
+  categories,
+  selectedCategoryId,
+  initialSizes,
+  tiersBySizeId,
+}: {
+  categories: Category[];
+  selectedCategoryId: string | null;
+  initialSizes: Row[];
+  tiersBySizeId: Record<string, number[]>;
+}) {
+  const t = useTranslations("Admin.table");
+  const locale = useLocale();
+  const router = useRouter();
+  const [sizes, setSizes] = useState(initialSizes);
+  const [editing, setEditing] = useState<SizeFormValue | null | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+  const [addKey, setAddKey] = useState(0);
+  const supabase = createClient();
+
+  async function refresh() {
+    if (!selectedCategoryId) return;
+    const { data, error: fetchError } = await supabase
+      .from("sizes")
+      .select("id, category_id, min_qty, max_qty, unit, price_modifier, active, sort_order")
+      .eq("category_id", selectedCategoryId)
+      .order("sort_order");
+    if (fetchError) {
+      setError(t("saveFailed"));
+      return;
+    }
+    if (data) setSizes(data as Row[]);
+  }
+
+  async function handleSave(value: SizeFormValue) {
+    setError(null);
+    if (!selectedCategoryId) return;
+    const payload = { category_id: selectedCategoryId, min_qty: value.min_qty, max_qty: value.max_qty, unit: value.unit, price_modifier: value.price_modifier };
+    if (value.id) {
+      const { error: updateError } = await supabase.from("sizes").update(payload).eq("id", value.id);
+      if (updateError) {
+        setError(t("saveFailed"));
+        return;
+      }
+    } else {
+      const nextSort = sizes.length > 0 ? Math.max(...sizes.map((s) => s.sort_order)) + 1 : 0;
+      const { error: insertError } = await supabase.from("sizes").insert({ ...payload, sort_order: nextSort });
+      if (insertError) {
+        setError(t("saveFailed"));
+        return;
+      }
+    }
+    setEditing(undefined);
+    await refresh();
+  }
+
+  async function handleDelete(id: string) {
+    setError(null);
+    const { error: deleteError } = await supabase.from("sizes").delete().eq("id", id);
+    if (deleteError) {
+      setError(t("saveFailed"));
+      return;
+    }
+    await refresh();
+  }
+
+  async function toggleActive(id: string, active: boolean) {
+    setError(null);
+    const { error: updateError } = await supabase.from("sizes").update({ active }).eq("id", id);
+    if (updateError) {
+      setError(t("saveFailed"));
+      return;
+    }
+    setSizes((prev) => prev.map((s) => (s.id === id ? { ...s, active } : s)));
+  }
+
+  function formatTiersAvailable(sizeId: string) {
+    const counts = tiersBySizeId[sizeId];
+    if (!counts || counts.length === 0) return t("noTiers");
+    const list = new Intl.ListFormat(locale, { style: "long", type: "disjunction" }).format(
+      counts.map((c) => String(c)),
+    );
+    return `${list} ${t("tierWord", { count: counts.length })}`;
+  }
+
+  const columns: AdminTableColumn<Row>[] = [
+    {
+      header: t("size"),
+      render: (row) =>
+        `${row.min_qty}>${row.max_qty} ${t(`unit${row.unit.charAt(0).toUpperCase()}${row.unit.slice(1)}` as "unitServings" | "unitQuantity" | "unitCm")}`,
+    },
+    { header: t("tiersAvailable"), render: (row) => formatTiersAvailable(row.id) },
+    { header: t("priceModifier"), render: (row) => row.price_modifier },
+    {
+      header: t("active"),
+      render: (row) => <Switch checked={row.active} onCheckedChange={(checked) => toggleActive(row.id, checked)} />,
+    },
+    {
+      header: t("actions"),
+      align: "end",
+      render: (row) => (
+        <RowActions
+          itemLabel={`${row.min_qty}–${row.max_qty}`}
+          onEdit={() => setEditing({ id: row.id, min_qty: row.min_qty, max_qty: row.max_qty, unit: row.unit, price_modifier: row.price_modifier })}
+          onDelete={() => handleDelete(row.id)}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-heading text-2xl font-bold text-brand-primary">{t("sizes")}</h1>
+        <Button
+          type="button"
+          variant="brand-primary"
+          size="xl"
+          className="px-5 py-3 text-base"
+          disabled={!selectedCategoryId}
+          onClick={() => {
+            setEditing(null);
+            setAddKey((k) => k + 1);
+          }}
+        >
+          {t("addSize")}
+        </Button>
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <Select
+        value={selectedCategoryId ?? ""}
+        onValueChange={(value) => {
+          if (value) router.push(`/admin/sizes?category=${value}`);
+        }}
+        items={categories.map((category) => ({ value: category.id, label: `${category.name.en} / ${category.name.ar}` }))}
+      >
+        <SelectTrigger className="h-11 w-full min-w-[260px] max-w-md bg-bg-surface text-[15px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="min-w-[var(--anchor-width)] bg-bg-surface" alignItemWithTrigger={false}>
+          {categories.map((category, index) => (
+            <SelectItem
+              key={category.id}
+              value={category.id}
+              className={cn("py-2.5 text-[15px]", index > 0 && "border-t border-border-default")}
+            >
+              {category.name.en} / {category.name.ar}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <AdminTable columns={columns} rows={sizes} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
+      <SizeFormDialog
+        key={editing?.id ?? `new-${addKey}`}
+        open={editing !== undefined}
+        initialValue={editing ?? null}
+        onSave={handleSave}
+        onCancel={() => setEditing(undefined)}
+      />
+    </div>
+  );
+}

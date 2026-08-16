@@ -4,6 +4,7 @@ import { ShopBrowse } from "@/components/storefront/ShopBrowse";
 import {
   getCakesByCategorySlug,
   getCategoryBySlug,
+  getSubcategories,
   getTopLevelCategories,
 } from "@/lib/catalog/queries";
 
@@ -12,19 +13,20 @@ export default async function ShopCategoryPage({
   searchParams,
 }: {
   params: Promise<{ category: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; subcategory?: string }>;
 }) {
   const { category: slug } = await params;
-  const { page } = await searchParams;
+  const { page, subcategory } = await searchParams;
   const t = await getTranslations("Shop");
   const locale = (await getLocale()) as "en" | "ar";
 
   const category = await getCategoryBySlug(slug);
   if (!category || category.parent_id !== null) notFound();
 
-  const [categories, cakes] = await Promise.all([
+  const [categories, subcategories, cakes] = await Promise.all([
     getTopLevelCategories(),
-    getCakesByCategorySlug(slug),
+    getSubcategories(category.id),
+    getCakesByCategorySlug(slug, subcategory),
   ]);
 
   return (
@@ -32,9 +34,11 @@ export default async function ShopCategoryPage({
       locale={locale}
       categories={categories}
       activeSlug={slug}
+      subcategories={subcategories}
+      activeSubcategoryId={subcategory ?? null}
       breadcrumbLabel={category.name[locale]}
       pageTitle={category.name[locale]}
-      pageSubtitle={t(`subtitle.${slug}` as never)}
+      pageSubtitle={t.has(`subtitle.${slug}` as never) ? t(`subtitle.${slug}` as never) : ""}
       cakes={cakes}
       currentPage={Number(page) || 1}
       basePath={`/shop/${slug}`}

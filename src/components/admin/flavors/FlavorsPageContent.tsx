@@ -1,0 +1,179 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { AdminTable, type AdminTableColumn } from "@/components/admin/AdminTable";
+import { RowActions } from "@/components/admin/RowActions";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { FlavorFormDialog, type FlavorFormValue } from "./FlavorFormDialog";
+import type { Category, Flavor } from "@/types/catalog";
+
+type Row = Flavor & { active: boolean; sort_order: number };
+
+export function FlavorsPageContent({
+  initialFlavors,
+  restrictionsByFlavor,
+  allCategories,
+}: {
+  initialFlavors: Row[];
+  restrictionsByFlavor: Record<string, { id: string; name: string }[]>;
+  allCategories: Category[];
+}) {
+  const t = useTranslations("Admin.table");
+  const tCommon = useTranslations("Common");
+  const [flavors, setFlavors] = useState(initialFlavors);
+  const [editing, setEditing] = useState<FlavorFormValue | null | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+  const [addKey, setAddKey] = useState(0);
+  const [restrictions, setRestrictions] = useState(restrictionsByFlavor);
+  const supabase = createClient();
+
+  async function refresh() {
+    const [{ data, error: fetchError }, { data: restrictionRows, error: restrictionsError }] = await Promise.all([
+      supabase.from("flavors").select("id, name, price_modifier, active, sort_order").order("sort_order"),
+      supabase.from("category_flavors").select("flavor_id, category_id, categories(name)"),
+    ]);
+    if (fetchError || restrictionsError) {
+      setError(t("saveFailed"));
+      return;
+    }
+    if (data) setFlavors(data as Row[]);
+    const next: Record<string, { id: string; name: string }[]> = {};
+    for (const row of restrictionRows ?? []) {
+      const categoryName = (row.categories as unknown as { name: { en: string } } | null)?.name?.en;
+      if (!categoryName) continue;
+      (next[row.flavor_id] ??= []).push({ id: row.category_id, name: categoryName });
+    }
+    setRestrictions(next);
+  }
+
+  async function handleSave(value: FlavorFormValue) {
+    setError(null);
+    const payload = { name: { en: value.name_en, ar: value.name_ar }, price_modifier: value.price_modifier };
+    let flavorId = value.id;
+    if (flavorId) {
+      const { error: updateError } = await supabase.from("flavors").update(payload).eq("id", flavorId);
+      if (updateError) {
+        setError(t("saveFailed"));
+        return;
+      }
+      const { error: deleteRestrictionsError } = await supabase.from("category_flavors").delete().eq("flavor_id", flavorId);
+      if (deleteRestrictionsError) {
+        setError(t("saveFailed"));
+        return;
+      }
+    } else {
+      const nextSort = flavors.length > 0 ? Math.max(...flavors.map((f) => f.sort_order)) + 1 : 0;
+      const { data, error: insertError } = await supabase.from("flavors").insert({ ...payload, sort_order: nextSort }).select("id").single();
+      if (insertError) {
+        setError(t("saveFailed"));
+        return;
+      }
+      flavorId = data.id;
+    }
+
+    if (value.restricted_category_ids.length > 0) {
+      const { error: insertRestrictionsError } = await supabase
+        .from("category_flavors")
+        .insert(value.restricted_category_ids.map((category_id) => ({ category_id, flavor_id: flavorId })));
+      if (insertRestrictionsError) {
+        setError(t("saveFailed"));
+        return;
+      }
+    }
+
+    setEditing(undefined);
+    await refresh();
+  }
+
+  async function handleDelete(id: string) {
+    setError(null);
+    const { error: deleteError } = await supabase.from("flavors").delete().eq("id", id);
+    if (deleteError) {
+      setError(t("saveFailed"));
+      return;
+    }
+    await refresh();
+  }
+
+  async function toggleActive(id: string, active: boolean) {
+    setError(null);
+    const { error: updateError } = await supabase.from("flavors").update({ active }).eq("id", id);
+    if (updateError) {
+      setError(t("saveFailed"));
+      return;
+    }
+    setFlavors((prev) => prev.map((f) => (f.id === id ? { ...f, active } : f)));
+  }
+
+  const columns: AdminTableColumn<Row>[] = [
+    { header: t("name"), render: (row) => `${row.name.en} / ${row.name.ar}` },
+    {
+      header: t("restrictedTo"),
+      render: (row) => {
+        const list = restrictions[row.id];
+        return (
+          <span className="text-text-secondary">
+            {list?.length ? t("restrictedToList", { categories: list.map((c) => c.name).join(", ") }) : t("unrestricted")}
+          </span>
+        );
+      },
+    },
+    { header: t("priceModifier"), render: (row) => `${row.price_modifier} ${tCommon("egp")}` },
+    {
+      header: t("active"),
+      render: (row) => <Switch checked={row.active} onCheckedChange={(checked) => toggleActive(row.id, checked)} />,
+    },
+    {
+      header: t("actions"),
+      align: "end",
+      render: (row) => (
+        <RowActions
+          itemLabel={row.name.en}
+          onEdit={() =>
+            setEditing({
+              id: row.id,
+              name_en: row.name.en,
+              name_ar: row.name.ar,
+              price_modifier: row.price_modifier,
+              restricted_category_ids: (restrictions[row.id] ?? []).map((c) => c.id),
+            })
+          }
+          onDelete={() => handleDelete(row.id)}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-heading text-2xl font-bold text-brand-primary">{t("flavors")}</h1>
+        <Button
+          type="button"
+          variant="brand-primary"
+          size="xl"
+          className="px-5 py-3 text-base"
+          onClick={() => {
+            setEditing(null);
+            setAddKey((k) => k + 1);
+          }}
+        >
+          {t("addFlavor")}
+        </Button>
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <AdminTable columns={columns} rows={flavors} getRowId={(row) => row.id} emptyMessage={t("noResults")} />
+      <FlavorFormDialog
+        key={editing?.id ?? `new-${addKey}`}
+        open={editing !== undefined}
+        initialValue={editing ?? null}
+        allCategories={allCategories}
+        onSave={handleSave}
+        onCancel={() => setEditing(undefined)}
+      />
+    </div>
+  );
+}

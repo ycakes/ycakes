@@ -45,7 +45,7 @@ export function HeroSection() {
             <br />
             <span className="text-brand-secondary">{t("headlineLine2")}</span>
           </h1>
-          <p className="max-w-[420px] rounded-2xl bg-bg-page/80 px-3 py-2 text-[15px] font-bold leading-7 text-text-primary backdrop-blur-sm">
+          <p className="max-w-[420px] text-[15px] font-bold leading-7 text-text-primary">
             {t("subheadline")}
           </p>
           <div className="flex flex-wrap gap-3 pt-1 md:gap-4 md:pt-2">

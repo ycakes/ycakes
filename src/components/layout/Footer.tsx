@@ -21,7 +21,7 @@ export function Footer() {
     >
       <div className="flex flex-col gap-10 md:flex-row md:gap-[100px]">
         <div className="flex w-full max-w-[320px] flex-col gap-4">
-          <div className="relative h-[70px] w-[140px] overflow-hidden rounded-2xl bg-bg-surface-alt">
+          <div className="relative h-[70px] w-[140px] overflow-hidden rounded-2xl bg-bg-surface-alt transition-transform duration-150 hover:scale-105">
             <Image
               src="/images/brand/footer-logo.png"
               alt="YCakes"
@@ -37,11 +37,18 @@ export function Footer() {
           <p className="text-base font-semibold text-white">{t("quickLinks")}</p>
           {quickLinks.map((link) =>
             link.key === "contact" ? (
-              <ContactModal key={link.key} className="text-start text-sm text-text-on-brand-muted">
+              <ContactModal
+                key={link.key}
+                className="inline-block w-fit text-start text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
+              >
                 {t(link.key)}
               </ContactModal>
             ) : (
-              <Link key={link.key} href={link.href} className="text-sm text-text-on-brand-muted">
+              <Link
+                key={link.key}
+                href={link.href}
+                className="inline-block w-fit text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
+              >
                 {t(link.key)}
               </Link>
             ),
@@ -54,7 +61,7 @@ export function Footer() {
             href={CONTACT_WHATSAPP_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2.5 text-sm text-text-on-brand-muted"
+            className="flex w-fit items-center gap-2.5 text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
           >
             <Image src="/icons/whatsapp.svg" alt="" width={18} height={18} />
             {CONTACT_PHONE_DISPLAY}
@@ -63,7 +70,7 @@ export function Footer() {
             href={CONTACT_INSTAGRAM_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2.5 text-sm text-text-on-brand-muted"
+            className="flex w-fit items-center gap-2.5 text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
           >
             <Image src="/icons/instagram.svg" alt="" width={18} height={18} />
             @ycakes.eg

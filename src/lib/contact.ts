@@ -5,3 +5,10 @@ export const CONTACT_PHONE_DISPLAY = "+20 100 123 4567";
 export const CONTACT_PHONE_TEL = "+201001234567";
 export const CONTACT_WHATSAPP_URL = "https://wa.me/201001234567";
 export const CONTACT_INSTAGRAM_URL = "https://www.instagram.com/ycakes.eg/";
+
+/** Order Confirmation's "Message Us on WhatsApp" CTA — prefilled with the
+ * order number only (confirmed via the Figma annotation), no name/item
+ * summary; the owner looks those up in the admin dashboard. */
+export function buildOrderWhatsAppUrl(orderNumber: string) {
+  return `${CONTACT_WHATSAPP_URL}?text=${encodeURIComponent(orderNumber)}`;
+}
