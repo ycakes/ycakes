@@ -17,6 +17,13 @@ import {
   type NeverOrderedCakeRow,
 } from "@/components/admin/analytics/CatalogPerformanceTab";
 import { CustomersTab, CustomersExportButton, type CustomersData, type TopCustomerRow } from "@/components/admin/analytics/CustomersTab";
+import {
+  PromoCodesTab,
+  PromoCodesExportButton,
+  type PromoCodesData,
+  type PromoCodeRow,
+  type PromoRedemptionRow,
+} from "@/components/admin/analytics/PromoCodesTab";
 import type { Bilingual } from "@/types/catalog";
 import type { OrderSource } from "@/types/orders";
 
@@ -437,12 +444,83 @@ export default async function AdminAnalyticsPage({
 
     exportButton = <CustomersExportButton data={data} />;
     tabContent = <CustomersTab data={data} locale={locale as "en" | "ar"} />;
-  } else {
-    tabContent = (
-      <div className="rounded-[24px] bg-bg-surface p-12 text-center text-text-secondary">
-        This tab is coming in the next build pass.
-      </div>
+  } else if (tab === "promo") {
+    const [{ data: promoCodes }, { data: redemptionRows }] = await Promise.all([
+      supabase.from("promo_codes").select("id, code, active, redemption_cap"),
+      supabase
+        .from("promo_code_redemptions")
+        .select(
+          "promo_code_id, order_id, orders(order_number, created_at, status, final_price, subtotal_estimate, delivery_price, discount_amount, customer_id, guest_name, profiles(first_name, last_name))",
+        ),
+    ]);
+
+    type RedemptionRow = {
+      promo_code_id: string;
+      order_id: string;
+      orders: {
+        order_number: string;
+        created_at: string;
+        status: string;
+        final_price: number | null;
+        subtotal_estimate: number;
+        delivery_price: number;
+        discount_amount: number;
+        customer_id: string | null;
+        guest_name: string | null;
+        profiles: { first_name: string | null; last_name: string | null } | null;
+      } | null;
+    };
+    const allRedemptions = (redemptionRows ?? []) as unknown as RedemptionRow[];
+
+    const codes: PromoCodeRow[] = ((promoCodes ?? []) as { id: string; code: string; active: boolean; redemption_cap: number | null }[]).map(
+      (promo) => {
+        const forCode = allRedemptions.filter((r) => r.promo_code_id === promo.id && r.orders);
+        const inPeriod = forCode.filter((r) => {
+          const createdAt = new Date(r.orders!.created_at);
+          if (resolved.from && createdAt < resolved.from) return false;
+          if (createdAt >= resolved.to) return false;
+          return true;
+        });
+        const discountGiven = inPeriod.reduce((sum, r) => sum + r.orders!.discount_amount, 0);
+        const revenueInfluenced = inPeriod.reduce(
+          (sum, r) => sum + (r.orders!.final_price ?? r.orders!.subtotal_estimate + r.orders!.delivery_price - r.orders!.discount_amount),
+          0,
+        );
+        const redemptions: PromoRedemptionRow[] = inPeriod
+          .sort((a, b) => new Date(b.orders!.created_at).getTime() - new Date(a.orders!.created_at).getTime())
+          .map((r) => ({
+            orderId: r.order_id,
+            orderNumber: r.orders!.order_number,
+            customerName:
+              [r.orders!.profiles?.first_name, r.orders!.profiles?.last_name].filter(Boolean).join(" ").trim() ||
+              r.orders!.guest_name ||
+              "—",
+            date: r.orders!.created_at,
+            discount: r.orders!.discount_amount,
+          }));
+        return {
+          id: promo.id,
+          code: promo.code,
+          redemptionsAllTime: forCode.length,
+          redemptionCap: promo.redemption_cap,
+          discountGiven,
+          revenueInfluenced,
+          redemptions,
+        };
+      },
     );
+
+    const data: PromoCodesData = {
+      activeCodes: ((promoCodes ?? []) as { active: boolean }[]).filter((p) => p.active).length,
+      totalCodes: (promoCodes ?? []).length,
+      totalRedemptions: codes.reduce((sum, c) => sum + c.redemptions.length, 0),
+      totalDiscountGiven: codes.reduce((sum, c) => sum + c.discountGiven, 0),
+      totalRevenueInfluenced: codes.reduce((sum, c) => sum + c.revenueInfluenced, 0),
+      codes,
+    };
+
+    exportButton = <PromoCodesExportButton data={data} />;
+    tabContent = <PromoCodesTab data={data} locale={locale as "en" | "ar"} />;
   }
 
   return (

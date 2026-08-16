@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { SelectChip } from "@/components/storefront/SelectChip";
 import { ColorSwatch } from "@/components/storefront/ColorSwatch";
 import { TopperCard } from "@/components/storefront/TopperCard";
 import { InputField } from "@/components/storefront/InputField";
 import { SizeQuantityInput } from "@/components/storefront/SizeQuantityInput";
+import { ReferenceImageViewer } from "@/components/ui/reference-image-viewer";
 import { uploadReferenceImage, ReferenceImageUploadError } from "@/lib/customer/cloudinaryUpload";
 import type { Color, Flavor, Shape, Size, Tier, Topper } from "@/types/catalog";
 import type { CakeItemFieldsValue } from "@/types/adminCakeItem";
@@ -266,17 +266,7 @@ function ReferenceImageField({
   return (
     <div className="flex flex-col gap-2">
       {url ? (
-        <div className="relative flex h-[120px] w-[160px] items-center justify-center overflow-hidden rounded-2xl border-[1.5px] border-border-default bg-bg-page">
-          <Image src={url} alt="" fill sizes="160px" className="object-contain" />
-          <button
-            type="button"
-            onClick={() => onChange(null, null)}
-            aria-label={t("removeReferenceImage")}
-            className="absolute end-2 top-2 flex size-6 items-center justify-center rounded-full bg-brand-primary text-xs font-bold text-text-on-brand"
-          >
-            ×
-          </button>
-        </div>
+        <ReferenceImageViewer url={url} size={160} onRemove={() => onChange(null, null)} />
       ) : (
         <label className="flex h-[120px] w-[160px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-border-default bg-bg-surface text-center">
           <input

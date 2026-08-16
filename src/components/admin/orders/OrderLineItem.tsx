@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CakeItemFields } from "@/components/admin/orders/CakeItemFields";
+import { ReferenceImageViewer } from "@/components/ui/reference-image-viewer";
 import { orderItemToFieldsValue, buildUpdateOrderItemParams } from "@/lib/admin/orderItemFields";
 import type { Color, Flavor, Shape, Size, Tier, Topper } from "@/types/catalog";
 import type { AdminOrderItemDetail } from "@/types/adminOrderDetail";
@@ -181,11 +182,11 @@ export function OrderLineItem({
             <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
               <div className="flex shrink-0 flex-col gap-1.5">
                 <p className="text-[10px] font-semibold tracking-[0.4px] text-text-secondary uppercase">{t("referenceImage")}</p>
-                <div className="relative size-[120px] overflow-hidden rounded-xl bg-bg-surface-alt">
-                  {item.reference_image_url && (
-                    <Image src={item.reference_image_url} alt="" fill sizes="120px" className="object-contain" />
-                  )}
-                </div>
+                {item.reference_image_url ? (
+                  <ReferenceImageViewer url={item.reference_image_url} size={120} />
+                ) : (
+                  <div className="size-[120px] rounded-xl bg-bg-surface-alt" />
+                )}
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                 {!item.is_fake && item.sizes && (
