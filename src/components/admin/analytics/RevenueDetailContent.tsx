@@ -66,7 +66,7 @@ export function RevenueDetailContent({
 
   return (
     <main className="flex flex-1 flex-col">
-      <div className="flex h-[80px] shrink-0 items-center gap-4 border-b border-border-default bg-bg-surface px-8">
+      <div className="flex min-h-[80px] shrink-0 flex-wrap items-center gap-4 border-b border-border-default bg-bg-surface px-4 py-3 sm:px-8">
         <Button render={<Link href={backHref} />} nativeButton={false} variant="brand-ghost" size="xl" className="h-auto bg-bg-surface px-4 py-3 text-sm">
           ← {t("backToAnalytics")}
         </Button>
@@ -76,7 +76,7 @@ export function RevenueDetailContent({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 bg-bg-surface-alt px-8 py-6">
+      <div className="flex flex-1 flex-col gap-4 bg-bg-surface-alt px-4 py-6 sm:px-8">
         <p className="max-w-[900px] text-sm text-text-secondary">{t("revenueDetailDescription", { range: rangeLabel })}</p>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -97,11 +97,11 @@ export function RevenueDetailContent({
           ))}
         </div>
 
-        <div className="rounded-[24px] bg-bg-surface">
+        <div className="overflow-x-auto rounded-[24px] bg-bg-surface">
           {visibleRows.length === 0 ? (
             <p className="py-12 text-center text-sm text-text-secondary">{t("noLedgerRows")}</p>
           ) : (
-            <div className="flex flex-col px-6">
+            <div className="flex min-w-[720px] flex-col px-6">
               <div className="flex gap-4 pb-4 pt-6 text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">
                 <span className="w-[130px] shrink-0">{t("colDate")}</span>
                 <span className="w-[110px] shrink-0">{t("colType")}</span>

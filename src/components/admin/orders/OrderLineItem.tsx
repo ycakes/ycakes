@@ -111,7 +111,7 @@ export function OrderLineItem({
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex w-full items-center gap-4">
+      <div className="flex w-full flex-wrap items-center gap-4">
         <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-bg-surface-alt">
           {item.cakes?.primary_image_url && (
             <Image src={item.cakes.primary_image_url} alt="" fill sizes="64px" className="object-cover" />
@@ -124,7 +124,7 @@ export function OrderLineItem({
         <p className="shrink-0 text-[15px] font-semibold text-text-primary">
           {tCommon("egpPrice", { amount: item.final_price ?? item.line_estimate })}
         </p>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
           {saved && <span className="text-[13px] font-semibold text-status-completed">{tOrders("itemSaved")}</span>}
           <Button
             type="button"

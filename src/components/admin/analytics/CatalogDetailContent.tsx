@@ -112,7 +112,7 @@ export function CatalogDetailContent({
 
   return (
     <main className="flex flex-1 flex-col">
-      <div className="flex h-[80px] shrink-0 items-center gap-4 border-b border-border-default bg-bg-surface px-8">
+      <div className="flex min-h-[80px] shrink-0 flex-wrap items-center gap-4 border-b border-border-default bg-bg-surface px-4 py-3 sm:px-8">
         <Button render={<Link href={backHref} />} nativeButton={false} variant="brand-ghost" size="xl" className="h-auto bg-bg-surface px-4 py-3 text-sm">
           ← {t("backToAnalytics")}
         </Button>
@@ -122,7 +122,7 @@ export function CatalogDetailContent({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-6 bg-bg-surface-alt px-8 py-6">
+      <div className="flex flex-1 flex-col gap-6 bg-bg-surface-alt px-4 py-6 sm:px-8">
         <div className="flex flex-col gap-4 rounded-[24px] bg-bg-surface p-6">
           <h2 className="font-heading text-xl font-bold text-text-primary">{t("allCakesRanked")}</h2>
 
@@ -174,25 +174,27 @@ export function CatalogDetailContent({
           {data.cakes.length === 0 ? (
             <p className="py-8 text-center text-sm text-text-secondary">{t("noCakesMatch")}</p>
           ) : (
-            <div className="flex flex-col">
-              <div className="flex gap-4 pb-3 text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">
-                <span className="w-[50px] shrink-0">{t("rank")}</span>
-                <span className="w-[280px] shrink-0">{t("cake")}</span>
-                <span className="w-[160px] shrink-0">{t("category")}</span>
-                <span className="w-[100px] shrink-0">{t("ordersColumn")}</span>
-                <span className="w-[130px] shrink-0">{t("revenue")}</span>
-              </div>
-              {data.cakes.map((row, index) => (
-                <div key={row.cakeId} className={`flex items-center gap-4 py-3 ${index < data.cakes.length - 1 ? "border-b border-border-default" : ""}`}>
-                  <span className="w-[50px] shrink-0 text-[14px] text-text-secondary">{index + 1}</span>
-                  <Link href={`/admin/cakes/${row.cakeId}`} className="w-[280px] shrink-0 truncate text-[14px] font-medium text-text-primary hover:underline">
-                    {row.name[locale]}
-                  </Link>
-                  <span className="w-[160px] shrink-0 truncate text-[14px] text-text-secondary">{row.categoryName[locale]}</span>
-                  <span className="w-[100px] shrink-0 text-[14px] text-text-primary">{row.orders}</span>
-                  <span className="w-[130px] shrink-0 text-[14px] text-text-secondary">{tCommon("egpPrice", { amount: row.revenue })}</span>
+            <div className="overflow-x-auto">
+              <div className="flex min-w-[720px] flex-col">
+                <div className="flex gap-4 pb-3 text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">
+                  <span className="w-[50px] shrink-0">{t("rank")}</span>
+                  <span className="w-[280px] shrink-0">{t("cake")}</span>
+                  <span className="w-[160px] shrink-0">{t("category")}</span>
+                  <span className="w-[100px] shrink-0">{t("ordersColumn")}</span>
+                  <span className="w-[130px] shrink-0">{t("revenue")}</span>
                 </div>
-              ))}
+                {data.cakes.map((row, index) => (
+                  <div key={row.cakeId} className={`flex items-center gap-4 py-3 ${index < data.cakes.length - 1 ? "border-b border-border-default" : ""}`}>
+                    <span className="w-[50px] shrink-0 text-[14px] text-text-secondary">{index + 1}</span>
+                    <Link href={`/admin/cakes/${row.cakeId}`} className="w-[280px] shrink-0 truncate text-[14px] font-medium text-text-primary hover:underline">
+                      {row.name[locale]}
+                    </Link>
+                    <span className="w-[160px] shrink-0 truncate text-[14px] text-text-secondary">{row.categoryName[locale]}</span>
+                    <span className="w-[100px] shrink-0 text-[14px] text-text-primary">{row.orders}</span>
+                    <span className="w-[130px] shrink-0 text-[14px] text-text-secondary">{tCommon("egpPrice", { amount: row.revenue })}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

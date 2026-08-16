@@ -143,9 +143,9 @@ export function ExpensesPageContent({
 
   return (
     <main className="flex flex-1 flex-col">
-      <div className="flex h-[80px] shrink-0 flex-wrap items-center gap-3 border-b border-border-default bg-bg-surface px-8">
+      <div className="flex min-h-[80px] shrink-0 flex-wrap items-center gap-3 border-b border-border-default bg-bg-surface px-4 py-3 sm:px-8">
         <h1 className="font-heading text-[28px] font-bold text-brand-primary">{tExpenses("title")}</h1>
-        <div className="ms-auto flex shrink-0 gap-2">
+        <div className="flex w-full shrink-0 flex-wrap gap-2 sm:ms-auto sm:w-auto">
           <Button type="button" variant="brand-primary" size="xl" className="h-auto px-4 py-3 text-sm" onClick={() => setManageCategoriesOpen(true)}>
             {tExpenses("manageCategories")}
           </Button>
@@ -164,7 +164,7 @@ export function ExpensesPageContent({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-5 bg-bg-surface-alt px-8 py-6">
+      <div className="flex flex-1 flex-col gap-5 bg-bg-surface-alt px-4 py-6 sm:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-text-secondary">{tExpenses("categoryLabel")}</span>

@@ -51,14 +51,14 @@ export function CustomersListContent({
 
   return (
     <main className="flex flex-1 flex-col">
-      <div className="flex h-[80px] shrink-0 items-center gap-4 border-b border-border-default bg-bg-surface px-8">
+      <div className="flex min-h-[80px] shrink-0 flex-wrap items-center gap-4 border-b border-border-default bg-bg-surface px-4 py-3 sm:px-8">
         <Button render={<Link href={backHref} />} nativeButton={false} variant="brand-ghost" size="xl" className="h-auto bg-bg-surface px-4 py-3 text-sm">
           ← {t("backToAnalytics")}
         </Button>
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("allCustomers")}</h1>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 bg-bg-surface-alt px-8 py-6">
+      <div className="flex flex-1 flex-col gap-4 bg-bg-surface-alt px-4 py-6 sm:px-8">
         <div className="flex w-full max-w-[400px] items-center gap-2.5 rounded-full border-[1.5px] border-border-default bg-bg-surface px-4 py-3">
           <Search className="size-4 text-text-secondary" />
           <input
@@ -148,29 +148,31 @@ export function CustomersListContent({
                         {customer.orders.length === 0 ? (
                           <p className="text-[13px] text-text-secondary">{t("noOrdersInPeriod")}</p>
                         ) : (
-                          <div className="flex flex-col">
-                            <div className="flex gap-4 pb-1 text-[11px] font-semibold tracking-[0.44px] text-text-secondary uppercase">
-                              <span className="w-[200px] shrink-0">{t("colOrderNumber")}</span>
-                              <span className="w-[140px] shrink-0">{t("colDate")}</span>
-                              <span className="w-[140px] shrink-0">{t("colStatus")}</span>
-                              <span className="w-[120px] shrink-0">{t("colTotal")}</span>
+                          <div className="overflow-x-auto">
+                            <div className="flex min-w-[600px] flex-col">
+                              <div className="flex gap-4 pb-1 text-[11px] font-semibold tracking-[0.44px] text-text-secondary uppercase">
+                                <span className="w-[200px] shrink-0">{t("colOrderNumber")}</span>
+                                <span className="w-[140px] shrink-0">{t("colDate")}</span>
+                                <span className="w-[140px] shrink-0">{t("colStatus")}</span>
+                                <span className="w-[120px] shrink-0">{t("colTotal")}</span>
+                              </div>
+                              {customer.orders.map((order) => (
+                                <Link
+                                  key={order.id}
+                                  href={`/admin/orders/${order.id}`}
+                                  className="flex gap-4 border-t border-border-default py-1.5 text-[13px] hover:bg-bg-surface-alt"
+                                >
+                                  <span className="w-[200px] shrink-0 truncate font-medium text-text-primary">{order.order_number}</span>
+                                  <span className="w-[140px] shrink-0 text-text-secondary">
+                                    {new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(new Date(order.created_at))}
+                                  </span>
+                                  <span className="w-[140px] shrink-0">
+                                    <StatusBadge status={order.status} />
+                                  </span>
+                                  <span className="w-[120px] shrink-0 text-text-secondary">{tCommon("egpPrice", { amount: order.total })}</span>
+                                </Link>
+                              ))}
                             </div>
-                            {customer.orders.map((order) => (
-                              <Link
-                                key={order.id}
-                                href={`/admin/orders/${order.id}`}
-                                className="flex gap-4 border-t border-border-default py-1.5 text-[13px] hover:bg-bg-surface-alt"
-                              >
-                                <span className="w-[200px] shrink-0 truncate font-medium text-text-primary">{order.order_number}</span>
-                                <span className="w-[140px] shrink-0 text-text-secondary">
-                                  {new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(new Date(order.created_at))}
-                                </span>
-                                <span className="w-[140px] shrink-0">
-                                  <StatusBadge status={order.status} />
-                                </span>
-                                <span className="w-[120px] shrink-0 text-text-secondary">{tCommon("egpPrice", { amount: order.total })}</span>
-                              </Link>
-                            ))}
                           </div>
                         )}
                       </div>
