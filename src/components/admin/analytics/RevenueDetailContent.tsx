@@ -72,7 +72,7 @@ export function RevenueDetailContent({
         </Button>
         <h1 className="font-heading text-2xl font-bold text-text-primary">{t("revenueExpenseLog")}</h1>
         <div className="ms-auto">
-          <RevenueDetailExportButton rows={rows} />
+          <RevenueDetailExportButton rows={visibleRows} />
         </div>
       </div>
 

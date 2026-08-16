@@ -84,7 +84,9 @@ export function CatalogDetailContent({
   sort,
   category,
   categories,
-  buildHref,
+  period,
+  from,
+  to,
 }: {
   data: CatalogDetailData;
   locale: "en" | "ar";
@@ -92,10 +94,21 @@ export function CatalogDetailContent({
   sort: Sort;
   category: string;
   categories: { slug: string; name: Bilingual }[];
-  buildHref: (overrides: { sort?: Sort; category?: string }) => string;
+  period: string;
+  from: string | null;
+  to: string | null;
 }) {
   const t = useTranslations("Admin.analytics");
   const tCommon = useTranslations("Common");
+
+  function buildHref(overrides: { sort?: Sort; category?: string }) {
+    const params = new URLSearchParams({ period, sort: overrides.sort ?? sort, category: overrides.category ?? category });
+    if (period === "custom") {
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+    }
+    return `/admin/analytics/catalog-detail?${params.toString()}`;
+  }
 
   return (
     <main className="flex flex-1 flex-col">

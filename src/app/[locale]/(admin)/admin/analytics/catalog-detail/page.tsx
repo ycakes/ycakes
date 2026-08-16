@@ -149,15 +149,6 @@ export default async function CatalogDetailPage({
     if (customTo) backParams.set("to", customTo);
   }
 
-  function buildHref(overrides: { sort?: Sort; category?: string }) {
-    const params = new URLSearchParams({ period, sort: overrides.sort ?? sort, category: overrides.category ?? category });
-    if (period === "custom") {
-      if (customFrom) params.set("from", customFrom);
-      if (customTo) params.set("to", customTo);
-    }
-    return `/admin/analytics/catalog-detail?${params.toString()}`;
-  }
-
   return (
     <CatalogDetailContent
       data={data}
@@ -166,7 +157,9 @@ export default async function CatalogDetailPage({
       sort={sort}
       category={category}
       categories={topLevelCategories.map((c) => ({ slug: c.slug, name: c.name }))}
-      buildHref={buildHref}
+      period={period}
+      from={customFrom}
+      to={customTo}
     />
   );
 }

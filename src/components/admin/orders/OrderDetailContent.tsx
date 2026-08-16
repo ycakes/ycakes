@@ -213,7 +213,11 @@ export function OrderDetailContent({
 
             <label className="flex flex-col gap-1">
               <span className="text-[13px] font-medium text-text-primary">{t("orderStatus")}</span>
-              <Select value={status} onValueChange={(v) => setStatus(v as OrderStatus)}>
+              <Select
+                value={status}
+                onValueChange={(v) => setStatus(v as OrderStatus)}
+                items={STATUSES.map((s) => ({ value: s, label: t(`statusValue.${s}`) }))}
+              >
                 <SelectTrigger className="h-[52px] w-full rounded-2xl bg-bg-surface p-3 text-[15px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -282,7 +286,11 @@ export function OrderDetailContent({
 
               <label className="flex flex-col gap-1">
                 <span className="text-[13px] font-medium text-text-primary">{t("phoneMethod")}</span>
-                <Select value={phoneMethodDraft} onValueChange={(v) => setPhoneMethodDraft(v as "call" | "whatsapp" | "both")}>
+                <Select
+                  value={phoneMethodDraft}
+                  onValueChange={(v) => setPhoneMethodDraft(v as "call" | "whatsapp" | "both")}
+                  items={(["call", "whatsapp", "both"] as const).map((m) => ({ value: m, label: tCommon(`contactMethod.${m}`) }))}
+                >
                   <SelectTrigger className="h-[52px] w-full rounded-2xl bg-bg-surface p-3 text-[15px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -339,7 +347,11 @@ export function OrderDetailContent({
               {fulfillmentTypeDraft === "delivery" && (
                 <label className="flex flex-col gap-1">
                   <span className="text-[13px] font-medium text-text-primary">{t("deliveryArea")}</span>
-                  <Select value={deliveryAreaIdDraft} onValueChange={(v) => handleDeliveryAreaChange(v ?? "")}>
+                  <Select
+                    value={deliveryAreaIdDraft}
+                    onValueChange={(v) => handleDeliveryAreaChange(v ?? "")}
+                    items={deliveryAreas.map((area) => ({ value: area.id, label: area.name[locale] }))}
+                  >
                     <SelectTrigger className="h-[52px] w-full rounded-2xl bg-bg-surface p-3 text-[15px]">
                       <SelectValue />
                     </SelectTrigger>
