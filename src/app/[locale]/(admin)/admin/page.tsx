@@ -97,7 +97,7 @@ export default async function AdminHomePage({ params }: { params: Promise<{ loca
   const monthEndISO = toISODate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
   const todayISO = toISODate(todayStart);
 
-  const ghostButtonClass = "h-auto flex-1 justify-center px-[14px] py-[10px] text-[14px]";
+  const ghostButtonClass = "h-auto w-full justify-center px-[14px] py-[10px] text-[14px]";
 
   return (
     <main className="flex flex-1 flex-col">
@@ -118,17 +118,14 @@ export default async function AdminHomePage({ params }: { params: Promise<{ loca
             <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("todayOrders")}</p>
             <p className="font-heading text-[36px] font-bold text-text-primary">{todayCount ?? 0}</p>
             <p className="text-[13px] font-medium text-text-secondary">{t("todayOrdersSubtext")}</p>
-            <div className="mt-auto flex gap-2 pt-2">
-              <Button render={<Link href="/admin/orders" />} variant="brand-ghost" size="xl" className={ghostButtonClass}>
-                {t("viewAllOrders")}
-              </Button>
+            <div className="mt-auto pt-2">
               <Button
                 render={<Link href={`/admin/orders?orderFrom=${todayISO}&orderTo=${todayISO}`} />}
                 variant="brand-ghost"
                 size="xl"
                 className={ghostButtonClass}
               >
-                {t("filterToday")}
+                {t("viewTodayOrders")}
               </Button>
             </div>
           </div>
@@ -137,17 +134,14 @@ export default async function AdminHomePage({ params }: { params: Promise<{ loca
             <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("pendingOrders")}</p>
             <p className="font-heading text-[36px] font-bold text-text-primary">{pendingCount ?? 0}</p>
             <p className="text-[13px] font-medium text-status-pending">{t("pendingOrdersSubtext")}</p>
-            <div className="mt-auto flex gap-2 pt-2">
-              <Button render={<Link href="/admin/orders" />} variant="brand-ghost" size="xl" className={ghostButtonClass}>
-                {t("viewAllOrders")}
-              </Button>
+            <div className="mt-auto pt-2">
               <Button
                 render={<Link href="/admin/orders?status=pending" />}
                 variant="brand-ghost"
                 size="xl"
                 className={ghostButtonClass}
               >
-                {t("filterPending")}
+                {t("viewPendingOrders")}
               </Button>
             </div>
           </div>
@@ -163,7 +157,7 @@ export default async function AdminHomePage({ params }: { params: Promise<{ loca
                 render={<Link href={`/admin/analytics?tab=revenue&period=custom&from=${currentMonthISO}&to=${monthEndISO}`} />}
                 variant="brand-ghost"
                 size="xl"
-                className="h-auto w-full justify-center px-[14px] py-[10px] text-[14px]"
+                className={ghostButtonClass}
               >
                 {t("viewRevenue")}
               </Button>

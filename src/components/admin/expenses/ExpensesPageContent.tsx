@@ -165,8 +165,6 @@ export function ExpensesPageContent({
       </div>
 
       <div className="flex flex-1 flex-col gap-5 bg-bg-surface-alt px-8 py-6">
-        <p className="max-w-[900px] text-sm text-text-secondary">{tExpenses("description")}</p>
-
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-text-secondary">{tExpenses("categoryLabel")}</span>
