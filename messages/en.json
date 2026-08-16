@@ -638,7 +638,7 @@
     "phone1": "Phone Number 1",
     "phone2": "Phone Number 2 (optional)",
     "emailOptional": "Email (optional)",
-    "saveAddress": "Save Address",
+    "saveAddress": "Save Address and Phone Numbers",
     "saveAddressHint": "Shown only when logged in — saves this name/address/phone to the account in one action",
     "saveAddressCapReached": "You've already saved the maximum of 5 addresses or phone numbers.",
     "saveAddressSuccess": "Saved to your account.",
