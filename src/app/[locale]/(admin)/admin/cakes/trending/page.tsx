@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin/requireAdmin";
 import { TrendingCakesContent } from "@/components/admin/cakes/TrendingCakesContent";
 
-export default async function AdminTrendingCakesPage() {
+export default async function AdminTrendingCakesPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  await requireAdmin(locale);
   const supabase = await createClient();
 
   const [{ data: categories, error: categoriesError }, { data: cakes, error: cakesError }] = await Promise.all([

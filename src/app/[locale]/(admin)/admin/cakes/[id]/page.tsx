@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin/requireAdmin";
 import { CakeForm } from "@/components/admin/cakes/CakeForm";
 
-export default async function AdminCakeFormPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function AdminCakeFormPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+  const { id, locale } = await params;
+  await requireAdmin(locale);
   const supabase = await createClient();
 
   const { data: categories, error: categoriesError } = await supabase

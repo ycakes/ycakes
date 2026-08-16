@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin/requireAdmin";
 import { CategoriesPageContent } from "@/components/admin/categories/CategoriesPageContent";
 import type { Category } from "@/types/catalog";
 
-export default async function AdminCategoriesPage() {
+export default async function AdminCategoriesPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  await requireAdmin(locale);
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("categories")

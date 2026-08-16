@@ -136,6 +136,8 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 ## Phase 6 — Admin: orders & operations
 
 - [ ] Orders list/detail, status changes, final pricing
+  - [x] Orders list (`/admin/orders`): search (order # with/without hyphens), status + source filter chips, independent Order Date / Delivery Date range popovers, sortable Order Date (default, newest first) / Delivery Date columns, status badges, pagination. Accountant gets read-only access (no "+ New Order" button); admin-only routes (catalog + the other Orders sub-pages) now individually call `requireAdmin` since the shared `/admin` layout guard was widened to `requireStaff` (admin OR accountant) to let this page through — see ARCHITECTURE.md.
+  - [ ] Order Detail (`/admin/orders/[id]`)
 - [ ] **Manual/offline order entry** — admin can register orders placed off-platform (phone, Instagram DM, in-person) directly into the dashboard, tagged via `orders.source`, so they count toward business analytics alongside real website orders
 - [ ] Delivery areas + pricing management
 - [ ] Delivery/pickup calendar block management

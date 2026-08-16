@@ -32,7 +32,41 @@
       "toggleSidebar": "Toggle sidebar",
       "logOut": "Log Out",
       "role": "Admin",
+      "roleAccountant": "Accountant",
       "switchLanguage": "Switch language"
+    },
+    "orders": {
+      "title": "Orders",
+      "newOrder": "+ New Order",
+      "orderNumber": "Order #",
+      "customer": "Customer",
+      "orderDate": "Order Date",
+      "deliveryDate": "Delivery Date",
+      "fulfillment": "Fulfillment",
+      "total": "Total",
+      "status": "Status",
+      "source": "Source",
+      "view": "View",
+      "sourceLabel": "Source:",
+      "delivery": "Delivery",
+      "pickup": "Pickup",
+      "any": "Any",
+      "apply": "Apply",
+      "dateRangeHint": "Click a day, then a second day for a range. Click the same day twice for a single day.",
+      "searchPlaceholder": "Search order # (e.g. 20260814-0921)",
+      "showingCount": "Showing {start}–{end} of {total} orders",
+      "statusValue": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "sourceValue": {
+        "website": "Website",
+        "phone": "Phone",
+        "instagram": "Instagram",
+        "in_person": "In-Person"
+      }
     },
     "table": {
       "edit": "Edit",

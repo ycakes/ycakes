@@ -1,13 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin/requireAdmin";
 import { CakesListContent } from "@/components/admin/cakes/CakesListContent";
 
 const PAGE_SIZE = 20;
 
 export default async function AdminCakesPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ category?: string; subcategory?: string; sort?: string; dir?: string; page?: string; search?: string }>;
 }) {
+  const { locale } = await params;
+  await requireAdmin(locale);
   const { category, subcategory, sort, dir, page, search } = await searchParams;
   const supabase = await createClient();
 

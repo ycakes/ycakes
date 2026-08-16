@@ -7,9 +7,11 @@ import { AdminSidebarNav } from "./AdminSidebarNav";
 
 export function AdminShell({
   adminName,
+  role,
   children,
 }: {
   adminName?: string;
+  role: "admin" | "accountant";
   children: React.ReactNode;
 }) {
   const t = useTranslations("Admin.nav");
@@ -17,7 +19,7 @@ export function AdminShell({
 
   return (
     <div className="flex min-h-screen bg-bg-page">
-      <AdminSidebarNav adminName={adminName} mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
+      <AdminSidebarNav adminName={adminName} role={role} mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col overflow-x-auto">
         <div className="flex h-14 shrink-0 items-center gap-3 border-b border-border-default bg-bg-surface px-4 lg:hidden">
           <button

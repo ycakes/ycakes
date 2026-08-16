@@ -32,7 +32,41 @@
       "toggleSidebar": "تبديل الشريط الجانبي",
       "logOut": "تسجيل الخروج",
       "role": "مسؤول",
+      "roleAccountant": "محاسب",
       "switchLanguage": "تغيير اللغة"
+    },
+    "orders": {
+      "title": "الطلبات",
+      "newOrder": "+ طلب جديد",
+      "orderNumber": "رقم الطلب",
+      "customer": "العميل",
+      "orderDate": "تاريخ الطلب",
+      "deliveryDate": "تاريخ التسليم",
+      "fulfillment": "طريقة التسليم",
+      "total": "الإجمالي",
+      "status": "الحالة",
+      "source": "المصدر",
+      "view": "عرض",
+      "sourceLabel": "المصدر:",
+      "delivery": "توصيل",
+      "pickup": "استلام",
+      "any": "الكل",
+      "apply": "تطبيق",
+      "dateRangeHint": "اضغط على يوم، ثم يوم ثانٍ لتحديد فترة. اضغط على نفس اليوم مرتين لتحديد يوم واحد.",
+      "searchPlaceholder": "ابحث برقم الطلب (مثال: 20260814-0921)",
+      "showingCount": "عرض {start}–{end} من {total} طلب",
+      "statusValue": {
+        "pending": "قيد الانتظار",
+        "confirmed": "مؤكد",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "sourceValue": {
+        "website": "الموقع الإلكتروني",
+        "phone": "هاتف",
+        "instagram": "إنستجرام",
+        "in_person": "حضوريًا"
+      }
     },
     "table": {
       "edit": "تعديل",
