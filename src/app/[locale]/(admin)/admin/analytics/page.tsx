@@ -3,7 +3,22 @@ import { requireStaff } from "@/lib/admin/requireAdmin";
 import { resolvePeriod, toISODate, type AnalyticsPeriod } from "@/lib/admin/analyticsPeriod";
 import { AnalyticsShell, type AnalyticsTabKey } from "@/components/admin/analytics/AnalyticsShell";
 import { RevenueProfitTab, RevenueProfitExportButton, type RevenueProfitData } from "@/components/admin/analytics/RevenueProfitTab";
+import {
+  OrdersFulfillmentTab,
+  OrdersFulfillmentExportButton,
+  type OrdersFulfillmentData,
+  type CancelledOrderRow,
+} from "@/components/admin/analytics/OrdersFulfillmentTab";
+import {
+  CatalogPerformanceTab,
+  CatalogPerformanceExportButton,
+  type CatalogPerformanceData,
+  type MostOrderedCakeRow,
+  type NeverOrderedCakeRow,
+} from "@/components/admin/analytics/CatalogPerformanceTab";
+import { CustomersTab, CustomersExportButton, type CustomersData, type TopCustomerRow } from "@/components/admin/analytics/CustomersTab";
 import type { Bilingual } from "@/types/catalog";
+import type { OrderSource } from "@/types/orders";
 
 const VALID_TABS: AnalyticsTabKey[] = ["revenue", "orders", "catalog", "customers", "promo"];
 const VALID_PERIODS: AnalyticsPeriod[] = ["day", "week", "month", "year", "custom", "all"];
@@ -121,6 +136,307 @@ export default async function AdminAnalyticsPage({
 
     exportButton = <RevenueProfitExportButton data={data} />;
     tabContent = <RevenueProfitTab data={data} locale={locale as "en" | "ar"} />;
+  } else if (tab === "orders") {
+    let ordersQuery = supabase
+      .from("orders")
+      .select(
+        "id, order_number, created_at, guest_name, status, fulfillment_type, source, final_price, subtotal_estimate, delivery_price, discount_amount, profiles(first_name, last_name), delivery_areas(name)",
+      )
+      .lt("created_at", resolved.to.toISOString());
+    if (resolved.from) ordersQuery = ordersQuery.gte("created_at", resolved.from.toISOString());
+    const { data: periodOrders } = await ordersQuery;
+
+    const rows = (periodOrders ?? []) as unknown as {
+      id: string;
+      order_number: string;
+      created_at: string;
+      guest_name: string | null;
+      status: string;
+      fulfillment_type: "delivery" | "pickup";
+      source: OrderSource;
+      final_price: number | null;
+      subtotal_estimate: number;
+      delivery_price: number;
+      discount_amount: number;
+      profiles: { first_name: string | null; last_name: string | null } | null;
+      delivery_areas: { name: Bilingual } | null;
+    }[];
+
+    const totalOrders = rows.length;
+    const pendingOrders = rows.filter((r) => r.status === "pending").length;
+    const cancelledOrders = rows.filter((r) => r.status === "cancelled").length;
+    const deliveryOrders = rows.filter((r) => r.fulfillment_type === "delivery").length;
+    const pickupOrders = rows.filter((r) => r.fulfillment_type === "pickup").length;
+
+    const sourceCounts = new Map<OrderSource, number>();
+    for (const r of rows) sourceCounts.set(r.source, (sourceCounts.get(r.source) ?? 0) + 1);
+    const sourceBreakdown = [...sourceCounts.entries()]
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const areaCounts = new Map<string, { name: Bilingual; count: number }>();
+    for (const r of rows) {
+      if (r.fulfillment_type !== "delivery" || !r.delivery_areas) continue;
+      const key = r.delivery_areas.name.en;
+      const existing = areaCounts.get(key);
+      if (existing) existing.count += 1;
+      else areaCounts.set(key, { name: r.delivery_areas.name, count: 1 });
+    }
+    const areaBreakdown = [...areaCounts.values()].sort((a, b) => b.count - a.count);
+
+    const cancelledRows: CancelledOrderRow[] = rows
+      .filter((r) => r.status === "cancelled")
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 10)
+      .map((r) => ({
+        id: r.id,
+        order_number: r.order_number,
+        created_at: r.created_at,
+        customerName:
+          [r.profiles?.first_name, r.profiles?.last_name].filter(Boolean).join(" ").trim() || r.guest_name || "—",
+        total: r.final_price ?? r.subtotal_estimate + r.delivery_price - r.discount_amount,
+      }));
+
+    const data: OrdersFulfillmentData = {
+      totalOrders,
+      pendingOrders,
+      cancelledOrders,
+      deliveryOrders,
+      pickupOrders,
+      sourceBreakdown,
+      areaBreakdown,
+      cancelledRows,
+      period,
+      orderFrom: resolved.from ? toISODate(resolved.from) : toISODate(new Date(0)),
+      orderTo: toISODate(new Date(resolved.to.getTime() - 86400000)),
+    };
+
+    exportButton = <OrdersFulfillmentExportButton data={data} />;
+    tabContent = <OrdersFulfillmentTab data={data} locale={locale as "en" | "ar"} />;
+  } else if (tab === "catalog") {
+    const [{ data: categories }, { data: itemRows }, { data: activeCakes }, { data: everOrderedRows }] = await Promise.all([
+      supabase.from("categories").select("id, parent_id, name"),
+      supabase
+        .from("order_items")
+        .select(
+          "id, cake_id, size_id, fake_size_cm, is_fake, final_price, line_estimate, cakes(id, name, category_id), sizes(min_qty, max_qty), tiers(tier_count), order_item_flavors(flavor_id, flavors(name)), orders(status, created_at)",
+        ),
+      supabase.from("cakes").select("id, name, category_id, created_at").eq("active", true),
+      supabase.from("order_items").select("cake_id"),
+    ]);
+
+    const categoryMap = new Map<string, { id: string; parent_id: string | null; name: Bilingual }>();
+    for (const c of (categories ?? []) as { id: string; parent_id: string | null; name: Bilingual }[]) categoryMap.set(c.id, c);
+    function topLevelName(categoryId: string | undefined): Bilingual {
+      if (!categoryId) return { en: "—", ar: "—" };
+      const cat = categoryMap.get(categoryId);
+      if (!cat) return { en: "—", ar: "—" };
+      const parent = cat.parent_id ? categoryMap.get(cat.parent_id) : null;
+      return (parent ?? cat).name;
+    }
+
+    type ItemRow = {
+      id: string;
+      cake_id: string;
+      size_id: string | null;
+      fake_size_cm: number | null;
+      is_fake: boolean;
+      final_price: number | null;
+      line_estimate: number;
+      cakes: { id: string; name: Bilingual; category_id: string } | null;
+      sizes: { min_qty: number; max_qty: number } | null;
+      tiers: { tier_count: number } | null;
+      order_item_flavors: { flavor_id: string; flavors: { name: Bilingual } }[];
+      orders: { status: string; created_at: string } | null;
+    };
+
+    const allItems = (itemRows ?? []) as unknown as ItemRow[];
+    const periodItems = allItems.filter((item) => {
+      if (!item.orders) return false;
+      if (item.orders.status === "cancelled") return false;
+      const createdAt = new Date(item.orders.created_at);
+      if (resolved.from && createdAt < resolved.from) return false;
+      if (createdAt >= resolved.to) return false;
+      return true;
+    });
+    const revenueItems = periodItems.filter((item) => item.orders?.status === "completed");
+
+    const cakeCounts = new Map<string, { name: Bilingual; categoryId: string; orders: number }>();
+    for (const item of periodItems) {
+      if (!item.cakes) continue;
+      const existing = cakeCounts.get(item.cake_id);
+      if (existing) existing.orders += 1;
+      else cakeCounts.set(item.cake_id, { name: item.cakes.name, categoryId: item.cakes.category_id, orders: 1 });
+    }
+    const cakeRevenue = new Map<string, number>();
+    for (const item of revenueItems) {
+      if (!item.cakes) continue;
+      cakeRevenue.set(item.cake_id, (cakeRevenue.get(item.cake_id) ?? 0) + (item.final_price ?? item.line_estimate));
+    }
+
+    const mostOrdered: MostOrderedCakeRow[] = [...cakeCounts.entries()]
+      .map(([cakeId, v]) => ({
+        cakeId,
+        name: v.name,
+        categoryName: topLevelName(v.categoryId),
+        orders: v.orders,
+        revenue: cakeRevenue.get(cakeId) ?? 0,
+      }))
+      .sort((a, b) => b.orders - a.orders)
+      .slice(0, 5);
+
+    const topCakeEntry = [...cakeCounts.entries()].sort((a, b) => b[1].orders - a[1].orders)[0];
+    const topCake = topCakeEntry ? { name: topCakeEntry[1].name, orders: topCakeEntry[1].orders } : null;
+
+    const flavorCounts = new Map<string, { name: Bilingual; count: number }>();
+    let totalFlavorOccurrences = 0;
+    for (const item of periodItems) {
+      for (const f of item.order_item_flavors) {
+        totalFlavorOccurrences += 1;
+        const existing = flavorCounts.get(f.flavor_id);
+        if (existing) existing.count += 1;
+        else flavorCounts.set(f.flavor_id, { name: f.flavors.name, count: 1 });
+      }
+    }
+    const topFlavorEntry = [...flavorCounts.values()].sort((a, b) => b.count - a.count)[0];
+    const topFlavor = topFlavorEntry
+      ? { name: topFlavorEntry.name, pct: totalFlavorOccurrences > 0 ? Math.round((topFlavorEntry.count / totalFlavorOccurrences) * 100) : 0 }
+      : null;
+
+    const sizeCounts = new Map<string, { label: string; count: number }>();
+    for (const item of periodItems) {
+      let label: string;
+      if (item.is_fake) {
+        if (item.fake_size_cm == null) continue;
+        label = `${item.fake_size_cm} cm`;
+      } else if (item.sizes) {
+        const range = item.sizes.max_qty !== item.sizes.min_qty ? `${item.sizes.min_qty}>${item.sizes.max_qty}` : String(item.sizes.min_qty);
+        label = item.tiers ? `${range}, ${item.tiers.tier_count} Tier` : range;
+      } else {
+        continue;
+      }
+      const existing = sizeCounts.get(label);
+      if (existing) existing.count += 1;
+      else sizeCounts.set(label, { label, count: 1 });
+    }
+    const topSizeEntry = [...sizeCounts.values()].sort((a, b) => b.count - a.count)[0];
+    const topSize = topSizeEntry ? { label: topSizeEntry.label, orders: topSizeEntry.count } : null;
+
+    const categoryRevenue = new Map<string, { name: Bilingual; amount: number }>();
+    for (const item of revenueItems) {
+      if (!item.cakes) continue;
+      const name = topLevelName(item.cakes.category_id);
+      const key = name.en;
+      const existing = categoryRevenue.get(key);
+      const amount = item.final_price ?? item.line_estimate;
+      if (existing) existing.amount += amount;
+      else categoryRevenue.set(key, { name, amount });
+    }
+    const revenueByCategory = [...categoryRevenue.values()].sort((a, b) => b.amount - a.amount);
+
+    const everOrderedCakeIds = new Set(((everOrderedRows ?? []) as { cake_id: string | null }[]).map((r) => r.cake_id).filter(Boolean));
+    const neverOrderedCakesAll = ((activeCakes ?? []) as { id: string; name: Bilingual; category_id: string; created_at: string }[]).filter(
+      (c) => !everOrderedCakeIds.has(c.id),
+    );
+    const neverOrdered: NeverOrderedCakeRow[] = neverOrderedCakesAll
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 10)
+      .map((c) => ({ cakeId: c.id, name: c.name, categoryName: topLevelName(c.category_id), createdAt: c.created_at }));
+
+    const data: CatalogPerformanceData = {
+      topCake,
+      topFlavor,
+      topSize,
+      neverOrderedCount: neverOrderedCakesAll.length,
+      revenueByCategory,
+      mostOrdered,
+      neverOrdered,
+      period,
+    };
+
+    exportButton = <CatalogPerformanceExportButton data={data} />;
+    tabContent = <CatalogPerformanceTab data={data} locale={locale as "en" | "ar"} />;
+  } else if (tab === "customers") {
+    let newCustomersQuery = supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "customer")
+      .lt("created_at", resolved.to.toISOString());
+    if (resolved.from) newCustomersQuery = newCustomersQuery.gte("created_at", resolved.from.toISOString());
+
+    const [{ count: totalCustomers }, { count: newThisPeriod }, { data: allTimeOrderCustomerIds }, { data: periodOrders }] = await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer"),
+      newCustomersQuery,
+      supabase.from("orders").select("customer_id").not("customer_id", "is", null),
+      (() => {
+        let q = supabase
+          .from("orders")
+          .select(
+            "id, customer_id, guest_name, contact_phone, status, final_price, subtotal_estimate, delivery_price, discount_amount, created_at, profiles(first_name, last_name)",
+          )
+          .lt("created_at", resolved.to.toISOString());
+        if (resolved.from) q = q.gte("created_at", resolved.from.toISOString());
+        return q;
+      })(),
+    ]);
+
+    const customerOrderCounts = new Map<string, number>();
+    for (const row of (allTimeOrderCustomerIds ?? []) as { customer_id: string | null }[]) {
+      if (!row.customer_id) continue;
+      customerOrderCounts.set(row.customer_id, (customerOrderCounts.get(row.customer_id) ?? 0) + 1);
+    }
+    const customersWithOrders = customerOrderCounts.size;
+    const repeatCustomers = [...customerOrderCounts.values()].filter((c) => c >= 2).length;
+    const repeatRate = customersWithOrders > 0 ? Math.round((repeatCustomers / customersWithOrders) * 100) : 0;
+
+    const orderRows = (periodOrders ?? []) as unknown as {
+      id: string;
+      customer_id: string | null;
+      guest_name: string | null;
+      contact_phone: string | null;
+      status: string;
+      final_price: number | null;
+      subtotal_estimate: number;
+      delivery_price: number;
+      discount_amount: number;
+      created_at: string;
+      profiles: { first_name: string | null; last_name: string | null } | null;
+    }[];
+
+    const guestOrders = orderRows.filter((r) => !r.customer_id).length;
+    const accountOrders = orderRows.filter((r) => r.customer_id).length;
+
+    type Agg = { key: string; name: string; orders: number; totalSpent: number; lastOrderDate: string; type: "account" | "guest" };
+    const aggregates = new Map<string, Agg>();
+    for (const r of orderRows) {
+      const key = r.customer_id ? `c:${r.customer_id}` : `g:${(r.guest_name ?? "").toLowerCase()}:${r.contact_phone ?? ""}`;
+      const name = r.customer_id
+        ? [r.profiles?.first_name, r.profiles?.last_name].filter(Boolean).join(" ").trim() || "—"
+        : r.guest_name || "—";
+      const spent = r.status === "completed" ? r.final_price ?? r.subtotal_estimate + r.delivery_price - r.discount_amount : 0;
+      const existing = aggregates.get(key);
+      if (existing) {
+        existing.orders += 1;
+        existing.totalSpent += spent;
+        if (r.created_at > existing.lastOrderDate) existing.lastOrderDate = r.created_at;
+      } else {
+        aggregates.set(key, { key, name, orders: 1, totalSpent: spent, lastOrderDate: r.created_at, type: r.customer_id ? "account" : "guest" });
+      }
+    }
+    const topCustomers: TopCustomerRow[] = [...aggregates.values()].sort((a, b) => b.orders - a.orders).slice(0, 5);
+
+    const data: CustomersData = {
+      totalCustomers: totalCustomers ?? 0,
+      newThisPeriod: newThisPeriod ?? 0,
+      repeatRate,
+      guestOrders,
+      accountOrders,
+      topCustomers,
+      period,
+    };
+
+    exportButton = <CustomersExportButton data={data} />;
+    tabContent = <CustomersTab data={data} locale={locale as "en" | "ar"} />;
   } else {
     tabContent = (
       <div className="rounded-[24px] bg-bg-surface p-12 text-center text-text-secondary">
@@ -136,7 +452,7 @@ export default async function AdminAnalyticsPage({
       from={customFrom}
       to={customTo}
       locale={locale as "en" | "ar"}
-      showAllTimeChip={tab === "customers"}
+      showAllTimeChip={tab === "customers" || tab === "revenue" || tab === "orders" || tab === "catalog"}
       exportButton={exportButton}
     >
       {tabContent}

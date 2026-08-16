@@ -7,7 +7,7 @@ import type { AdminOrderDetail, AdminOrderItemDetail } from "@/types/adminOrderD
 
 const ORDER_ITEM_SELECT = `
   id, cake_id, size_id, tier_id, shape_id, is_fifty_fifty, topper_id, topper_color_id,
-  text_on_cake, text_on_board, notes, quantity, unit_base_price, price_modifiers_total, line_estimate,
+  text_on_cake, text_on_board, notes, quantity, unit_base_price, price_modifiers_total, line_estimate, final_price,
   is_fake, fake_size_cm, fake_shape_id, reference_image_url, reference_image_public_id, color_arrangement_notes,
   cakes(id, name, primary_image_url, category_id),
   sizes(min_qty, max_qty, unit),

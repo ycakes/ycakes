@@ -121,6 +121,7 @@ export default async function AdminHomePage({ params }: { params: Promise<{ loca
             <div className="mt-auto pt-2">
               <Button
                 render={<Link href={`/admin/orders?orderFrom=${todayISO}&orderTo=${todayISO}`} />}
+                nativeButton={false}
                 variant="brand-ghost"
                 size="xl"
                 className={ghostButtonClass}
@@ -137,6 +138,7 @@ export default async function AdminHomePage({ params }: { params: Promise<{ loca
             <div className="mt-auto pt-2">
               <Button
                 render={<Link href="/admin/orders?status=pending" />}
+                nativeButton={false}
                 variant="brand-ghost"
                 size="xl"
                 className={ghostButtonClass}
@@ -155,6 +157,7 @@ export default async function AdminHomePage({ params }: { params: Promise<{ loca
             <div className="mt-auto pt-2">
               <Button
                 render={<Link href={`/admin/analytics?tab=revenue&period=custom&from=${currentMonthISO}&to=${monthEndISO}`} />}
+                nativeButton={false}
                 variant="brand-ghost"
                 size="xl"
                 className={ghostButtonClass}

@@ -27,9 +27,10 @@ export function orderItemToFieldsValue(item: AdminOrderItemDetail): CakeItemFiel
   };
 }
 
-export function buildUpdateOrderItemParams(orderItemId: string, value: CakeItemFieldsValue) {
+export function buildUpdateOrderItemParams(orderItemId: string, value: CakeItemFieldsValue, finalPrice: string) {
   return {
     p_order_item_id: orderItemId,
+    p_final_price: finalPrice.trim() ? Number(finalPrice) : null,
     p_size_id: value.isFake ? null : value.sizeId,
     p_tier_id: value.isFake ? null : value.tierId,
     p_shape_id: value.isFake ? null : value.shapeId,

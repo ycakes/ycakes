@@ -5,7 +5,7 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recha
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { downloadExcel } from "@/lib/admin/exportExcel";
-import { trendPercent, type AnalyticsPeriod } from "@/lib/admin/analyticsPeriod";
+import { periodWordKey, trendPercent, type AnalyticsPeriod } from "@/lib/admin/analyticsPeriod";
 import type { Bilingual } from "@/types/catalog";
 
 export type RevenueProfitData = {
@@ -21,24 +21,6 @@ export type RevenueProfitData = {
   from: string | null;
   to: string | null;
 };
-
-function periodWordKey(period: AnalyticsPeriod) {
-  switch (period) {
-    case "day":
-      return "periodWordDay";
-    case "week":
-      return "periodWordWeek";
-    case "year":
-      return "periodWordYear";
-    case "all":
-      return "periodWordAll";
-    case "custom":
-      return "periodWordCustom";
-    case "month":
-    default:
-      return "periodWordMonth";
-  }
-}
 
 export function RevenueProfitExportButton({ data }: { data: RevenueProfitData }) {
   const t = useTranslations("Admin.analytics");
@@ -93,7 +75,7 @@ export function RevenueProfitTab({ data, locale }: { data: RevenueProfitData; lo
   return (
     <>
       <div>
-        <Button render={<Link href={logHref} />} variant="brand-secondary" size="xl" className="h-auto px-4 py-3 text-sm">
+        <Button render={<Link href={logHref} />} nativeButton={false} variant="brand-secondary" size="xl" className="h-auto px-4 py-3 text-sm">
           {t("viewFullRevenueLog")}
         </Button>
       </div>

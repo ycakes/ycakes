@@ -77,3 +77,21 @@ export function trendPercent(current: number, previous: number): number | null {
   if (previous <= 0) return current > 0 ? 100 : null;
   return Math.round(((current - previous) / previous) * 100);
 }
+
+export function periodWordKey(period: AnalyticsPeriod) {
+  switch (period) {
+    case "day":
+      return "periodWordDay";
+    case "week":
+      return "periodWordWeek";
+    case "year":
+      return "periodWordYear";
+    case "all":
+      return "periodWordAll";
+    case "custom":
+      return "periodWordCustom";
+    case "month":
+    default:
+      return "periodWordMonth";
+  }
+}

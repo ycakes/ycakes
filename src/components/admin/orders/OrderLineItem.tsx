@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -15,6 +15,12 @@ import type { CakeItemFieldsValue } from "@/types/adminCakeItem";
 
 type SizeWithTiers = Size & { tierIds: string[] };
 
+// Admin (canEdit) view: expanding a line item goes straight into the
+// editable form — no separate "Edit" click first. Earlier revisions had a
+// two-step expand-then-edit flow that repeatedly confused the owner into
+// thinking the fields weren't editable at all, since the default expanded
+// state was read-only. Accountants (canEdit=false) still only ever see the
+// read-only detail view, since they have no write access to order_items.
 export function OrderLineItem({
   item,
   locale,
@@ -39,10 +45,11 @@ export function OrderLineItem({
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
-  const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<CakeItemFieldsValue | null>(null);
+  const [priceDraft, setPriceDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const flavorNames = [...item.order_item_flavors].sort((a, b) => a.position - b.position).map((f) => f.flavors.name[locale]);
   const colorNames = [...item.order_item_colors].sort((a, b) => a.sort_order - b.sort_order).map((c) => c.colors.name[locale]);
@@ -60,34 +67,43 @@ export function OrderLineItem({
   if (shapeName) summaryParts.push(shapeName);
   summaryParts.push(t("qty", { count: item.quantity }));
 
-  function startEdit() {
-    setDraft(orderItemToFieldsValue(item));
-    setEditing(true);
-    setExpanded(true);
-    setError(null);
-  }
-
-  function cancelEdit() {
-    setEditing(false);
-    setDraft(null);
-    setError(null);
+  function toggleExpanded() {
+    setExpanded((prev) => {
+      const next = !prev;
+      if (next && canEdit) {
+        setDraft(orderItemToFieldsValue(item));
+        setPriceDraft(String(item.final_price ?? item.line_estimate));
+        setError(null);
+        setSaved(false);
+      }
+      return next;
+    });
   }
 
   async function save() {
     if (!draft) return;
     setSaving(true);
     setError(null);
+    setSaved(false);
     const supabase = createClient();
-    const { error: rpcError } = await supabase.rpc("update_order_item_customization", buildUpdateOrderItemParams(item.id, draft));
+    const { error: rpcError } = await supabase.rpc(
+      "update_order_item_customization",
+      buildUpdateOrderItemParams(item.id, draft, priceDraft),
+    );
     setSaving(false);
     if (rpcError) {
       setError(tOrders("itemSaveFailed"));
       return;
     }
-    setEditing(false);
-    setDraft(null);
+    setSaved(true);
     router.refresh();
   }
+
+  useEffect(() => {
+    if (!saved) return;
+    const timeout = setTimeout(() => setSaved(false), 4000);
+    return () => clearTimeout(timeout);
+  }, [saved]);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -101,19 +117,18 @@ export function OrderLineItem({
           <p className="truncate text-[15px] font-semibold text-text-primary">{item.cakes?.name[locale] ?? ""}</p>
           <p className="truncate text-[13px] text-text-secondary">{summaryParts.join(" • ")}</p>
         </div>
-        <p className="shrink-0 text-[15px] font-semibold text-text-primary">{tCommon("egpPrice", { amount: item.line_estimate })}</p>
+        <p className="shrink-0 text-[15px] font-semibold text-text-primary">
+          {tCommon("egpPrice", { amount: item.final_price ?? item.line_estimate })}
+        </p>
         <div className="flex shrink-0 items-center gap-3">
-          {canEdit && (
-            <button type="button" onClick={startEdit} className="text-[13px] font-semibold text-brand-primary">
-              {tOrders("edit")}
-            </button>
-          )}
+          {saved && <span className="text-[13px] font-semibold text-status-completed">{tOrders("itemSaved")}</span>}
           <button
             type="button"
-            onClick={() => setExpanded((v) => !v)}
-            aria-label={expanded ? tOrders("collapse") : tOrders("expand")}
-            className="text-text-secondary"
+            onClick={toggleExpanded}
+            aria-label={expanded ? tOrders("collapse") : canEdit ? tOrders("edit") : tOrders("expand")}
+            className="flex items-center gap-1 text-[13px] font-semibold text-brand-primary"
           >
+            {!expanded && canEdit && <span>{tOrders("edit")}</span>}
             {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
           </button>
         </div>
@@ -121,8 +136,18 @@ export function OrderLineItem({
 
       {expanded && (
         <div className="flex w-full flex-col gap-4 rounded-2xl bg-bg-subtle p-4">
-          {editing && draft ? (
+          {canEdit && draft ? (
             <>
+              <label className="flex max-w-[220px] flex-col gap-1">
+                <span className="text-[13px] font-semibold text-text-primary">{tOrders("itemPrice")}</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={priceDraft}
+                  onChange={(e) => setPriceDraft(e.target.value)}
+                  className="rounded-xl border-[1.5px] border-border-default bg-bg-surface p-2.5 text-sm text-text-primary"
+                />
+              </label>
               <CakeItemFields
                 locale={locale}
                 value={draft}
@@ -140,7 +165,14 @@ export function OrderLineItem({
                 <Button type="button" variant="brand-primary" size="sm" disabled={saving} onClick={save} className="flex-1 justify-center">
                   {tOrders("save")}
                 </Button>
-                <Button type="button" variant="brand-ghost" size="sm" disabled={saving} onClick={cancelEdit} className="flex-1 justify-center bg-bg-surface">
+                <Button
+                  type="button"
+                  variant="brand-ghost"
+                  size="sm"
+                  disabled={saving}
+                  onClick={() => setExpanded(false)}
+                  className="flex-1 justify-center bg-bg-surface"
+                >
                   {tOrders("cancel")}
                 </Button>
               </div>

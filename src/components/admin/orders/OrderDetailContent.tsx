@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -43,9 +43,14 @@ export function OrderDetailContent({
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus>(order.status);
-  const [finalPrice, setFinalPrice] = useState(order.final_price != null ? String(order.final_price) : "");
+  const itemsSubtotal = items.reduce((sum, item) => sum + (item.final_price ?? item.line_estimate), 0);
+  const [finalPrice, setFinalPrice] = useState(
+    order.final_price != null ? String(order.final_price) : itemsSubtotal > 0 ? String(itemsSubtotal) : "",
+  );
+  const [deliveryFeeDraft, setDeliveryFeeDraft] = useState(String(order.delivery_price));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const customerName = order.profiles
     ? [order.profiles.first_name, order.profiles.last_name].filter(Boolean).join(" ").trim()
@@ -58,23 +63,37 @@ export function OrderDetailContent({
     order.fulfillment_type === "delivery"
       ? `${t("delivery")} — ${order.delivery_areas?.name[locale] ?? ""}`
       : `${t("pickup")} — ${PICKUP_LOCATION[locale]}`;
-  const subtotal = order.final_price ?? order.subtotal_estimate + order.delivery_price - order.discount_amount;
+  const deliveryFee = order.fulfillment_type === "delivery" ? Number(deliveryFeeDraft) || 0 : 0;
+  const finalPriceValue = finalPrice.trim() ? Number(finalPrice) : itemsSubtotal;
+  const total = finalPriceValue + deliveryFee - order.discount_amount;
 
   async function handleSave() {
     setSaving(true);
     setError(null);
+    setSaved(false);
     const supabase = createClient();
     const { error: updateError } = await supabase
       .from("orders")
-      .update({ status, final_price: finalPrice.trim() ? Number(finalPrice) : null })
+      .update({
+        status,
+        final_price: finalPrice.trim() ? Number(finalPrice) : null,
+        delivery_price: order.fulfillment_type === "delivery" ? deliveryFee : order.delivery_price,
+      })
       .eq("id", order.id);
     setSaving(false);
     if (updateError) {
       setError(t("saveFailed"));
       return;
     }
+    setSaved(true);
     router.refresh();
   }
+
+  useEffect(() => {
+    if (!saved) return;
+    const timeout = setTimeout(() => setSaved(false), 4000);
+    return () => clearTimeout(timeout);
+  }, [saved]);
 
   return (
     <div className="flex flex-col gap-4 p-6">
@@ -132,7 +151,10 @@ export function OrderDetailContent({
           {order.delivery_address && <Row label={t("address")} value={order.delivery_address} />}
 
           <div className="h-px w-full bg-border-default" />
-          <Row label={t("subtotal")} value={tCommon("egpPrice", { amount: subtotal })} bold />
+          <Row label={t("itemsSubtotal")} value={tCommon("egpPrice", { amount: itemsSubtotal })} />
+          {deliveryFee > 0 && <Row label={t("deliveryFee")} value={tCommon("egpPrice", { amount: deliveryFee })} />}
+          {order.discount_amount > 0 && <Row label={t("discount")} value={`- ${tCommon("egpPrice", { amount: order.discount_amount })}`} />}
+          <Row label={t("total")} value={tCommon("egpPrice", { amount: total })} bold />
         </div>
 
         {role === "admin" && (
@@ -164,9 +186,26 @@ export function OrderDetailContent({
                 onChange={(e) => setFinalPrice(e.target.value)}
                 className="w-full rounded-2xl border-[1.5px] border-border-default bg-bg-surface p-3 text-[15px] text-text-primary focus:outline-none"
               />
+              <span className="text-xs text-text-secondary">{t("finalPriceHelper")}</span>
             </label>
 
+            {order.fulfillment_type === "delivery" && (
+              <label className="flex flex-col gap-1">
+                <span className="text-[13px] font-medium text-text-primary">{t("deliveryFee")}</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={deliveryFeeDraft}
+                  onChange={(e) => setDeliveryFeeDraft(e.target.value)}
+                  className="w-full rounded-2xl border-[1.5px] border-border-default bg-bg-surface p-3 text-[15px] text-text-primary focus:outline-none"
+                />
+                <span className="text-xs text-text-secondary">{t("deliveryFeeHelper")}</span>
+              </label>
+            )}
+            <Row label={t("total")} value={tCommon("egpPrice", { amount: total })} bold />
+
             {error && <p className="text-xs text-red-600">{error}</p>}
+            {saved && <p className="text-xs font-semibold text-status-completed">{t("orderSaved")}</p>}
             <Button type="button" variant="brand-primary" size="xl" disabled={saving} onClick={handleSave} className="w-full justify-center">
               {t("saveChanges")}
             </Button>

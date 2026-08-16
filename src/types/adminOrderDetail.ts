@@ -17,6 +17,7 @@ export type AdminOrderItemDetail = {
   unit_base_price: number;
   price_modifiers_total: number;
   line_estimate: number;
+  final_price: number | null;
   is_fake: boolean;
   fake_size_cm: number | null;
   fake_shape_id: string | null;
