@@ -37,6 +37,7 @@ function itemToPayload(item: CartItem) {
     fake_size_cm: item.fakeSizeCm,
     fake_shape_id: item.fakeShapeId,
     reference_image_url: item.referenceImageUrl,
+    reference_image_public_id: item.referenceImagePublicId,
     color_arrangement_notes: item.colorArrangementNotes,
     flavor_ids: item.flavorIds,
     color_ids: item.colorIds,

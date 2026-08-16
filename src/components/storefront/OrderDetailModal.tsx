@@ -134,14 +134,8 @@ function OrderItemCard({ item }: { item: OrderDetailItem }) {
           {item.reference_image_url && (
             <div className="flex flex-col gap-1">
               <span className="text-text-secondary">{t("referenceImage")}</span>
-              {/* Plain <img>, not next/image — reference_image_url is
-                  currently a client-side blob: URL (Cloudinary isn't wired
-                  to the storefront yet, see ARCHITECTURE.md's Phase 3
-                  notes), which next/image can't optimize. Matches the same
-                  pattern already used in CakeCustomizer's own preview. */}
-              <div className="h-32 w-full overflow-hidden rounded-xl bg-bg-surface">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.reference_image_url} alt="" className="size-full object-contain" />
+              <div className="relative h-32 w-full overflow-hidden rounded-xl bg-bg-surface">
+                <Image src={item.reference_image_url} alt="" fill sizes="320px" className="object-contain" />
               </div>
             </div>
           )}

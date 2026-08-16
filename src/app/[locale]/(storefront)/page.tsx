@@ -63,7 +63,10 @@ export default async function HomePage() {
             const cakes = trendingByCategory[category.slug] ?? [];
             if (cakes.length === 0) return null;
             return (
-              <div key={category.id} className="flex flex-col gap-6">
+              <div
+                key={category.id}
+                className="flex flex-col gap-6 rounded-[32px] border border-border-default bg-bg-surface-alt/60 p-5 sm:p-8"
+              >
                 <h3 className="font-heading text-2xl font-bold text-brand-primary">
                   {category.name[locale]}
                 </h3>
