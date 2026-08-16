@@ -210,7 +210,8 @@ export function CheckoutPageContent({
       const { orderNumber } = await createOrder({
         customerId: session?.user.id ?? null,
         guestName: session ? null : `${firstName} ${lastName}`.trim(),
-        guestPhone: session ? null : phone1,
+        contactPhone: phone1,
+        contactPhoneMethod: phone1Method,
         fulfillmentType: fulfillmentMethod,
         deliveryAreaId: fulfillmentMethod === "delivery" ? deliveryAreaId : null,
         deliveryAddress: fullAddress,

@@ -125,8 +125,11 @@ export function OrderDetailContent({
           <div className="h-px w-full bg-border-default" />
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("contactAndAddress")}</p>
           <Row label={t("name")} value={customerName || "—"} />
-          <Row label={t("phone")} value={order.guest_phone || "—"} />
-          {order.fulfillment_type === "delivery" && <Row label={t("address")} value={order.delivery_address || "—"} />}
+          <Row
+            label={t("phone")}
+            value={order.contact_phone ? `${order.contact_phone}${order.contact_phone_method ? ` (${tCommon(`contactMethod.${order.contact_phone_method}`)})` : ""}` : "—"}
+          />
+          {order.delivery_address && <Row label={t("address")} value={order.delivery_address} />}
 
           <div className="h-px w-full bg-border-default" />
           <Row label={t("subtotal")} value={tCommon("egpPrice", { amount: subtotal })} bold />
