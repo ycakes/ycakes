@@ -113,7 +113,8 @@ export function SizesPageContent({
       render: (row) => <Switch checked={row.active} onCheckedChange={(checked) => toggleActive(row.id, checked)} />,
     },
     {
-      header: "",
+      header: t("actions"),
+      align: "end",
       render: (row) => (
         <RowActions
           itemLabel={`${row.min_qty}–${row.max_qty}`}

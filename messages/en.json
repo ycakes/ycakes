@@ -55,6 +55,7 @@
       "noColorVariants": "No color variants",
       "noResults": "No results yet.",
       "saveFailed": "Failed to save. Please try again.",
+      "categoryHasCakes": "Can't delete this category — it still has cakes assigned to it. Move or delete those cakes first.",
       "sizes": "Sizes",
       "minQty": "Min",
       "maxQty": "Max",

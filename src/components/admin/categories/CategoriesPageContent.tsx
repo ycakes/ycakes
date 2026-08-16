@@ -130,7 +130,7 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
     const category = categories.find((c) => c.id === id);
     const { error: deleteError } = await supabase.from("categories").delete().eq("id", id);
     if (deleteError) {
-      setError(t("saveFailed"));
+      setError(deleteError.code === "23503" ? t("categoryHasCakes") : t("saveFailed"));
       return;
     }
     if (category?.image_public_id) {
@@ -183,9 +183,9 @@ export function CategoriesPageContent({ initialCategories }: { initialCategories
           <span className="w-4" />
           <span className="w-9" />
           <span className="flex-1">{t("category")}</span>
-          <span className="w-40 shrink-0">{t("subcategoriesCountHeader")}</span>
-          <span className="w-10 shrink-0" />
-          <span className="w-[68px] shrink-0">{t("actions")}</span>
+          <span className="w-40 shrink-0 pe-8 text-center">{t("subcategoriesCountHeader")}</span>
+          <span className="w-10 shrink-0 text-end">{t("active")}</span>
+          <span className="w-[68px] shrink-0 text-end">{t("actions")}</span>
         </div>
 
         <div className="flex flex-col gap-2">

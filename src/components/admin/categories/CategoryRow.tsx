@@ -53,10 +53,14 @@ export function CategoryRow({
         {category.name.en} / {category.name.ar}
       </span>
       {subcategoriesLabel !== undefined && (
-        <span className="w-40 shrink-0 text-sm text-text-secondary">{subcategoriesLabel}</span>
+        <span className="w-40 shrink-0 pe-8 text-center text-sm text-text-secondary">{subcategoriesLabel}</span>
       )}
-      <Switch checked={active} onCheckedChange={onToggleActive} />
-      <RowActions itemLabel={category.name.en} onEdit={onEdit} onDelete={onDelete} />
+      <span className="flex w-10 shrink-0 justify-end">
+        <Switch checked={active} onCheckedChange={onToggleActive} />
+      </span>
+      <span className="flex w-[68px] shrink-0 justify-end">
+        <RowActions itemLabel={category.name.en} onEdit={onEdit} onDelete={onDelete} />
+      </span>
     </div>
   );
 }

@@ -93,7 +93,8 @@ export function ColorsPageContent({ initialColors }: { initialColors: Row[] }) {
       render: (row) => <Switch checked={row.active} onCheckedChange={(checked) => toggleActive(row.id, checked)} />,
     },
     {
-      header: "",
+      header: t("actions"),
+      align: "end",
       render: (row) => (
         <RowActions
           itemLabel={row.name.en}

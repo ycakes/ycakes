@@ -457,7 +457,7 @@ export function CakeCustomizer({
 
       <Section label={t("referenceImage")}>
         {referenceImageUrl ? (
-          <div className="relative flex h-[140px] w-[200px] items-center justify-center overflow-hidden rounded-2xl border-[1.5px] border-border-default bg-bg-surface">
+          <div className="relative flex h-[140px] w-[200px] items-center justify-center overflow-hidden rounded-2xl border-[1.5px] border-border-default bg-bg-page">
             {/* eslint-disable-next-line @next/next/no-img-element -- blob: object URL, next/image can't render it */}
             <img src={referenceImageUrl} alt="" className="size-full object-contain" />
             <button
@@ -470,7 +470,7 @@ export function CakeCustomizer({
             </button>
           </div>
         ) : (
-          <label className="flex h-[140px] w-[200px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-border-default bg-bg-page text-center">
+          <label className="flex h-[140px] w-[200px] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-white bg-bg-surface text-center">
             <input
               type="file"
               accept="image/*"

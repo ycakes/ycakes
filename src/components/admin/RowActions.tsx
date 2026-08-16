@@ -22,7 +22,7 @@ export function RowActions({
   const [confirming, setConfirming] = useState(false);
 
   return (
-    <div className="flex items-center gap-[4px]">
+    <div className="inline-flex items-center gap-[4px]">
       {editHref ? (
         <Link href={editHref}>
           <Button

@@ -76,8 +76,15 @@ function SidebarContent({
 
   return (
     <>
-      <div className="flex h-[64px] shrink-0 items-center justify-between border-b border-border-default pe-[16px] ps-[20px]">
-        <div className="flex min-w-0 items-center gap-2">
+      <div
+        className={cn(
+          "flex shrink-0 border-b border-border-default",
+          collapsed && !isMobile
+            ? "flex-col items-center gap-2 py-3"
+            : "h-[64px] items-center justify-between pe-[16px] ps-[20px]",
+        )}
+      >
+        <div className={cn("flex min-w-0 items-center gap-2", collapsed && !isMobile && "flex-col gap-2")}>
           <Link
             href="/"
             aria-label={t("goToHome")}

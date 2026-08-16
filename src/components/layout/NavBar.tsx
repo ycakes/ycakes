@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Menu as MenuIcon, User, X } from "lucide-react";
 import { Menu } from "@base-ui/react/menu";
@@ -28,23 +28,6 @@ export function NavBar({ className }: { className?: string }) {
   const { session, isAdmin } = useSession();
   const otherLocale = locale === "en" ? "ar" : "en";
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const closeMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function openProfileMenu() {
-    if (closeMenuTimer.current) clearTimeout(closeMenuTimer.current);
-    setProfileMenuOpen(true);
-  }
-
-  function scheduleCloseProfileMenu() {
-    closeMenuTimer.current = setTimeout(() => setProfileMenuOpen(false), 150);
-  }
-
-  useEffect(() => {
-    return () => {
-      if (closeMenuTimer.current) clearTimeout(closeMenuTimer.current);
-    };
-  }, []);
 
   async function handleLogOut() {
     const supabase = createClient();
@@ -107,22 +90,16 @@ export function NavBar({ className }: { className?: string }) {
             {otherLocale.toUpperCase()}
           </Link>
           {session ? (
-            <Menu.Root open={profileMenuOpen} onOpenChange={setProfileMenuOpen}>
+            <Menu.Root>
               <Menu.Trigger
                 aria-label={t("profile")}
-                onMouseEnter={openProfileMenu}
-                onMouseLeave={scheduleCloseProfileMenu}
-                className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-sm transition-transform duration-150 hover:scale-105 sm:size-11"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-surface text-text-primary shadow-sm sm:size-11"
               >
                 <User className="size-4" />
               </Menu.Trigger>
               <Menu.Portal>
                 <Menu.Positioner side="bottom" align="center" sideOffset={8} className="z-30">
-                  <Menu.Popup
-                    onMouseEnter={openProfileMenu}
-                    onMouseLeave={scheduleCloseProfileMenu}
-                    className="w-max rounded-2xl border border-border-default bg-bg-surface p-1.5 shadow-md"
-                  >
+                  <Menu.Popup className="w-max rounded-2xl border border-border-default bg-bg-surface p-1.5 shadow-md">
                     <Menu.LinkItem
                       render={<Link href="/profile" />}
                       className="block w-full cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-center text-sm text-text-primary data-[highlighted]:bg-bg-surface-alt"

@@ -8,6 +8,7 @@ export type AdminTableColumn<T> = {
   header: string;
   render: (row: T) => React.ReactNode;
   sortKey?: string;
+  align?: "start" | "end";
 };
 
 export function AdminTable<T>({
@@ -42,7 +43,12 @@ export function AdminTable<T>({
               const isSorted = buildSortHref && col.sortKey && currentSortKey === col.sortKey;
               const nextDir = isSorted && currentSortDir === "asc" ? "desc" : "asc";
               const header = (
-                <span className="flex items-center gap-1 uppercase tracking-[0.48px]">
+                <span
+                  className={cn(
+                    "flex items-center gap-1 uppercase tracking-[0.48px]",
+                    col.align === "end" && "justify-end",
+                  )}
+                >
                   {col.header}
                   {isSorted && (currentSortDir === "asc" ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />)}
                 </span>
@@ -50,7 +56,10 @@ export function AdminTable<T>({
               return (
                 <th
                   key={col.header}
-                  className="px-[24px] text-start text-[12px] font-semibold text-text-secondary"
+                  className={cn(
+                    "px-[24px] text-[12px] font-semibold text-text-secondary",
+                    col.align === "end" ? "text-end" : "text-start",
+                  )}
                 >
                   {buildSortHref && col.sortKey ? (
                     <Link href={buildSortHref(col.sortKey, nextDir)}>{header}</Link>
@@ -73,7 +82,10 @@ export function AdminTable<T>({
               )}
             >
               {columns.map((col) => (
-                <td key={col.header} className="px-[24px] align-middle text-text-primary">
+                <td
+                  key={col.header}
+                  className={cn("px-[24px] align-middle text-text-primary", col.align === "end" && "text-end")}
+                >
                   {col.render(row)}
                 </td>
               ))}
