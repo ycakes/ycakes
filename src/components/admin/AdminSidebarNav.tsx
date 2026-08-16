@@ -21,6 +21,7 @@ import {
   User,
   X,
   Home,
+  LayoutDashboard,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, Link } from "@/i18n/navigation";
@@ -126,6 +127,16 @@ function SidebarContent({
       </div>
 
       <div className="flex flex-1 flex-col gap-[20px] overflow-y-auto p-[16px]">
+        <nav className="flex flex-col gap-1" onClick={onCloseMobile}>
+          <AdminNavItem
+            href="/admin"
+            icon={LayoutDashboard}
+            label={t("dashboard")}
+            active={pathname === "/admin"}
+            collapsed={collapsed}
+          />
+        </nav>
+
         {isAdmin && (
           <nav className="flex flex-col gap-1" onClick={onCloseMobile}>
             {!collapsed && (

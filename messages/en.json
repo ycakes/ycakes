@@ -12,6 +12,7 @@
     "nav": {
       "brand": "Ycakes Admin",
       "goToHome": "Go to home page",
+      "dashboard": "Dashboard",
       "catalog": "Catalog",
       "cakes": "Cakes",
       "categories": "Categories",
@@ -253,9 +254,10 @@
       "redemptionCapOptional": "Redemption Cap (optional)"
     },
     "dashboard": {
+      "pageTitle": "Dashboard",
       "welcomeNamed": "Welcome back, {name}!",
       "welcomeGeneric": "Welcome back!",
-      "subline": "Here's what's happening today.",
+      "subline": "Here's what's happening with Ycakes today.",
       "todayOrders": "Today's Orders",
       "todayOrdersSubtext": "orders placed today",
       "pendingOrders": "Pending Orders",
@@ -273,7 +275,34 @@
       "upcomingDeliveriesHint": "Next 7 days",
       "viewAllOrdersLink": "View all orders →",
       "noUpcomingDeliveries": "No deliveries or pickups scheduled in the next 7 days.",
-      "view": "View"
+      "view": "View",
+      "colDate": "Date",
+      "colOrderNumber": "Order #",
+      "colCustomer": "Customer",
+      "colFulfillment": "Fulfillment",
+      "colActions": "Actions"
+    },
+    "expenses": {
+      "title": "Expenses",
+      "description": "Log business expenses as they happen, or backdate an entry for something that already occurred. These roll up into Analytics → Revenue & Profit alongside revenue to calculate net profit.",
+      "manageCategories": "Manage Categories",
+      "addExpense": "+ Add Expense",
+      "categoryLabel": "Category:",
+      "dateRangeLabel": "Date Range",
+      "colDate": "Date",
+      "colCategory": "Category",
+      "colAmount": "Amount (EGP)",
+      "colNotes": "Notes",
+      "noExpenses": "No expenses logged yet.",
+      "expenseDate": "Date",
+      "expenseCategory": "Category",
+      "expenseAmount": "Amount (EGP)",
+      "expenseNotes": "Notes (optional)",
+      "expenseCategoryInUse": "Can't delete this category — it still has expenses logged against it. Reassign or delete those expenses first.",
+      "manageCategoriesTitle": "Manage Expense Categories",
+      "addCategory": "+ Add Category",
+      "noCategories": "No categories yet.",
+      "done": "Done"
     }
   },
   "NavBar": {

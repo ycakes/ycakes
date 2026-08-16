@@ -12,6 +12,7 @@
     "nav": {
       "brand": "لوحة تحكم واي كيكس",
       "goToHome": "الذهاب إلى الصفحة الرئيسية",
+      "dashboard": "لوحة التحكم",
       "catalog": "الكتالوج",
       "cakes": "الكيكات",
       "categories": "الفئات",
@@ -253,9 +254,10 @@
       "redemptionCapOptional": "الحد الأقصى للاستخدام (اختياري)"
     },
     "dashboard": {
+      "pageTitle": "لوحة التحكم",
       "welcomeNamed": "أهلاً بعودتك، {name}!",
       "welcomeGeneric": "أهلاً بعودتك!",
-      "subline": "إليك آخر مستجدات اليوم.",
+      "subline": "إليك آخر مستجدات واي كيكس اليوم.",
       "todayOrders": "طلبات اليوم",
       "todayOrdersSubtext": "طلب تم اليوم",
       "pendingOrders": "الطلبات المعلقة",
@@ -273,7 +275,34 @@
       "upcomingDeliveriesHint": "الأيام السبعة القادمة",
       "viewAllOrdersLink": "عرض كل الطلبات ‹",
       "noUpcomingDeliveries": "لا توجد توصيلات أو استلامات مجدولة خلال الأيام السبعة القادمة.",
-      "view": "عرض"
+      "view": "عرض",
+      "colDate": "التاريخ",
+      "colOrderNumber": "رقم الطلب",
+      "colCustomer": "العميل",
+      "colFulfillment": "التنفيذ",
+      "colActions": "الإجراءات"
+    },
+    "expenses": {
+      "title": "المصروفات",
+      "description": "سجّل مصروفات العمل عند حدوثها، أو أضف مصروفًا بتاريخ سابق لشيء حدث بالفعل. تُحتسب هذه المصروفات ضمن التحليلات ← الإيرادات والأرباح جنبًا إلى جنب مع الإيرادات لحساب صافي الربح.",
+      "manageCategories": "إدارة الفئات",
+      "addExpense": "+ إضافة مصروف",
+      "categoryLabel": "الفئة:",
+      "dateRangeLabel": "نطاق التاريخ",
+      "colDate": "التاريخ",
+      "colCategory": "الفئة",
+      "colAmount": "المبلغ (جنيه)",
+      "colNotes": "ملاحظات",
+      "noExpenses": "لا توجد مصروفات مسجلة بعد.",
+      "expenseDate": "التاريخ",
+      "expenseCategory": "الفئة",
+      "expenseAmount": "المبلغ (جنيه)",
+      "expenseNotes": "ملاحظات (اختياري)",
+      "expenseCategoryInUse": "لا يمكن حذف هذه الفئة — لا تزال هناك مصروفات مسجلة عليها. أعد تعيين تلك المصروفات أو احذفها أولاً.",
+      "manageCategoriesTitle": "إدارة فئات المصروفات",
+      "addCategory": "+ إضافة فئة",
+      "noCategories": "لا توجد فئات بعد.",
+      "done": "تم"
     }
   },
   "NavBar": {
