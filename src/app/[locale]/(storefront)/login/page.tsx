@@ -52,7 +52,8 @@ export default function LoginPage() {
       .maybeSingle();
     setSubmitting(false);
 
-    router.replace(profile?.role === "admin" ? "/admin" : "/");
+    const isStaff = profile?.role === "admin" || profile?.role === "accountant";
+    router.replace(isStaff ? "/admin" : "/");
     router.refresh();
   }
 

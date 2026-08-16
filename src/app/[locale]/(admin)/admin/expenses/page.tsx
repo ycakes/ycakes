@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { requireAdmin } from "@/lib/admin/requireAdmin";
+import { requireStaff } from "@/lib/admin/requireAdmin";
 import { ExpensesPageContent } from "@/components/admin/expenses/ExpensesPageContent";
 import type { ExpenseCategory, ExpenseRow } from "@/types/expenses";
 
 export default async function AdminExpensesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  await requireAdmin(locale);
+  await requireStaff(locale);
   const supabase = await createClient();
 
   const [{ data: expenses, error: expensesError }, { data: categories, error: categoriesError }] = await Promise.all([

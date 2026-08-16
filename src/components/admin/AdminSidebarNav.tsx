@@ -69,7 +69,7 @@ function SidebarContent({
   ];
 
   const moneyItems = [
-    { href: isAdmin ? "/admin/expenses" : null, icon: Wallet, label: t("expenses"), dimmed: !isAdmin },
+    { href: "/admin/expenses", icon: Wallet, label: t("expenses") },
     { href: "/admin/analytics", icon: BarChart3, label: t("analytics") },
   ];
 

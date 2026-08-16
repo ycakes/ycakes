@@ -172,6 +172,7 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 
 - [ ] Admin/accountant role separation fully enforced (RLS pass)
 - [x] Multi-admin account management (2-3 admins, 1 accountant) — `/admin/staff`, admin-only. See ARCHITECTURE.md's Phase 8 section for the register-then-promote model, the new RPCs, and exactly what's enforced where.
+- [x] **Accountant access pass (owner request)**: login now redirects accountants to `/admin` too (previously only `role === "admin"` did — accountants landed on the storefront home page after login). Expenses (`/admin/expenses`) opened up to accountants: page guard changed from `requireAdmin` to `requireStaff`, and the sidebar's Expenses entry is no longer dimmed/disabled for accountants — no RLS change needed, `accountant_all` (`20260813121300_rls_admin_accountant.sql`) already granted accountants full CRUD on `expenses`/`expense_categories`, the page guard was the only actual block. Storefront `NavBar`'s profile dropdown "Dashboard" link (→ `/admin`) is now shown for both roles via a new `isStaff` flag on `useSession()` (previously gated on `isAdmin` only, so an accountant had no way back into `/admin` from the storefront header).
 
 ## Phase 9 — i18n/RTL completion
 
