@@ -12,11 +12,17 @@ export function RowActions({
   onDelete,
   itemLabel,
   editHref,
+  deleteTitle,
+  deleteMessage,
+  deleteLabel,
 }: {
   onEdit?: () => void;
   onDelete: () => void;
   itemLabel: string;
   editHref?: string;
+  deleteTitle?: string;
+  deleteMessage?: string;
+  deleteLabel?: string;
 }) {
   const t = useTranslations("Admin.table");
   const [confirming, setConfirming] = useState(false);
@@ -59,9 +65,9 @@ export function RowActions({
       </Button>
       <ConfirmDialog
         open={confirming}
-        title={t("deleteTitle")}
-        message={t("deleteMessage", { item: itemLabel })}
-        confirmLabel={t("delete")}
+        title={deleteTitle ?? t("deleteTitle")}
+        message={deleteMessage ?? t("deleteMessage", { item: itemLabel })}
+        confirmLabel={deleteLabel ?? t("delete")}
         cancelLabel={t("cancel")}
         onConfirm={() => {
           setConfirming(false);

@@ -235,6 +235,26 @@
       "priceTbd": "0 (TBD)",
       "price": "Delivery Price (EGP)"
     },
+    "staff": {
+      "title": "Admins & Roles",
+      "hint": "Manage who has admin or accountant access to this dashboard. New staff create an account via Register first, then get added here by email.",
+      "addStaffMember": "+ Add Staff Member",
+      "editStaffMember": "Edit Staff Member",
+      "modalHint": "The account must already exist via Register — this only looks up and assigns a role, it doesn't create one.",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "emailRequired": "Enter an email address.",
+      "role": "Role",
+      "roleAdmin": "Admin",
+      "roleAccountant": "Accountant",
+      "name": "Name",
+      "added": "Added",
+      "unnamed": "(No name on file)",
+      "you": "(You)",
+      "revokeTitle": "Revoke dashboard access?",
+      "revokeMessage": "{name} will lose admin/accountant access to this dashboard and revert to a regular customer account. Their account itself is not deleted.",
+      "revoke": "Revoke Access"
+    },
     "deliveryCalendar": {
       "title": "Delivery Calendar",
       "hint": "Click a date to block it for both delivery and pickup. Blocked dates are unavailable at checkout for either fulfillment method.",

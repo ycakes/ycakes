@@ -73,7 +73,7 @@ function SidebarContent({
     { href: "/admin/analytics", icon: BarChart3, label: t("analytics") },
   ];
 
-  const teamItems = [{ icon: Users, label: t("adminsAndRoles") }];
+  const teamItems = [{ href: "/admin/staff", icon: Users, label: t("adminsAndRoles") }];
 
   const displayName = adminName || t("role");
   const initial = adminName ? adminName.trim().charAt(0).toUpperCase() : null;
@@ -203,7 +203,14 @@ function SidebarContent({
               </p>
             )}
             {teamItems.map((item) => (
-              <AdminNavItem key={item.label} href={null} icon={item.icon} label={item.label} active={false} collapsed={collapsed} dimmed />
+              <AdminNavItem
+                key={item.label}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={pathname.startsWith(item.href)}
+                collapsed={collapsed}
+              />
             ))}
           </nav>
         )}

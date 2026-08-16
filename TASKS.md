@@ -170,8 +170,7 @@ Decisions made after the original Phase 2 schema was built, applied via `2026081
 ## Phase 8 — Roles & security
 
 - [ ] Admin/accountant role separation fully enforced (RLS pass)
-- [ ] Audit log wired to every admin/accountant mutation
-- [ ] Multi-admin account management (2-3 admins, 1 accountant)
+- [x] Multi-admin account management (2-3 admins, 1 accountant) — `/admin/staff`, admin-only. See ARCHITECTURE.md's Phase 8 section for the register-then-promote model, the new RPCs, and exactly what's enforced where.
 
 ## Phase 9 — i18n/RTL completion
 
