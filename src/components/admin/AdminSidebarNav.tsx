@@ -190,7 +190,6 @@ function SidebarContent({
               label={item.label}
               active={!!item.href && pathname.startsWith(item.href)}
               collapsed={collapsed}
-              dimmed={item.dimmed}
             />
           ))}
         </nav>
