@@ -54,7 +54,7 @@
       "any": "Any",
       "apply": "Apply",
       "dateRangeHint": "Click a day, then a second day for a range. Click the same day twice for a single day.",
-      "searchPlaceholder": "Search order # (e.g. 20260814-0921)",
+      "searchPlaceholder": "Search order # or customer name",
       "showingCount": "Showing {start}–{end} of {total} orders",
       "statusValue": {
         "pending": "Pending",

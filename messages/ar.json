@@ -54,7 +54,7 @@
       "any": "الكل",
       "apply": "تطبيق",
       "dateRangeHint": "اضغط على يوم، ثم يوم ثانٍ لتحديد فترة. اضغط على نفس اليوم مرتين لتحديد يوم واحد.",
-      "searchPlaceholder": "ابحث برقم الطلب (مثال: 20260814-0921)",
+      "searchPlaceholder": "ابحث برقم الطلب أو اسم العميل",
       "showingCount": "عرض {start}–{end} من {total} طلب",
       "statusValue": {
         "pending": "قيد الانتظار",

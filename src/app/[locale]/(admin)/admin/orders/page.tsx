@@ -100,10 +100,20 @@ export default async function AdminOrdersPage({
 
   const rows = (allOrders ?? []) as unknown as AdminOrderListRow[];
 
-  // Search matches order_number with or without hyphens — strip "-" from
-  // both the query and the stored value before comparing.
+  // Search matches order_number (with or without hyphens — strip "-" from
+  // both the query and the stored value before comparing) OR customer name
+  // (account holder's first/last name, or the guest name for guest orders).
   const needle = search?.trim().replace(/-/g, "").toLowerCase();
-  const filtered = needle ? rows.filter((o) => o.order_number.replace(/-/g, "").toLowerCase().includes(needle)) : rows;
+  const nameNeedle = search?.trim().toLowerCase();
+  const filtered = needle
+    ? rows.filter((o) => {
+        if (o.order_number.replace(/-/g, "").toLowerCase().includes(needle)) return true;
+        const customerName = o.profiles
+          ? [o.profiles.first_name, o.profiles.last_name].filter(Boolean).join(" ")
+          : (o.guest_name ?? "");
+        return customerName.toLowerCase().includes(nameNeedle!);
+      })
+    : rows;
 
   const currentPage = Math.max(1, Number(page) || 1);
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
