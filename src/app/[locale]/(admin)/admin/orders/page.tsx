@@ -11,13 +11,49 @@ const PAGE_SIZE = 20;
 // DB session's UTC timezone instead of Cairo's — silently shifting the
 // window by 2-3 hours and missing/including the wrong orders. Convert the
 // intended Cairo wall-clock instant to its real UTC instant instead.
+//
+// This must not rely on the host process's own default timezone (e.g. via
+// `new Date(someLocaleString)`, which re-parses using the *local* TZ and
+// silently cancels out or doubles the correction depending on what that
+// happens to be — broken on a Cairo-based dev machine, fine on a UTC
+// server). Intl.DateTimeFormat's `timeZone` option is explicit and doesn't
+// depend on host TZ, so we use it to measure Cairo's offset directly.
 const CAIRO_TZ = "Africa/Cairo";
 
+function cairoOffsetMs(instant: Date): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: CAIRO_TZ,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })
+    .formatToParts(instant)
+    .reduce<Record<string, string>>((acc, part) => {
+      if (part.type !== "literal") acc[part.type] = part.value;
+      return acc;
+    }, {});
+  const wallClockAsUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  );
+  return wallClockAsUtc - instant.getTime();
+}
+
 function cairoWallTimeToUtcISOString(dateStr: string, timeStr: string): string {
-  const naive = new Date(`${dateStr}T${timeStr}Z`);
-  const asCairo = new Date(naive.toLocaleString("en-US", { timeZone: CAIRO_TZ }));
-  const offsetMs = naive.getTime() - asCairo.getTime();
-  return new Date(naive.getTime() + offsetMs).toISOString();
+  // First guess: treat the wall-clock digits as if they were UTC.
+  const naiveUtc = new Date(`${dateStr}T${timeStr}Z`);
+  // Cairo's offset barely changes across a single day, so using the guess's
+  // offset to correct the guess itself is accurate enough here.
+  const offset = cairoOffsetMs(naiveUtc);
+  return new Date(naiveUtc.getTime() - offset).toISOString();
 }
 
 export default async function AdminOrdersPage({
