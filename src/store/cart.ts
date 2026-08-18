@@ -14,6 +14,7 @@ type CartState = {
   /** ISO date, 'YYYY-MM-DD'. */
   fulfillmentDate: string | null;
   addItem: (item: CartItem) => void;
+  updateItem: (id: string, item: CartItem) => void;
   removeItem: (id: string) => void;
   setQuantity: (id: string, quantity: number) => void;
   setFulfillmentMethod: (method: FulfillmentMethod | null) => void;
@@ -35,6 +36,8 @@ export const useCartStore = create<CartState>()(
       ...emptyFulfillment,
       addItem: (item) =>
         set((state) => ({ items: [...state.items, item] })),
+      updateItem: (id, item) =>
+        set((state) => ({ items: state.items.map((i) => (i.id === id ? item : i)) })),
       removeItem: (id) =>
         set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
       setQuantity: (id, quantity) =>

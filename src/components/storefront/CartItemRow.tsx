@@ -77,9 +77,12 @@ export function CartItemRow({
         )}
         <div className="flex w-full items-center justify-between pt-1">
           <QuantityStepper quantity={item.quantity} onChange={onQuantityChange} />
-          <p className="text-xl font-semibold text-text-primary">
-            {item.lineEstimate > 0 ? `${item.lineEstimate} ${tCommon("egp")}` : tCommon("priceOnRequest")}
-          </p>
+          <div className="flex flex-col items-end">
+            <p className="text-xl font-semibold text-text-primary">
+              {item.lineEstimate > 0 ? `${item.lineEstimate} ${tCommon("egp")}` : tCommon("priceOnRequest")}
+            </p>
+            {item.lineEstimate > 0 && <p className="text-xs text-text-secondary">{tCommon("estimatedPriceLabel")}</p>}
+          </div>
         </div>
       </div>
     </div>

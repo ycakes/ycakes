@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { Dialog } from "@base-ui/react/dialog";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useCartStore } from "@/store/cart";
 import { SelectChip } from "@/components/storefront/SelectChip";
 import { ColorSwatch } from "@/components/storefront/ColorSwatch";
@@ -47,7 +47,9 @@ export function CakeCustomizer({
 }) {
   const t = useTranslations("CakeDetail");
   const tCommon = useTranslations("Common");
+  const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
+  const updateItem = useCartStore((state) => state.updateItem);
 
   const sizeUnit = sizes[0]?.unit ?? "servings";
   const fakeShapes = useMemo(() => shapes.filter((s) => s.fake_eligible), [shapes]);
@@ -81,16 +83,17 @@ export function CakeCustomizer({
   const [quantity, setQuantity] = useState(1);
 
   const [addedModalOpen, setAddedModalOpen] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   // Pre-fill from a cart item being edited (Cart's Edit button stashes it
   // in sessionStorage before navigating here — see src/lib/cart/editItem.ts).
-  // Editing never touches the original cart row; it only pre-fills the form
-  // so "Add to Cart" below creates a separate new item, per the owner's
-  // decision that the old one stays until removed manually.
+  // `editingItemId` makes the submit button update that same cart row in
+  // place (Save Changes) instead of appending a new one.
   useEffect(() => {
     const item = getEditCartItem();
     if (!item || item.cakeId !== cake.id) return;
     clearEditCartItem();
+    setEditingItemId(item.id);
 
     /* eslint-disable react-hooks/set-state-in-effect -- one-time form
        pre-fill from a client-only sessionStorage read, not something a
@@ -213,7 +216,7 @@ export function CakeCustomizer({
     }
 
     const item: CartItem = {
-      id: crypto.randomUUID(),
+      id: editingItemId ?? crypto.randomUUID(),
       cakeId: cake.id,
       cakeName: cake.name,
       cakeImage: cake.primary_image_url,
@@ -261,6 +264,11 @@ export function CakeCustomizer({
       lineEstimate,
     };
 
+    if (editingItemId) {
+      updateItem(editingItemId, item);
+      router.push("/cart");
+      return;
+    }
     addItem(item);
     setAddedModalOpen(true);
   }
@@ -285,9 +293,12 @@ export function CakeCustomizer({
       )}
 
       <div className="flex flex-col gap-2">
-        <p className="text-2xl font-bold text-text-primary">
-          {unitTotal > 0 ? t("priceFrom", { price: priceLabel }) : priceLabel}
-        </p>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <p className="text-2xl font-bold text-text-primary">
+            {unitTotal > 0 ? t("priceFrom", { price: priceLabel }) : priceLabel}
+          </p>
+          {unitTotal > 0 && <p className="text-sm font-medium text-text-secondary">({tCommon("estimatedPriceLabel")})</p>}
+        </div>
         {cake.description && (
           <p className="text-base font-medium text-text-secondary">{cake.description[locale]}</p>
         )}
@@ -593,9 +604,13 @@ export function CakeCustomizer({
           className="flex-1 justify-center"
           onClick={handleAddToCart}
         >
-          {unitTotal > 0
-            ? t("addToCartWithPrice", { price: `${lineEstimate} ${tCommon("egp")}` })
-            : t("addToCart")}
+          {editingItemId
+            ? unitTotal > 0
+              ? t("saveChangesWithPrice", { price: `${lineEstimate} ${tCommon("egp")}` })
+              : t("saveChanges")
+            : unitTotal > 0
+              ? t("addToCartWithPrice", { price: `${lineEstimate} ${tCommon("egp")}` })
+              : t("addToCart")}
         </Button>
       </div>
 
