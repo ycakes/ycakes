@@ -26,6 +26,7 @@ type CatalogContext = {
   shapes: Shape[];
   toppers: Topper[];
   showToppers: boolean;
+  allowFakeCake: boolean;
 };
 
 const SOURCES: ManualOrderSource[] = ["phone", "instagram", "in_person"];

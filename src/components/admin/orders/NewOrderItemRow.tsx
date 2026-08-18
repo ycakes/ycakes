@@ -17,6 +17,7 @@ type CatalogContext = {
   shapes: Shape[];
   toppers: Topper[];
   showToppers: boolean;
+  allowFakeCake: boolean;
 };
 
 export function NewOrderItemRow({
@@ -38,6 +39,8 @@ export function NewOrderItemRow({
 }) {
   const t = useTranslations("Admin.orders");
   const catalog = item.categoryId ? catalogByCategoryId[item.categoryId] : undefined;
+  const selectedCake = cakes.find((c) => c.id === item.cakeId);
+  const allowFakeCake = Boolean(selectedCake?.allow_fake) && Boolean(catalog?.allowFakeCake);
   const [blockedMessage, setBlockedMessage] = useState(false);
 
   // Once another row makes removal possible again, drop the message rather
@@ -122,6 +125,7 @@ export function NewOrderItemRow({
               shapes={catalog.shapes}
               toppers={catalog.toppers}
               showToppers={catalog.showToppers}
+              allowFakeCake={allowFakeCake}
             />
           )}
           <button type="button" onClick={() => onChange({ customizing: false })} className="self-start text-[13px] font-semibold text-brand-primary">

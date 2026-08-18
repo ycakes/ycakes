@@ -17,10 +17,14 @@ type SizeWithTiers = Size & { tierIds: string[] };
 // Admin version of CakeCustomizer's field set (Order Detail line-item edit,
 // New Order's customization panel) — same components/branching logic
 // (normal vs Fake Cake), driven by a fully controlled value/onChange
-// instead of internal state + cart submission. No Cake Type toggle here:
-// whichever type the item already is stays fixed, matching the Figma
-// annotation's intent (reuse the same field-rendering logic per type, not
-// let an admin convert a real order into a display one mid-edit).
+// instead of internal state + cart submission. The Cake Type toggle itself
+// is opt-in via `allowFakeCake` (omitted/false hides it): Order Detail's
+// edit doesn't pass it, since whichever type the item already is stays
+// fixed there (Figma annotation's intent — reuse the same field-rendering
+// logic per type, not let an admin convert a real order into a display one
+// mid-edit); New Order passes it because at creation time there's no
+// existing type to preserve, and the item needs a way to become a Fake Cake
+// in the first place.
 export function CakeItemFields({
   locale,
   value,
@@ -32,6 +36,7 @@ export function CakeItemFields({
   shapes,
   toppers,
   showToppers,
+  allowFakeCake = false,
 }: {
   locale: "en" | "ar";
   value: CakeItemFieldsValue;
@@ -43,6 +48,7 @@ export function CakeItemFields({
   shapes: Shape[];
   toppers: Topper[];
   showToppers: boolean;
+  allowFakeCake?: boolean;
 }) {
   const t = useTranslations("CakeDetail");
 
@@ -60,8 +66,37 @@ export function CakeItemFields({
     });
   }
 
+  function switchCakeType(isFake: boolean) {
+    onChange({
+      isFake,
+      sizeId: null,
+      tierId: null,
+      flavorId: null,
+      fiftyFifty: false,
+      secondFlavorId: null,
+      shapeId: null,
+      fakeSizeCm: "",
+      fakeShapeId: null,
+      referenceImageUrl: null,
+      referenceImagePublicId: null,
+      colorIds: [],
+      colorArrangementNotes: "",
+      topperId: null,
+      topperColorId: null,
+    });
+  }
+
   return (
     <div className="flex w-full flex-col gap-5">
+      {allowFakeCake && (
+        <Field label={t("cakeType")}>
+          <div className="flex flex-wrap gap-2.5">
+            <SelectChip label={t("normalCake")} selected={!value.isFake} onSelect={() => switchCakeType(false)} />
+            <SelectChip label={t("fakeCake")} selected={value.isFake} onSelect={() => switchCakeType(true)} />
+          </div>
+        </Field>
+      )}
+
       {value.isFake ? (
         <InputField
           label={t("sizeCm")}

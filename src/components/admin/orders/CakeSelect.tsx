@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { Bilingual } from "@/types/catalog";
 
-export type SelectableCake = { id: string; name: Bilingual; category_id: string; active: boolean };
+export type SelectableCake = { id: string; name: Bilingual; category_id: string; active: boolean; allow_fake: boolean };
 
 // Searchable single-select over active+inactive cakes, plus a "Custom /
 // Other" option with no backing cakes row (order_items.cake_id is
