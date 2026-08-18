@@ -281,11 +281,13 @@ export function AdminSidebarNav({
         </>
       )}
 
-      {/* Desktop sidebar: always in normal flow on lg+, never fixed/translated,
-          so there is nothing for a stuck transform state to happen to. */}
+      {/* Desktop sidebar: sticky + viewport-height (not a stretched flex
+          child), so it's always exactly as tall as the screen — ending
+          right after the profile/logout/language row — instead of
+          stretching to match however long the main content column is. */}
       <aside
         className={cn(
-          "hidden shrink-0 flex-col border-e border-border-default bg-bg-surface lg:flex",
+          "sticky top-0 hidden h-screen shrink-0 flex-col border-e border-border-default bg-bg-surface lg:flex",
           collapsed ? "lg:w-[76px]" : "lg:w-[240px]",
         )}
       >
