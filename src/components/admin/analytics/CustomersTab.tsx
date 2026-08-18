@@ -17,7 +17,6 @@ export type TopCustomerRow = {
 
 export type CustomersData = {
   totalCustomers: number;
-  previousTotalCustomers: number;
   newThisPeriod: number;
   previousNewThisPeriod: number;
   repeatRate: number;
@@ -70,7 +69,6 @@ export function CustomersTab({ data, locale }: { data: CustomersData; locale: "e
   const maxOrders = Math.max(1, data.guestOrders, data.accountOrders);
 
   const isAllTime = data.period === "all";
-  const totalCustomersPct = trendPercent(data.totalCustomers, data.previousTotalCustomers);
   const newThisPeriodPct = trendPercent(data.newThisPeriod, data.previousNewThisPeriod);
 
   function trendText(pct: number | null) {
@@ -100,13 +98,7 @@ export function CustomersTab({ data, locale }: { data: CustomersData; locale: "e
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalCustomers")}</p>
           <p className="font-heading text-[30px] font-bold text-text-primary">{data.totalCustomers}</p>
-          {isAllTime ? (
-            <p className="text-[13px] font-medium text-text-secondary">{t("withSavedAccount")}</p>
-          ) : (
-            <p className={`text-[13px] font-medium ${totalCustomersPct === null ? "text-text-secondary" : totalCustomersPct >= 0 ? "text-status-completed" : "text-destructive"}`}>
-              {trendText(totalCustomersPct)}
-            </p>
-          )}
+          <p className="text-[13px] font-medium text-text-secondary">{t("withSavedAccount")}</p>
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("newThisPeriod")}</p>

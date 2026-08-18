@@ -447,9 +447,6 @@ export default async function AdminAnalyticsPage({
           .gte("created_at", resolved.previousFrom.toISOString())
           .lt("created_at", resolved.previousTo!.toISOString())
       : null;
-    const prevTotalCustomersQuery = resolved.previousTo
-      ? supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer").lt("created_at", resolved.previousTo.toISOString())
-      : null;
 
     const [
       { count: totalCustomers },
@@ -457,9 +454,8 @@ export default async function AdminAnalyticsPage({
       { data: allTimeOrderCustomerIds },
       { data: periodOrders },
       { count: previousNewThisPeriod },
-      { count: previousTotalCustomers },
     ] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer").lt("created_at", resolved.to.toISOString()),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer"),
       newCustomersQuery,
       supabase.from("orders").select("customer_id").not("customer_id", "is", null),
       (() => {
@@ -473,7 +469,6 @@ export default async function AdminAnalyticsPage({
         return q;
       })(),
       prevNewCustomersQuery ?? Promise.resolve({ count: 0 }),
-      prevTotalCustomersQuery ?? Promise.resolve({ count: 0 }),
     ]);
 
     const customerOrderCounts = new Map<string, number>();
@@ -523,7 +518,6 @@ export default async function AdminAnalyticsPage({
 
     const data: CustomersData = {
       totalCustomers: totalCustomers ?? 0,
-      previousTotalCustomers: previousTotalCustomers ?? 0,
       newThisPeriod: newThisPeriod ?? 0,
       previousNewThisPeriod: previousNewThisPeriod ?? 0,
       repeatRate,
