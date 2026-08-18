@@ -24,15 +24,15 @@ export function ProductCard({
         className,
       )}
     >
-      <div className="relative h-[280px] w-full overflow-hidden rounded-2xl bg-bg-surface-alt">
+      <div className="relative aspect-[340/280] w-full overflow-hidden rounded-2xl bg-bg-surface-alt">
         {cake.primary_image_url && (
           <Image
             src={cake.primary_image_url}
             alt={cake.name[locale]}
             fill
-            sizes="340px"
+            sizes="(max-width: 768px) 45vw, 340px"
             priority={priority}
-            className="object-contain transition-transform duration-300 group-hover:scale-110"
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
           />
         )}
       </div>

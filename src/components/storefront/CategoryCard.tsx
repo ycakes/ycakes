@@ -19,15 +19,15 @@ export function CategoryCard({
       href={`/shop/${category.slug}`}
       className="group flex w-[280px] flex-col items-start gap-3 rounded-3xl bg-bg-surface p-2.5 drop-shadow-[0px_1px_1.5px_rgba(43,30,25,0.08)] transition-shadow hover:drop-shadow-[0px_4px_8px_rgba(43,30,25,0.12)]"
     >
-      <div className="relative h-[280px] w-full overflow-hidden rounded-2xl bg-bg-surface-alt">
+      <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-bg-surface-alt">
         {category.image_url && (
           <Image
             src={category.image_url}
             alt={category.name[locale]}
             fill
-            sizes="280px"
+            sizes="(max-width: 768px) 45vw, 280px"
             priority={priority}
-            className="object-contain transition-transform duration-300 group-hover:scale-110"
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
           />
         )}
       </div>
