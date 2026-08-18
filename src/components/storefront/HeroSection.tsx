@@ -25,12 +25,20 @@ export function HeroSection() {
           logo baked into the photo itself, so it isn't used. */}
       <div className="absolute inset-0 z-0">
         <Image
+          src="/images/hero/herobgphone.jpg"
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 768px) 0px, 100vw"
+          className="object-cover md:hidden"
+        />
+        <Image
           src={locale === "ar" ? "/images/hero/hero-flipped.jpg" : "/images/hero/hero.jpg"}
           alt=""
           fill
           priority
-          sizes="100vw"
-          className="object-cover"
+          sizes="(min-width: 768px) 100vw, 0px"
+          className="hidden object-cover md:block"
         />
       </div>
       <NavBar className="relative z-20" />
