@@ -12,6 +12,7 @@ import type { Color, DeliveryArea, Flavor, Shape, Size, Tier, Topper } from "@/t
 import type { AdminOrderDetail, AdminOrderItemDetail } from "@/types/adminOrderDetail";
 import type { FulfillmentType, OrderStatus } from "@/types/orders";
 import { cn } from "@/lib/utils";
+import { isValidPhone } from "@/lib/validation/phone";
 
 type SizeWithTiers = Size & { tierIds: string[] };
 type CatalogContext = {
@@ -66,6 +67,9 @@ export function OrderDetailContent({
   const [nameDraft, setNameDraft] = useState(order.guest_name ?? customerName);
   const [phoneDraft, setPhoneDraft] = useState(order.contact_phone ?? "");
   const [phoneMethodDraft, setPhoneMethodDraft] = useState(order.contact_phone_method ?? "call");
+  const [phone2Draft, setPhone2Draft] = useState(order.contact_phone_2 ?? "");
+  const [phone2MethodDraft, setPhone2MethodDraft] = useState(order.contact_phone_2_method ?? "call");
+  const [instagramDraft, setInstagramDraft] = useState(order.instagram_username ?? "");
   const [addressDraft, setAddressDraft] = useState(order.delivery_address ?? "");
   const [fulfillmentTypeDraft, setFulfillmentTypeDraft] = useState<FulfillmentType>(order.fulfillment_type);
   const [deliveryAreaIdDraft, setDeliveryAreaIdDraft] = useState(order.delivery_area_id ?? "");
@@ -84,9 +88,18 @@ export function OrderDetailContent({
   const total = finalPriceValue + deliveryFee - order.discount_amount;
 
   async function handleSave() {
-    setSaving(true);
     setError(null);
     setSaved(false);
+    if (phoneDraft.trim() && !isValidPhone(phoneDraft)) {
+      setError(t("invalidPhoneError"));
+      return;
+    }
+    if (phone2Draft.trim() && !isValidPhone(phone2Draft)) {
+      setError(t("invalidPhoneError"));
+      return;
+    }
+
+    setSaving(true);
     const supabase = createClient();
     const { error: updateError } = await supabase
       .from("orders")
@@ -97,6 +110,9 @@ export function OrderDetailContent({
         guest_name: nameDraft.trim() || null,
         contact_phone: phoneDraft.trim() || null,
         contact_phone_method: phoneDraft.trim() ? phoneMethodDraft : null,
+        contact_phone_2: phone2Draft.trim() || null,
+        contact_phone_2_method: phone2Draft.trim() ? phone2MethodDraft : null,
+        instagram_username: instagramDraft.trim() || null,
         delivery_address: addressDraft.trim() || null,
         fulfillment_type: fulfillmentTypeDraft,
         delivery_area_id: fulfillmentTypeDraft === "delivery" ? deliveryAreaIdDraft || null : null,
@@ -309,6 +325,48 @@ export function OrderDetailContent({
                     ))}
                   </SelectContent>
                 </Select>
+              </label>
+
+              <label className="flex flex-col gap-1">
+                <span className="text-[13px] font-medium text-text-primary">{t("phoneNumber2")}</span>
+                <input
+                  value={phone2Draft}
+                  onChange={(e) => setPhone2Draft(e.target.value)}
+                  className="w-full rounded-2xl border-[1.5px] border-border-default bg-bg-surface p-3 text-[15px] text-text-primary focus:outline-none"
+                  dir="ltr"
+                />
+              </label>
+
+              {phone2Draft.trim() && (
+                <label className="flex flex-col gap-1">
+                  <span className="text-[13px] font-medium text-text-primary">{t("phoneMethod")}</span>
+                  <Select
+                    value={phone2MethodDraft}
+                    onValueChange={(v) => setPhone2MethodDraft(v as "call" | "whatsapp" | "both")}
+                    items={(["call", "whatsapp", "both"] as const).map((m) => ({ value: m, label: tCommon(`contactMethod.${m}`) }))}
+                  >
+                    <SelectTrigger className="h-[52px] w-full rounded-2xl bg-bg-surface p-3 text-[15px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="min-w-[var(--anchor-width)] bg-bg-surface" alignItemWithTrigger={false}>
+                      {(["call", "whatsapp", "both"] as const).map((m) => (
+                        <SelectItem key={m} value={m}>
+                          {tCommon(`contactMethod.${m}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </label>
+              )}
+
+              <label className="flex flex-col gap-1">
+                <span className="text-[13px] font-medium text-text-primary">{t("instagramUsername")}</span>
+                <input
+                  value={instagramDraft}
+                  onChange={(e) => setInstagramDraft(e.target.value)}
+                  className="w-full rounded-2xl border-[1.5px] border-border-default bg-bg-surface p-3 text-[15px] text-text-primary focus:outline-none"
+                  dir="ltr"
+                />
               </label>
 
               <label className="flex flex-col gap-1">

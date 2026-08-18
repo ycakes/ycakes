@@ -16,6 +16,7 @@ import {
   type ManualOrderItem,
 } from "@/lib/admin/manualOrder";
 import { useRouter, Link } from "@/i18n/navigation";
+import { isValidPhone } from "@/lib/validation/phone";
 import type {
   Color,
   DeliveryArea,
@@ -130,6 +131,14 @@ export function NewOrderContent({
       (!deliveryAreaId || !address.trim())
     ) {
       setError(t("requiredFieldsError"));
+      return;
+    }
+    if (phone.trim() && !isValidPhone(phone)) {
+      setError(t("invalidPhoneError"));
+      return;
+    }
+    if (phone2.trim() && !isValidPhone(phone2)) {
+      setError(t("invalidPhoneError"));
       return;
     }
 

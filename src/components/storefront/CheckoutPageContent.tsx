@@ -15,6 +15,7 @@ import { useSession } from "@/hooks/useSession";
 import { createClient } from "@/lib/supabase/client";
 import { createOrder } from "@/lib/orders/createOrder";
 import { setLastOrder } from "@/lib/orders/lastOrder";
+import { isValidPhone } from "@/lib/validation/phone";
 import type { DeliveryArea, PromoCode } from "@/types/catalog";
 import type { ContactMethod, SavedAddress, SavedPhone } from "@/types/auth";
 import type { CartItem } from "@/types/cart";
@@ -95,7 +96,9 @@ export function CheckoutPageContent({
   if (!lastName.trim()) fieldErrors.lastName = t("errorRequired");
   if (fulfillmentMethod === "delivery" && !address.trim()) fieldErrors.address = t("errorRequired");
   if (!phone1.trim()) fieldErrors.phone1 = t("errorRequired");
-  const fieldOrder = ["firstName", "lastName", "address", "phone1"];
+  else if (!isValidPhone(phone1)) fieldErrors.phone1 = t("errorInvalidPhone");
+  if (phone2.trim() && !isValidPhone(phone2)) fieldErrors.phone2 = t("errorInvalidPhone");
+  const fieldOrder = ["firstName", "lastName", "address", "phone1", "phone2"];
   const fieldError = (id: string) => (attempted ? fieldErrors[id] : undefined);
 
   function handleUseAddress(saved: SavedAddress) {
@@ -325,7 +328,7 @@ export function CheckoutPageContent({
 
               <div className="flex items-end gap-2">
                 <div className="flex-1">
-                  <InputField label={t("phone2")} type="tel" value={phone2} onChange={setPhone2} />
+                  <InputField id="phone2" label={t("phone2")} type="tel" value={phone2} onChange={setPhone2} error={fieldError("phone2")} />
                 </div>
                 <div className="flex gap-1.5 pb-3">
                   {(["call", "whatsapp", "both"] as const).map((method) => (

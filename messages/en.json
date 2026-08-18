@@ -140,7 +140,8 @@
       "deliveryFee": "Delivery Fee",
       "createOrder": "Create Order",
       "createOrderFailed": "Failed to create the order. Please try again.",
-      "requiredFieldsError": "Please fill in the customer's name and at least one order item with a price."
+      "requiredFieldsError": "Please fill in the customer's name and at least one order item with a price.",
+      "invalidPhoneError": "Enter a valid phone number (11–15 digits, optionally starting with +)."
     },
     "table": {
       "edit": "Edit",
@@ -630,6 +631,7 @@
     "errorPasswordTooShort": "Password must be at least 8 characters.",
     "errorEmailInUse": "An account with this email already exists.",
     "errorRequired": "This field is required.",
+    "errorInvalidPhone": "Enter a valid phone number (11–15 digits, optionally starting with +).",
     "confirmEmailBody": "We've sent a confirmation link to {email}. Click it to finish creating your account.",
     "loggedInAs": "Logged in as {email}",
     "savedAddresses": "Saved Addresses",
