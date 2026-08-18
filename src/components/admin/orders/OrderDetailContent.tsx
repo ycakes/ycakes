@@ -198,6 +198,13 @@ export function OrderDetailContent({
             label={t("phone")}
             value={order.contact_phone ? `${order.contact_phone}${order.contact_phone_method ? ` (${tCommon(`contactMethod.${order.contact_phone_method}`)})` : ""}` : "—"}
           />
+          {order.contact_phone_2 && (
+            <Row
+              label={t("phoneNumber2")}
+              value={`${order.contact_phone_2}${order.contact_phone_2_method ? ` (${tCommon(`contactMethod.${order.contact_phone_2_method}`)})` : ""}`}
+            />
+          )}
+          {order.instagram_username && <Row label={t("instagramUsername")} value={order.instagram_username} />}
           {order.delivery_address && <Row label={t("address")} value={order.delivery_address} />}
 
           <div className="h-px w-full bg-border-default" />

@@ -68,8 +68,11 @@ function itemToPayload(item: ManualOrderItem) {
 
 export type CreateManualOrderInput = {
   guestName: string;
-  contactPhone: string;
+  contactPhone: string | null;
   contactPhoneMethod: ContactMethod;
+  contactPhone2: string | null;
+  contactPhone2Method: ContactMethod;
+  instagramUsername: string | null;
   email: string | null;
   source: "phone" | "instagram" | "in_person";
   fulfillmentType: "pickup" | "delivery";
@@ -87,7 +90,10 @@ export async function createManualOrder(input: CreateManualOrderInput): Promise<
     .rpc("create_manual_order", {
       p_guest_name: input.guestName,
       p_contact_phone: input.contactPhone,
-      p_contact_phone_method: input.contactPhoneMethod,
+      p_contact_phone_method: input.contactPhone ? input.contactPhoneMethod : null,
+      p_contact_phone_2: input.contactPhone2,
+      p_contact_phone_2_method: input.contactPhone2 ? input.contactPhone2Method : null,
+      p_instagram_username: input.instagramUsername,
       p_email: input.email,
       p_source: input.source,
       p_fulfillment_type: input.fulfillmentType,

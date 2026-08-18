@@ -9,7 +9,7 @@ export type CreateOrderInput = {
   contactPhoneMethod: ContactMethod;
   fulfillmentType: "pickup" | "delivery";
   deliveryAreaId: string | null;
-  deliveryAddress: string;
+  deliveryAddress: string | null;
   fulfillmentDate: string;
   promoCodeId: string | null;
   subtotalEstimate: number;

@@ -123,6 +123,9 @@
       "orderSourceHint": "من أي قناة جاء هذا الطلب؟",
       "customerDetails": "بيانات العميل",
       "phoneNumber": "رقم الهاتف",
+      "phoneNumber2": "رقم الهاتف 2",
+      "instagramUsername": "اسم مستخدم إنستجرام",
+      "instagramUsernamePlaceholder": "@username",
       "addressDeliveryHint": "العنوان (لطلبات التوصيل)",
       "orderItems": "عناصر الطلب",
       "addCustomizationDetails": "+ إضافة تفاصيل التخصيص (الحجم، النكهة، اللون، الشكل، النص، صورة مرجعية…)",
@@ -137,7 +140,7 @@
       "deliveryFee": "رسوم التوصيل",
       "createOrder": "إنشاء الطلب",
       "createOrderFailed": "فشل إنشاء الطلب. حاول مرة أخرى.",
-      "requiredFieldsError": "يرجى إدخال اسم العميل ورقم هاتفه وعنصر طلب واحد على الأقل مع السعر."
+      "requiredFieldsError": "يرجى إدخال اسم العميل وعنصر طلب واحد على الأقل مع السعر."
     },
     "table": {
       "edit": "تعديل",
@@ -635,6 +638,7 @@
     "contactDetailsTitle": "تفاصيل التواصل",
     "company": "الشركة (اختياري)",
     "address": "العنوان",
+    "addressOptionalPickupHint": "اختياري لطلبات الاستلام — مطلوب للتوصيل.",
     "apartment": "شقة، دور، إلخ (اختياري)",
     "phone1": "رقم الهاتف 1",
     "phone2": "رقم الهاتف 2 (اختياري)",

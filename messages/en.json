@@ -123,6 +123,9 @@
       "orderSourceHint": "Which channel did this order come in through?",
       "customerDetails": "Customer Details",
       "phoneNumber": "Phone Number",
+      "phoneNumber2": "Phone Number 2",
+      "instagramUsername": "Instagram Username",
+      "instagramUsernamePlaceholder": "@username",
       "addressDeliveryHint": "Address (for delivery orders)",
       "orderItems": "Order Items",
       "addCustomizationDetails": "+ Add customization details (size, flavor, color, shape, text, reference image…)",
@@ -137,7 +140,7 @@
       "deliveryFee": "Delivery Fee",
       "createOrder": "Create Order",
       "createOrderFailed": "Failed to create the order. Please try again.",
-      "requiredFieldsError": "Please fill in the customer's name, phone, and at least one order item with a price."
+      "requiredFieldsError": "Please fill in the customer's name and at least one order item with a price."
     },
     "table": {
       "edit": "Edit",
@@ -635,6 +638,7 @@
     "contactDetailsTitle": "Contact Details",
     "company": "Company (optional)",
     "address": "Address",
+    "addressOptionalPickupHint": "Optional for pickup orders — required for delivery.",
     "apartment": "Apartment, suite, etc. (optional)",
     "phone1": "Phone Number 1",
     "phone2": "Phone Number 2 (optional)",

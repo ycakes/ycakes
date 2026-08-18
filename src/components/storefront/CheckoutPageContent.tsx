@@ -93,7 +93,7 @@ export function CheckoutPageContent({
   const fieldErrors: Record<string, string> = {};
   if (!firstName.trim()) fieldErrors.firstName = t("errorRequired");
   if (!lastName.trim()) fieldErrors.lastName = t("errorRequired");
-  if (!address.trim()) fieldErrors.address = t("errorRequired");
+  if (fulfillmentMethod === "delivery" && !address.trim()) fieldErrors.address = t("errorRequired");
   if (!phone1.trim()) fieldErrors.phone1 = t("errorRequired");
   const fieldOrder = ["firstName", "lastName", "address", "phone1"];
   const fieldError = (id: string) => (attempted ? fieldErrors[id] : undefined);
@@ -215,6 +215,7 @@ export function CheckoutPageContent({
 
     setSubmittingOrder(true);
     const fullAddress = apartment.trim() ? `${address}, ${apartment}` : address;
+    const deliveryAddress = fullAddress.trim() ? fullAddress : null;
     try {
       const { orderNumber } = await createOrder({
         customerId: session?.user.id ?? null,
@@ -223,7 +224,7 @@ export function CheckoutPageContent({
         contactPhoneMethod: phone1Method,
         fulfillmentType: fulfillmentMethod,
         deliveryAreaId: fulfillmentMethod === "delivery" ? deliveryAreaId : null,
-        deliveryAddress: fullAddress,
+        deliveryAddress,
         fulfillmentDate,
         promoCodeId: appliedPromo?.id ?? null,
         subtotalEstimate: subtotal,
@@ -296,7 +297,14 @@ export function CheckoutPageContent({
                 <InputField id="lastName" label={t("lastName")} value={lastName} onChange={setLastName} error={fieldError("lastName")} />
                 <InputField label={t("company")} value={company} onChange={setCompany} />
               </div>
-              <InputField id="address" label={t("address")} value={address} onChange={setAddress} error={fieldError("address")} />
+              <InputField
+                id="address"
+                label={t("address")}
+                value={address}
+                onChange={setAddress}
+                error={fieldError("address")}
+                helperText={fulfillmentMethod === "pickup" ? t("addressOptionalPickupHint") : undefined}
+              />
               <InputField label={t("apartment")} value={apartment} onChange={setApartment} />
 
               <div className="flex items-end gap-2">

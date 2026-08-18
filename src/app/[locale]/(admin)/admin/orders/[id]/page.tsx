@@ -38,7 +38,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
     supabase
       .from("orders")
       .select(
-        "id, order_number, customer_id, guest_name, contact_phone, contact_phone_method, status, fulfillment_type, delivery_area_id, delivery_address, fulfillment_date, notes, subtotal_estimate, delivery_price, discount_amount, final_price, source, created_at, profiles(first_name, last_name), delivery_areas(name)",
+        "id, order_number, customer_id, guest_name, contact_phone, contact_phone_method, contact_phone_2, contact_phone_2_method, instagram_username, status, fulfillment_type, delivery_area_id, delivery_address, fulfillment_date, notes, subtotal_estimate, delivery_price, discount_amount, final_price, source, created_at, profiles(first_name, last_name), delivery_areas(name)",
       )
       .eq("id", id)
       .maybeSingle(),

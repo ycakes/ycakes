@@ -122,10 +122,12 @@ export default function OrderConfirmationPage() {
                 {order.phone} ({tCommon(`contactMethod.${order.phoneMethod}`)})
               </span>
             </div>
-            <div className="flex items-center justify-between text-[15px]">
-              <span className="font-medium text-text-secondary">{t("address")}</span>
-              <span className="font-semibold text-text-primary">{order.address}</span>
-            </div>
+            {order.address && (
+              <div className="flex items-center justify-between text-[15px]">
+                <span className="font-medium text-text-secondary">{t("address")}</span>
+                <span className="font-semibold text-text-primary">{order.address}</span>
+              </div>
+            )}
 
             <div className="h-px w-full bg-border-default" />
             <div className="flex items-center justify-between text-[20px] font-semibold text-text-primary">

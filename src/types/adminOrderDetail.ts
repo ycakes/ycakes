@@ -42,6 +42,9 @@ export type AdminOrderDetail = {
   guest_name: string | null;
   contact_phone: string | null;
   contact_phone_method: "call" | "whatsapp" | "both" | null;
+  contact_phone_2: string | null;
+  contact_phone_2_method: "call" | "whatsapp" | "both" | null;
+  instagram_username: string | null;
   status: OrderStatus;
   fulfillment_type: FulfillmentType;
   delivery_area_id: string | null;
