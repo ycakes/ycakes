@@ -75,7 +75,7 @@ export function NewOrderContent({
   const tCommon = useTranslations("Common");
   const router = useRouter();
 
-  const [source, setSource] = useState<ManualOrderSource>("phone");
+  const [source, setSource] = useState<ManualOrderSource>("instagram");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -235,32 +235,6 @@ export function NewOrderContent({
                 ))}
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <InputField
-                label={t("phoneNumber2")}
-                type="tel"
-                value={phone2}
-                onChange={setPhone2}
-              />
-              <div className="flex gap-1.5">
-                {(["call", "whatsapp", "both"] as const).map((method) => (
-                  <ToggleChip
-                    key={method}
-                    label={tCommon(`contactMethod.${method}`)}
-                    selected={phone2Method === method}
-                    onClick={() => setPhone2Method(method)}
-                  />
-                ))}
-              </div>
-            </div>
-            {source === "instagram" && (
-              <InputField
-                label={t("instagramUsername")}
-                placeholder={t("instagramUsernamePlaceholder")}
-                value={instagramUsername}
-                onChange={setInstagramUsername}
-              />
-            )}
             <InputField
               label={t("addressDeliveryHint")}
               value={address}
