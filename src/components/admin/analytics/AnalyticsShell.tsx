@@ -80,33 +80,35 @@ export function AnalyticsShell({
       </div>
 
       <div className="flex flex-1 flex-col gap-5 bg-bg-surface-alt px-8 py-6">
-        <div className="flex flex-wrap gap-2">
-          {tabs.map((tabItem) => (
-            <Chip key={tabItem.key} href={hrefFor({ tab: tabItem.key })} label={tabItem.label} active={tab === tabItem.key} />
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-text-secondary">{t("periodLabel")}</span>
-          <Chip href={hrefFor({ period: "day", from: null, to: null })} label={t("periodDay")} active={period === "day"} />
-          <Chip href={hrefFor({ period: "week", from: null, to: null })} label={t("periodWeek")} active={period === "week"} />
-          <Chip href={hrefFor({ period: "month", from: null, to: null })} label={t("periodMonth")} active={period === "month"} />
-          <Chip href={hrefFor({ period: "year", from: null, to: null })} label={t("periodYear")} active={period === "year"} />
-          <div className={cn("shrink-0 rounded-full", period === "custom" && "ring-2 ring-brand-primary/40")}>
-            <DateRangeFilterButton
-              locale={locale}
-              label={t("dateRangeLabel")}
-              value={{ from: period === "custom" ? from : null, to: period === "custom" ? to : null }}
-              onChange={(range: DateRange) => {
-                if (range.from && range.to) {
-                  router.push(hrefFor({ period: "custom", from: range.from, to: range.to }));
-                }
-              }}
-            />
+        <div className="flex flex-col gap-3 rounded-3xl border border-border-default bg-bg-surface p-4">
+          <div className="flex flex-wrap gap-2">
+            {tabs.map((tabItem) => (
+              <Chip key={tabItem.key} href={hrefFor({ tab: tabItem.key })} label={tabItem.label} active={tab === tabItem.key} />
+            ))}
           </div>
-          {showAllTimeChip && (
-            <Chip href={hrefFor({ period: "all", from: null, to: null })} label={t("periodAllTime")} active={period === "all"} />
-          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-text-secondary">{t("periodLabel")}</span>
+            <Chip href={hrefFor({ period: "day", from: null, to: null })} label={t("periodDay")} active={period === "day"} />
+            <Chip href={hrefFor({ period: "week", from: null, to: null })} label={t("periodWeek")} active={period === "week"} />
+            <Chip href={hrefFor({ period: "month", from: null, to: null })} label={t("periodMonth")} active={period === "month"} />
+            <Chip href={hrefFor({ period: "year", from: null, to: null })} label={t("periodYear")} active={period === "year"} />
+            <div className={cn("shrink-0 rounded-full", period === "custom" && "ring-2 ring-brand-primary/40")}>
+              <DateRangeFilterButton
+                locale={locale}
+                label={t("dateRangeLabel")}
+                value={{ from: period === "custom" ? from : null, to: period === "custom" ? to : null }}
+                onChange={(range: DateRange) => {
+                  if (range.from && range.to) {
+                    router.push(hrefFor({ period: "custom", from: range.from, to: range.to }));
+                  }
+                }}
+              />
+            </div>
+            {showAllTimeChip && (
+              <Chip href={hrefFor({ period: "all", from: null, to: null })} label={t("periodAllTime")} active={period === "all"} />
+            )}
+          </div>
         </div>
 
         {children}

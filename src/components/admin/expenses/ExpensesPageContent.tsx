@@ -165,7 +165,7 @@ export function ExpensesPageContent({
       </div>
 
       <div className="flex flex-1 flex-col gap-5 bg-bg-surface-alt px-4 py-6 sm:px-8">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-3xl border border-border-default bg-bg-surface p-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-text-secondary">{tExpenses("categoryLabel")}</span>
             <CategoryChip label={t("all")} active={!categoryFilter} onClick={() => setCategoryFilter(null)} />

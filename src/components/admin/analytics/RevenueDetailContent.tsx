@@ -79,7 +79,7 @@ export function RevenueDetailContent({
       <div className="flex flex-1 flex-col gap-4 bg-bg-surface-alt px-4 py-6 sm:px-8">
         <p className="max-w-[900px] text-sm text-text-secondary">{t("revenueDetailDescription", { range: rangeLabel })}</p>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-3xl border border-border-default bg-bg-surface p-4">
           <span className="text-sm text-text-secondary">{t("show")}</span>
           {(["all", "revenue", "expense"] as const).map((key) => (
             <button
@@ -89,7 +89,7 @@ export function RevenueDetailContent({
               className={
                 show === key
                   ? "flex shrink-0 items-center rounded-full bg-brand-primary px-3 py-2 text-sm text-text-on-brand"
-                  : "flex shrink-0 items-center rounded-full border-[1.5px] border-border-default bg-bg-surface px-3 py-2 text-sm text-text-primary"
+                  : "flex shrink-0 items-center rounded-full border-[1.5px] border-border-default bg-bg-surface-alt px-3 py-2 text-sm text-text-primary"
               }
             >
               {t(key === "all" ? "showAll" : key === "revenue" ? "showRevenueOnly" : "showExpensesOnly")}

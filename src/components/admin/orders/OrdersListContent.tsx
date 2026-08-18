@@ -160,45 +160,47 @@ export function OrdersListContent({
         )}
       </div>
 
-      <div className="relative w-full max-w-md">
-        <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
-        <input
-          type="search"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={t("searchPlaceholder")}
-          className="w-full rounded-full border-[1.5px] border-border-default bg-bg-surface py-2.5 ps-9 pe-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none"
-        />
-      </div>
+      <div className="flex flex-col gap-3 rounded-3xl border border-border-default bg-bg-surface p-4">
+        <div className="relative w-full max-w-md">
+          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="w-full rounded-full border-[1.5px] border-border-default bg-bg-surface-alt py-2.5 ps-9 pe-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none"
+          />
+        </div>
 
-      <div className="flex flex-wrap gap-2">
-        <FilterChip href={hrefWith({ status: null })} label={tTable("all")} active={!status} />
-        {STATUSES.map((s) => (
-          <FilterChip key={s} href={hrefWith({ status: s })} label={t(`statusValue.${s}`)} active={status === s} />
-        ))}
-      </div>
+        <div className="flex flex-wrap gap-2">
+          <FilterChip href={hrefWith({ status: null })} label={tTable("all")} active={!status} />
+          {STATUSES.map((s) => (
+            <FilterChip key={s} href={hrefWith({ status: s })} label={t(`statusValue.${s}`)} active={status === s} />
+          ))}
+        </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-text-secondary">{t("sourceLabel")}</span>
-        <FilterChip href={hrefWith({ source: null })} label={tTable("all")} active={!source} />
-        {SOURCES.map((s) => (
-          <FilterChip key={s} href={hrefWith({ source: s })} label={t(`sourceValue.${s}`)} active={source === s} />
-        ))}
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium text-text-secondary">{t("sourceLabel")}</span>
+          <FilterChip href={hrefWith({ source: null })} label={tTable("all")} active={!source} />
+          {SOURCES.map((s) => (
+            <FilterChip key={s} href={hrefWith({ source: s })} label={t(`sourceValue.${s}`)} active={source === s} />
+          ))}
+        </div>
 
-      <div className="flex flex-wrap gap-3">
-        <DateRangeFilterButton
-          locale={locale}
-          label={t("orderDate")}
-          value={orderDateRange}
-          onChange={(range) => pushWith({ orderFrom: range.from, orderTo: range.to })}
-        />
-        <DateRangeFilterButton
-          locale={locale}
-          label={t("deliveryDate")}
-          value={deliveryDateRange}
-          onChange={(range) => pushWith({ deliveryFrom: range.from, deliveryTo: range.to })}
-        />
+        <div className="flex flex-wrap gap-3">
+          <DateRangeFilterButton
+            locale={locale}
+            label={t("orderDate")}
+            value={orderDateRange}
+            onChange={(range) => pushWith({ orderFrom: range.from, orderTo: range.to })}
+          />
+          <DateRangeFilterButton
+            locale={locale}
+            label={t("deliveryDate")}
+            value={deliveryDateRange}
+            onChange={(range) => pushWith({ deliveryFrom: range.from, deliveryTo: range.to })}
+          />
+        </div>
       </div>
 
       <AdminTable

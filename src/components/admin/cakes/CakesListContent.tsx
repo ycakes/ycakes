@@ -170,38 +170,40 @@ export function CakesListContent({
         </div>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <div className="relative w-full max-w-md">
-        <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
-        <input
-          type="search"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={t("searchPlaceholder")}
-          className="w-full rounded-xl border-[1.5px] border-border-default bg-bg-surface py-2.5 ps-9 pe-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none"
-        />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <FilterChip href={search ? `${basePath}?search=${encodeURIComponent(search)}` : basePath} label={t("all")} active={!activeCategory} />
-        {topLevel.map((category) => {
-          const q = new URLSearchParams({ category: category.slug });
-          if (search) q.set("search", search);
-          return (
-            <FilterChip key={category.id} href={`${basePath}?${q.toString()}`} label={category.name.en} active={activeCategory === category.slug} />
-          );
-        })}
-      </div>
-      {activeCategory === "candy-corner" && (
-        <div className="flex flex-wrap gap-2 ps-4">
-          <FilterChip href={`${basePath}?${new URLSearchParams({ category: "candy-corner", ...(search ? { search } : {}) }).toString()}`} label={t("all")} active={!activeSubcategory} />
-          {subcategories.map((sub) => {
-            const q = new URLSearchParams({ category: "candy-corner", subcategory: sub.id });
+      <div className="flex flex-col gap-3 rounded-3xl border border-border-default bg-bg-surface p-4">
+        <div className="relative w-full max-w-md">
+          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="w-full rounded-xl border-[1.5px] border-border-default bg-bg-surface-alt py-2.5 ps-9 pe-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <FilterChip href={search ? `${basePath}?search=${encodeURIComponent(search)}` : basePath} label={t("all")} active={!activeCategory} />
+          {topLevel.map((category) => {
+            const q = new URLSearchParams({ category: category.slug });
             if (search) q.set("search", search);
             return (
-              <FilterChip key={sub.id} href={`${basePath}?${q.toString()}`} label={sub.name.en} active={activeSubcategory === sub.id} />
+              <FilterChip key={category.id} href={`${basePath}?${q.toString()}`} label={category.name.en} active={activeCategory === category.slug} />
             );
           })}
         </div>
-      )}
+        {activeCategory === "candy-corner" && (
+          <div className="flex flex-wrap gap-2 ps-4">
+            <FilterChip href={`${basePath}?${new URLSearchParams({ category: "candy-corner", ...(search ? { search } : {}) }).toString()}`} label={t("all")} active={!activeSubcategory} />
+            {subcategories.map((sub) => {
+              const q = new URLSearchParams({ category: "candy-corner", subcategory: sub.id });
+              if (search) q.set("search", search);
+              return (
+                <FilterChip key={sub.id} href={`${basePath}?${q.toString()}`} label={sub.name.en} active={activeSubcategory === sub.id} />
+              );
+            })}
+          </div>
+        )}
+      </div>
       <AdminTable
         columns={columns}
         rows={rows}
