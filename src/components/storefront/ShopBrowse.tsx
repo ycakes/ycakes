@@ -61,7 +61,7 @@ export function ShopBrowse({
           <h1 className="font-heading text-3xl font-extrabold text-brand-primary md:text-[40px]">
             {pageTitle}
           </h1>
-          <p className="text-[15px] text-text-secondary">{pageSubtitle}</p>
+          <p className="text-base font-medium text-text-secondary">{pageSubtitle}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <FilterChip href="/shop" label={filterAllLabel} active={activeSlug === null} />

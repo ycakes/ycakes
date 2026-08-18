@@ -425,7 +425,7 @@ export function CheckoutPageContent({
                 <span>{t("estimatedTotal")}</span>
                 <span>{total > 0 ? `${total} ${tCommon("egp")}` : tCommon("priceOnRequest")}</span>
               </div>
-              <p className="text-xs text-text-secondary">{t("priceDisclaimer")}</p>
+              <p className="text-sm font-semibold text-brand-primary">{t("priceDisclaimer")}</p>
               {orderError && <p className="text-center text-sm text-red-600">{orderError}</p>}
               <Button
                 variant="brand-primary"

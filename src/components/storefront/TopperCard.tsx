@@ -29,7 +29,7 @@ export function TopperCard({
       <div className="relative size-[70px] shrink-0 overflow-hidden rounded-2xl bg-bg-surface-alt">
         {imageSrc && <Image src={imageSrc} alt="" fill sizes="70px" className="object-contain" />}
       </div>
-      <p className="w-20 text-center text-[11px] text-text-primary">{label}</p>
+      <p className="w-20 text-center text-xs font-medium text-text-primary">{label}</p>
     </button>
   );
 }

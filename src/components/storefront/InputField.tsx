@@ -38,7 +38,7 @@ export function InputField({
 
   return (
     <div id={id} className="flex w-full scroll-mt-28 flex-col gap-1">
-      <label className="text-[13px] font-medium text-text-primary">{label}</label>
+      <label className="text-sm font-semibold text-text-primary">{label}</label>
       {multiline ? (
         <textarea
           value={value}
@@ -72,7 +72,7 @@ export function InputField({
       {error ? (
         <p className="text-xs text-red-600">{error}</p>
       ) : (
-        helperText && <p className="text-xs text-text-secondary">{helperText}</p>
+        helperText && <p className="text-sm font-medium text-text-secondary">{helperText}</p>
       )}
     </div>
   );

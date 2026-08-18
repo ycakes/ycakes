@@ -66,7 +66,7 @@ export default function OrderConfirmationPage() {
 
           <div className="flex flex-col items-center gap-3 rounded-3xl bg-bg-surface p-6 text-center">
             <p className="font-heading text-[22px] font-semibold text-text-primary">{t("whatsNextTitle")}</p>
-            <p className="text-sm text-text-secondary">{t("whatsNextBody")}</p>
+            <p className="text-[15px] font-medium text-text-secondary">{t("whatsNextBody")}</p>
             <a
               href={buildOrderWhatsAppUrl(order.orderNumber)}
               target="_blank"
@@ -88,7 +88,7 @@ export default function OrderConfirmationPage() {
                 </div>
                 <div className="flex flex-1 flex-col gap-1">
                   <p className="font-semibold text-text-primary">{item.name}</p>
-                  <p className="text-xs text-text-secondary">{item.attributesSummary}</p>
+                  <p className="text-sm font-medium text-text-secondary">{item.attributesSummary}</p>
                 </div>
                 <p className="font-semibold text-text-primary">
                   {item.lineEstimate > 0 ? `${item.lineEstimate} ${tCommon("egp")}` : tCommon("priceOnRequest")}
@@ -97,33 +97,33 @@ export default function OrderConfirmationPage() {
             ))}
 
             <div className="h-px w-full bg-border-default" />
-            <p className="text-[13px] font-semibold text-text-secondary">{t("fulfillmentLabel")}</p>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-text-secondary">{t("method")}</span>
+            <p className="text-sm font-bold tracking-wide text-brand-primary">{t("fulfillmentLabel")}</p>
+            <div className="flex items-center justify-between text-[15px]">
+              <span className="font-medium text-text-secondary">{t("method")}</span>
               <span className="font-semibold text-text-primary">
                 {order.fulfillmentMethod === "delivery" ? t("delivery") : t("pickup")}
                 {order.deliveryAreaName ? ` — ${order.deliveryAreaName}` : ""}
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-text-secondary">{t("date")}</span>
+            <div className="flex items-center justify-between text-[15px]">
+              <span className="font-medium text-text-secondary">{t("date")}</span>
               <span className="font-semibold text-text-primary">{order.fulfillmentDate}</span>
             </div>
 
             <div className="h-px w-full bg-border-default" />
-            <p className="text-[13px] font-semibold text-text-secondary">{t("contactLabel")}</p>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-text-secondary">{t("name")}</span>
+            <p className="text-sm font-bold tracking-wide text-brand-primary">{t("contactLabel")}</p>
+            <div className="flex items-center justify-between text-[15px]">
+              <span className="font-medium text-text-secondary">{t("name")}</span>
               <span className="font-semibold text-text-primary">{order.contactName}</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-text-secondary">{t("phone")}</span>
+            <div className="flex items-center justify-between text-[15px]">
+              <span className="font-medium text-text-secondary">{t("phone")}</span>
               <span className="font-semibold text-text-primary">
                 {order.phone} ({tCommon(`contactMethod.${order.phoneMethod}`)})
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-text-secondary">{t("address")}</span>
+            <div className="flex items-center justify-between text-[15px]">
+              <span className="font-medium text-text-secondary">{t("address")}</span>
               <span className="font-semibold text-text-primary">{order.address}</span>
             </div>
 
@@ -132,7 +132,7 @@ export default function OrderConfirmationPage() {
               <span>{t("estimatedTotal")}</span>
               <span>{order.total > 0 ? `${order.total} ${tCommon("egp")}` : tCommon("priceOnRequest")}</span>
             </div>
-            <p className="text-xs text-text-secondary">{t("priceDisclaimer")}</p>
+            <p className="text-sm font-semibold text-brand-primary">{t("priceDisclaimer")}</p>
           </div>
 
           <div className="flex justify-center">

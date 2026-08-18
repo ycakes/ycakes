@@ -34,7 +34,7 @@ export function CategoryCard({
       <div className="flex w-full items-center justify-between px-1 pb-1">
         <div className="flex flex-col gap-0.5">
           <p className="text-[15px] font-semibold text-text-primary">{category.name[locale]}</p>
-          <p className="text-xs text-text-secondary">{subtitle}</p>
+          <p className="text-sm font-medium text-text-secondary">{subtitle}</p>
         </div>
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-secondary">
           <Image

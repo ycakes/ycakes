@@ -659,7 +659,7 @@
     "promoApplied": "\"{code}\" applied — {amount} EGP off",
     "promoInvalid": "That promo code isn't valid.",
     "promoMinOrder": "This code needs a minimum order of {amount} EGP.",
-    "deliveryTBD": "TBD — confirmed on WhatsApp",
+    "deliveryTBD": "TBD — confirmed on WhatsApp or Call",
     "estimatedTotal": "Estimated Total",
     "priceDisclaimer": "Final price is confirmed by our team over WhatsApp or phone before your order is finalized.",
     "placeOrder": "Place Order",

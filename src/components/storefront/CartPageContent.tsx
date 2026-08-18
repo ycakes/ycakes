@@ -100,7 +100,7 @@ export function CartPageContent({
                 <span>{t("estimatedTotal")}</span>
                 <span>{subtotal > 0 ? `${subtotal} ${tCommon("egp")}` : tCommon("priceOnRequest")}</span>
               </div>
-              <p className="text-xs text-text-secondary">{t("priceDisclaimer")}</p>
+              <p className="text-sm font-semibold text-brand-primary">{t("priceDisclaimer")}</p>
               <Button
                 variant="brand-primary"
                 size="xl"

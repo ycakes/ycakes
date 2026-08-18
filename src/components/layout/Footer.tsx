@@ -39,7 +39,7 @@ export function Footer() {
             link.key === "contact" ? (
               <ContactModal
                 key={link.key}
-                className="inline-block w-fit text-start text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
+                className="inline-block w-fit text-start text-[15px] font-medium text-white transition-transform duration-150 hover:scale-105"
               >
                 {t(link.key)}
               </ContactModal>
@@ -47,7 +47,7 @@ export function Footer() {
               <Link
                 key={link.key}
                 href={link.href}
-                className="inline-block w-fit text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
+                className="inline-block w-fit text-[15px] font-medium text-white transition-transform duration-150 hover:scale-105"
               >
                 {t(link.key)}
               </Link>
@@ -61,7 +61,7 @@ export function Footer() {
             href={CONTACT_WHATSAPP_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex w-fit items-center gap-2.5 text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
+            className="flex w-fit items-center gap-2.5 text-[15px] font-medium text-white transition-transform duration-150 hover:scale-105"
           >
             <Image src="/icons/whatsapp.svg" alt="" width={18} height={18} />
             {CONTACT_PHONE_DISPLAY}
@@ -70,7 +70,7 @@ export function Footer() {
             href={CONTACT_INSTAGRAM_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex w-fit items-center gap-2.5 text-sm text-text-on-brand-muted transition-transform duration-150 hover:scale-105"
+            className="flex w-fit items-center gap-2.5 text-[15px] font-medium text-white transition-transform duration-150 hover:scale-105"
           >
             <Image src="/icons/instagram.svg" alt="" width={18} height={18} />
             @ycakes.eg

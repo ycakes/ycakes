@@ -285,10 +285,12 @@ export function CakeCustomizer({
       )}
 
       <div className="flex flex-col gap-2">
-        <p className="text-xl font-semibold text-text-primary">
+        <p className="text-2xl font-bold text-text-primary">
           {unitTotal > 0 ? t("priceFrom", { price: priceLabel }) : priceLabel}
         </p>
-        {cake.description && <p className="text-[15px] text-text-secondary">{cake.description[locale]}</p>}
+        {cake.description && (
+          <p className="text-base font-medium text-text-secondary">{cake.description[locale]}</p>
+        )}
       </div>
 
       {cakeType === "normal" ? (
@@ -364,7 +366,7 @@ export function CakeCustomizer({
               </div>
               {availableTiers.length > 0 && (
                 <>
-                  <label className="flex items-center gap-2 text-sm text-text-primary">
+                  <label className="flex items-center gap-2 text-[15px] font-medium text-text-primary">
                     <input
                       type="checkbox"
                       checked={fiftyFifty}
@@ -430,7 +432,7 @@ export function CakeCustomizer({
         </div>
         {colorIds.length > 1 && (
           <div id="section-colorArrangement" className="flex scroll-mt-28 flex-col gap-2">
-            <p className="text-xs text-text-secondary">{t("multiColorHint")}</p>
+            <p className="text-sm font-medium text-text-secondary">{t("multiColorHint")}</p>
             <InputField
               label={t("colorArrangement")}
               placeholder={t("colorArrangementPlaceholder")}
@@ -517,7 +519,7 @@ export function CakeCustomizer({
                 }
               }}
             />
-            <p className="w-40 text-xs text-text-secondary">
+            <p className="w-40 text-sm font-medium text-text-secondary">
               {referenceImageUploading ? t("uploadingReference") : t("uploadPrompt")}
             </p>
           </label>
@@ -604,7 +606,7 @@ export function CakeCustomizer({
             <Dialog.Title className="font-heading text-xl font-semibold text-brand-primary">
               {t("addedToCartTitle")}
             </Dialog.Title>
-            <p className="mt-1 text-sm text-text-secondary">{t("addedToCartBody")}</p>
+            <p className="mt-1 text-[15px] font-medium text-text-secondary">{t("addedToCartBody")}</p>
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 render={<Link href="/cart" />}
@@ -642,8 +644,8 @@ function Section({
   return (
     <div id={id} className="flex w-full scroll-mt-28 flex-col gap-2.5">
       <div className="flex items-center gap-2">
-        <p className="text-[15px] font-semibold text-text-primary">{label}</p>
-        {hint && <p className="text-xs text-text-secondary">{hint}</p>}
+        <p className="text-base font-bold text-text-primary sm:text-lg">{label}</p>
+        {hint && <p className="text-sm font-medium text-text-secondary">{hint}</p>}
       </div>
       {children}
       {error && <p className="text-xs text-red-600">{error}</p>}
