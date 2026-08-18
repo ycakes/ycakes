@@ -112,6 +112,8 @@ export default async function AdminAnalyticsPage({
       prevExpenses,
       pendingRevenue,
       confirmedRevenue,
+      prevPendingRevenue,
+      prevConfirmedRevenue,
     ] = await Promise.all([
       sumFinalPrice(supabase, resolved.from, resolved.to),
       sumExpenses(supabase, resolved.from, resolved.to),
@@ -119,6 +121,12 @@ export default async function AdminAnalyticsPage({
       resolved.previousFrom ? sumExpenses(supabase, resolved.previousFrom, resolved.previousTo!) : Promise.resolve(0),
       sumOrderValueByStatus(supabase, "pending", resolved.from, resolved.to),
       sumOrderValueByStatus(supabase, "confirmed", resolved.from, resolved.to),
+      resolved.previousFrom
+        ? sumOrderValueByStatus(supabase, "pending", resolved.previousFrom, resolved.previousTo!)
+        : Promise.resolve({ total: 0, count: 0 }),
+      resolved.previousFrom
+        ? sumOrderValueByStatus(supabase, "confirmed", resolved.previousFrom, resolved.previousTo!)
+        : Promise.resolve({ total: 0, count: 0 }),
     ]);
 
     const sixMonthsAgo = new Date();
@@ -173,8 +181,10 @@ export default async function AdminAnalyticsPage({
       completedOrdersCount,
       pendingRevenue: pendingRevenue.total,
       pendingOrdersCount: pendingRevenue.count,
+      previousPendingRevenue: prevPendingRevenue.total,
       confirmedRevenue: confirmedRevenue.total,
       confirmedOrdersCount: confirmedRevenue.count,
+      previousConfirmedRevenue: prevConfirmedRevenue.total,
       last6Months: monthBuckets.map(({ label, amount }) => ({ label, amount })),
       expensesByCategory,
       trendLabelKey: resolved.trendLabelKey,
@@ -193,7 +203,18 @@ export default async function AdminAnalyticsPage({
       )
       .lt("created_at", resolved.to.toISOString());
     if (resolved.from) ordersQuery = ordersQuery.gte("created_at", resolved.from.toISOString());
-    const { data: periodOrders } = await ordersQuery;
+
+    let prevOrdersQuery = resolved.previousFrom
+      ? supabase.from("orders").select("status").lt("created_at", resolved.previousTo!.toISOString()).gte("created_at", resolved.previousFrom.toISOString())
+      : null;
+
+    const [{ data: periodOrders }, prevResult] = await Promise.all([
+      ordersQuery,
+      prevOrdersQuery ?? Promise.resolve({ data: [] as { status: string }[] }),
+    ]);
+    const prevRows = (prevResult.data ?? []) as { status: string }[];
+    const previousTotalOrders = prevRows.length;
+    const previousCancelledOrders = prevRows.filter((r) => r.status === "cancelled").length;
 
     const rows = (periodOrders ?? []) as unknown as {
       id: string;
@@ -248,13 +269,16 @@ export default async function AdminAnalyticsPage({
 
     const data: OrdersFulfillmentData = {
       totalOrders,
+      previousTotalOrders,
       pendingOrders,
       cancelledOrders,
+      previousCancelledOrders,
       deliveryOrders,
       pickupOrders,
       sourceBreakdown,
       areaBreakdown,
       cancelledRows,
+      trendLabelKey: resolved.trendLabelKey,
       period,
       orderFrom: resolved.from ? toISODate(resolved.from) : toISODate(new Date(0)),
       orderTo: toISODate(new Date(resolved.to.getTime() - 86400000)),
@@ -415,8 +439,27 @@ export default async function AdminAnalyticsPage({
       .lt("created_at", resolved.to.toISOString());
     if (resolved.from) newCustomersQuery = newCustomersQuery.gte("created_at", resolved.from.toISOString());
 
-    const [{ count: totalCustomers }, { count: newThisPeriod }, { data: allTimeOrderCustomerIds }, { data: periodOrders }] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer"),
+    const prevNewCustomersQuery = resolved.previousFrom
+      ? supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "customer")
+          .gte("created_at", resolved.previousFrom.toISOString())
+          .lt("created_at", resolved.previousTo!.toISOString())
+      : null;
+    const prevTotalCustomersQuery = resolved.previousTo
+      ? supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer").lt("created_at", resolved.previousTo.toISOString())
+      : null;
+
+    const [
+      { count: totalCustomers },
+      { count: newThisPeriod },
+      { data: allTimeOrderCustomerIds },
+      { data: periodOrders },
+      { count: previousNewThisPeriod },
+      { count: previousTotalCustomers },
+    ] = await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "customer").lt("created_at", resolved.to.toISOString()),
       newCustomersQuery,
       supabase.from("orders").select("customer_id").not("customer_id", "is", null),
       (() => {
@@ -429,6 +472,8 @@ export default async function AdminAnalyticsPage({
         if (resolved.from) q = q.gte("created_at", resolved.from.toISOString());
         return q;
       })(),
+      prevNewCustomersQuery ?? Promise.resolve({ count: 0 }),
+      prevTotalCustomersQuery ?? Promise.resolve({ count: 0 }),
     ]);
 
     const customerOrderCounts = new Map<string, number>();
@@ -478,10 +523,13 @@ export default async function AdminAnalyticsPage({
 
     const data: CustomersData = {
       totalCustomers: totalCustomers ?? 0,
+      previousTotalCustomers: previousTotalCustomers ?? 0,
       newThisPeriod: newThisPeriod ?? 0,
+      previousNewThisPeriod: previousNewThisPeriod ?? 0,
       repeatRate,
       guestOrders,
       accountOrders,
+      trendLabelKey: resolved.trendLabelKey,
       topCustomers,
       period,
       from: customFrom,

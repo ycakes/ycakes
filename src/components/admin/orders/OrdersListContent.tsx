@@ -10,12 +10,13 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { DateRangeFilterButton, type DateRange } from "@/components/admin/orders/DateRangeFilterButton";
 import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
-import type { AdminOrderListRow, OrderSource, OrderStatus } from "@/types/orders";
+import type { AdminOrderListRow, FulfillmentType, OrderSource, OrderStatus } from "@/types/orders";
 
 const PICKUP_LOCATION = { en: "New Cairo", ar: "التجمع الخامس" };
 const BASE_PATH = "/admin/orders";
 const STATUSES: OrderStatus[] = ["pending", "confirmed", "completed", "cancelled"];
 const SOURCES: OrderSource[] = ["website", "phone", "instagram", "in_person"];
+const FULFILLMENT_TYPES: FulfillmentType[] = ["delivery", "pickup"];
 
 export function OrdersListContent({
   orders,
@@ -23,6 +24,7 @@ export function OrdersListContent({
   role,
   status,
   source,
+  fulfillmentType,
   search,
   orderDateRange,
   deliveryDateRange,
@@ -36,6 +38,7 @@ export function OrdersListContent({
   role: "admin" | "accountant";
   status: string | null;
   source: string | null;
+  fulfillmentType: string | null;
   search: string;
   orderDateRange: DateRange;
   deliveryDateRange: DateRange;
@@ -55,6 +58,7 @@ export function OrdersListContent({
   const baseParams: Record<string, string> = {};
   if (status) baseParams.status = status;
   if (source) baseParams.source = source;
+  if (fulfillmentType) baseParams.fulfillmentType = fulfillmentType;
   if (search) baseParams.search = search;
   if (orderDateRange.from) baseParams.orderFrom = orderDateRange.from;
   if (orderDateRange.to) baseParams.orderTo = orderDateRange.to;
@@ -184,6 +188,14 @@ export function OrdersListContent({
           <FilterChip href={hrefWith({ source: null })} label={tTable("all")} active={!source} />
           {SOURCES.map((s) => (
             <FilterChip key={s} href={hrefWith({ source: s })} label={t(`sourceValue.${s}`)} active={source === s} />
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium text-text-secondary">{t("fulfillmentTypeLabel")}</span>
+          <FilterChip href={hrefWith({ fulfillmentType: null })} label={tTable("all")} active={!fulfillmentType} />
+          {FULFILLMENT_TYPES.map((ft) => (
+            <FilterChip key={ft} href={hrefWith({ fulfillmentType: ft })} label={t(ft)} active={fulfillmentType === ft} />
           ))}
         </div>
 

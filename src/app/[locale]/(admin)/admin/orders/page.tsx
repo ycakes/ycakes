@@ -64,6 +64,7 @@ export default async function AdminOrdersPage({
   searchParams: Promise<{
     status?: string;
     source?: string;
+    fulfillmentType?: string;
     search?: string;
     orderFrom?: string;
     orderTo?: string;
@@ -76,7 +77,7 @@ export default async function AdminOrdersPage({
 }) {
   const { locale } = await params;
   const profile = await requireStaff(locale);
-  const { status, source, search, orderFrom, orderTo, deliveryFrom, deliveryTo, sort, dir, page } = await searchParams;
+  const { status, source, fulfillmentType, search, orderFrom, orderTo, deliveryFrom, deliveryTo, sort, dir, page } = await searchParams;
   const supabase = await createClient();
 
   let query = supabase
@@ -87,6 +88,7 @@ export default async function AdminOrdersPage({
 
   if (status) query = query.eq("status", status);
   if (source) query = query.eq("source", source);
+  if (fulfillmentType) query = query.eq("fulfillment_type", fulfillmentType);
   if (orderFrom) query = query.gte("created_at", cairoWallTimeToUtcISOString(orderFrom, "00:00:00"));
   if (orderTo) query = query.lte("created_at", cairoWallTimeToUtcISOString(orderTo, "23:59:59.999"));
   if (deliveryFrom) query = query.gte("fulfillment_date", deliveryFrom);
@@ -126,6 +128,7 @@ export default async function AdminOrdersPage({
       role={profile.role}
       status={status ?? null}
       source={source ?? null}
+      fulfillmentType={fulfillmentType ?? null}
       search={search ?? ""}
       orderDateRange={{ from: orderFrom ?? null, to: orderTo ?? null }}
       deliveryDateRange={{ from: deliveryFrom ?? null, to: deliveryTo ?? null }}

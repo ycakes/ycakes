@@ -16,8 +16,10 @@ export type RevenueProfitData = {
   completedOrdersCount: number;
   pendingRevenue: number;
   pendingOrdersCount: number;
+  previousPendingRevenue: number;
   confirmedRevenue: number;
   confirmedOrdersCount: number;
+  previousConfirmedRevenue: number;
   last6Months: { label: string; amount: number }[];
   expensesByCategory: { name: Bilingual; amount: number }[];
   trendLabelKey: "vsYesterday" | "vsLastWeek" | "vsLastMonth" | "vsLastYear" | "vsPreviousPeriod";
@@ -71,16 +73,27 @@ export function RevenueProfitTab({ data, locale }: { data: RevenueProfitData; lo
   const margin = data.totalRevenue > 0 ? Math.round((netProfit / data.totalRevenue) * 1000) / 10 : 0;
   const aov = data.completedOrdersCount > 0 ? Math.round(data.totalRevenue / data.completedOrdersCount) : 0;
 
+  const isAllTime = data.period === "all";
   const revenuePct = trendPercent(data.totalRevenue, data.previousRevenue);
   const expensesPct = trendPercent(data.totalExpenses, data.previousExpenses);
+  const pendingPct = trendPercent(data.pendingRevenue, data.previousPendingRevenue);
+  const confirmedPct = trendPercent(data.confirmedRevenue, data.previousConfirmedRevenue);
 
   const totalExpectedRevenue = data.totalRevenue + data.confirmedRevenue + data.pendingRevenue;
+  const previousTotalExpectedRevenue = data.previousRevenue + data.previousConfirmedRevenue + data.previousPendingRevenue;
+  const expectedRevenuePct = trendPercent(totalExpectedRevenue, previousTotalExpectedRevenue);
   const expectedNetProfit = totalExpectedRevenue - data.totalExpenses;
   const expectedMargin = totalExpectedRevenue > 0 ? Math.round((expectedNetProfit / totalExpectedRevenue) * 1000) / 10 : 0;
 
   function trendText(pct: number | null) {
     if (pct === null) return t("noPreviousData");
     return t(data.trendLabelKey, { sign: pct >= 0 ? "+" : "", pct });
+  }
+
+  function trendColorClass(pct: number | null, higherIsGood: boolean) {
+    if (pct === null) return "text-text-secondary";
+    const isGood = higherIsGood ? pct >= 0 : pct <= 0;
+    return isGood ? "text-status-completed" : "text-destructive";
   }
 
   const maxCategoryAmount = Math.max(1, ...data.expensesByCategory.map((r) => r.amount));
@@ -101,25 +114,25 @@ export function RevenueProfitTab({ data, locale }: { data: RevenueProfitData; lo
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {data.totalRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
-          <p className={`text-[13px] font-medium ${revenuePct === null ? "text-text-secondary" : revenuePct >= 0 ? "text-status-completed" : "text-destructive"}`}>
-            {trendText(revenuePct)}
-          </p>
+          {!isAllTime && <p className={`text-[13px] font-medium ${trendColorClass(revenuePct, true)}`}>{trendText(revenuePct)}</p>}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalExpenses")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {data.totalExpenses.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
-          <p className={`text-[13px] font-medium ${expensesPct === null ? "text-text-secondary" : expensesPct <= 0 ? "text-status-completed" : "text-destructive"}`}>
-            {trendText(expensesPct)}
-          </p>
+          {!isAllTime && <p className={`text-[13px] font-medium ${trendColorClass(expensesPct, false)}`}>{trendText(expensesPct)}</p>}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("netProfit")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {netProfit.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
-          <p className="text-[13px] font-medium text-status-completed">{t("marginLabel", { pct: margin })}</p>
+          {!isAllTime && (
+            <p className={`text-[13px] font-medium ${netProfit >= 0 ? "text-status-completed" : "text-destructive"}`}>
+              {t("marginLabel", { pct: margin })}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("avgOrderValue")}</p>
@@ -138,32 +151,32 @@ export function RevenueProfitTab({ data, locale }: { data: RevenueProfitData; lo
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {data.pendingRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
-          <p className="text-[13px] font-medium text-text-secondary">
-            {t("ordersInPeriod", { count: data.pendingOrdersCount, periodWord: t(periodWordKey(data.period)) })}
-          </p>
+          {!isAllTime && <p className={`text-[13px] font-medium ${trendColorClass(pendingPct, true)}`}>{trendText(pendingPct)}</p>}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("confirmedRevenue")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {data.confirmedRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
-          <p className="text-[13px] font-medium text-text-secondary">
-            {t("ordersInPeriod", { count: data.confirmedOrdersCount, periodWord: t(periodWordKey(data.period)) })}
-          </p>
+          {!isAllTime && <p className={`text-[13px] font-medium ${trendColorClass(confirmedPct, true)}`}>{trendText(confirmedPct)}</p>}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("expectedNetProfit")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {expectedNetProfit.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
-          <p className="text-[13px] font-medium text-text-secondary">{t("marginLabel", { pct: expectedMargin })}</p>
+          {!isAllTime && (
+            <p className={`text-[13px] font-medium ${expectedNetProfit >= 0 ? "text-status-completed" : "text-destructive"}`}>
+              {t("marginLabel", { pct: expectedMargin })}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalExpectedRevenue")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {totalExpectedRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
-          <p className="text-[13px] font-medium text-text-secondary">{t("expectedRevenueHint")}</p>
+          {!isAllTime && <p className={`text-[13px] font-medium ${trendColorClass(expectedRevenuePct, true)}`}>{trendText(expectedRevenuePct)}</p>}
         </div>
       </div>
 

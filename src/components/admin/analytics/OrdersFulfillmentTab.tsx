@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { downloadExcel } from "@/lib/admin/exportExcel";
-import { periodWordKey, type AnalyticsPeriod } from "@/lib/admin/analyticsPeriod";
+import { periodWordKey, trendPercent, type AnalyticsPeriod } from "@/lib/admin/analyticsPeriod";
 import type { Bilingual } from "@/types/catalog";
 import type { OrderSource } from "@/types/orders";
 
@@ -18,13 +18,16 @@ export type CancelledOrderRow = {
 
 export type OrdersFulfillmentData = {
   totalOrders: number;
+  previousTotalOrders: number;
   pendingOrders: number;
   cancelledOrders: number;
+  previousCancelledOrders: number;
   deliveryOrders: number;
   pickupOrders: number;
   sourceBreakdown: { source: OrderSource; count: number }[];
   areaBreakdown: { name: Bilingual; count: number }[];
   cancelledRows: CancelledOrderRow[];
+  trendLabelKey: "vsYesterday" | "vsLastWeek" | "vsLastMonth" | "vsLastYear" | "vsPreviousPeriod";
   period: AnalyticsPeriod;
   orderFrom: string;
   orderTo: string;
@@ -90,9 +93,20 @@ export function OrdersFulfillmentTab({ data, locale }: { data: OrdersFulfillment
   const tCommon = useTranslations("Common");
   const tDashboard = useTranslations("Admin.dashboard");
 
+  const isAllTime = data.period === "all";
   const cancellationRate = data.totalOrders > 0 ? Math.round((data.cancelledOrders / data.totalOrders) * 1000) / 10 : 0;
+  const previousCancellationRate =
+    data.previousTotalOrders > 0 ? Math.round((data.previousCancelledOrders / data.previousTotalOrders) * 1000) / 10 : 0;
+  const cancellationRatePointDiff = Math.round((cancellationRate - previousCancellationRate) * 10) / 10;
   const deliveryPct = data.totalOrders > 0 ? Math.round((data.deliveryOrders / data.totalOrders) * 100) : 0;
   const pickupPct = data.totalOrders > 0 ? Math.round((data.pickupOrders / data.totalOrders) * 100) : 0;
+
+  const totalOrdersPct = trendPercent(data.totalOrders, data.previousTotalOrders);
+
+  function trendText(pct: number | null) {
+    if (pct === null) return t("noPreviousData");
+    return t(data.trendLabelKey, { sign: pct >= 0 ? "+" : "", pct });
+  }
 
   const ordersListHref = `/admin/orders?orderFrom=${data.orderFrom}&orderTo=${data.orderTo}`;
   const cancelledListHref = `${ordersListHref}&status=cancelled`;
@@ -109,7 +123,13 @@ export function OrdersFulfillmentTab({ data, locale }: { data: OrdersFulfillment
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalOrders")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary">{data.totalOrders}</p>
-          <p className="text-[13px] font-medium text-text-secondary">{t(periodWordKey(data.period))}</p>
+          {isAllTime ? (
+            <p className="text-[13px] font-medium text-text-secondary">{t(periodWordKey(data.period))}</p>
+          ) : (
+            <p className={`text-[13px] font-medium ${totalOrdersPct === null ? "text-text-secondary" : totalOrdersPct >= 0 ? "text-status-completed" : "text-destructive"}`}>
+              {trendText(totalOrdersPct)}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{tDashboard("pendingOrders")}</p>
@@ -120,6 +140,11 @@ export function OrdersFulfillmentTab({ data, locale }: { data: OrdersFulfillment
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("cancelledOrders")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary">{data.cancelledOrders}</p>
           <p className="text-[13px] font-medium text-destructive">{t("cancellationRate", { pct: cancellationRate })}</p>
+          {!isAllTime && (
+            <p className={`text-[13px] font-medium ${cancellationRatePointDiff <= 0 ? "text-status-completed" : "text-destructive"}`}>
+              {t(data.trendLabelKey, { sign: cancellationRatePointDiff >= 0 ? "+" : "", pct: cancellationRatePointDiff })}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("deliveryOrders")}</p>

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { downloadExcel } from "@/lib/admin/exportExcel";
-import { periodWordKey, type AnalyticsPeriod } from "@/lib/admin/analyticsPeriod";
+import { periodWordKey, trendPercent, type AnalyticsPeriod } from "@/lib/admin/analyticsPeriod";
 
 export type TopCustomerRow = {
   key: string;
@@ -17,11 +17,14 @@ export type TopCustomerRow = {
 
 export type CustomersData = {
   totalCustomers: number;
+  previousTotalCustomers: number;
   newThisPeriod: number;
+  previousNewThisPeriod: number;
   repeatRate: number;
   guestOrders: number;
   accountOrders: number;
   topCustomers: TopCustomerRow[];
+  trendLabelKey: "vsYesterday" | "vsLastWeek" | "vsLastMonth" | "vsLastYear" | "vsPreviousPeriod";
   period: AnalyticsPeriod;
   from: string | null;
   to: string | null;
@@ -66,6 +69,15 @@ export function CustomersTab({ data, locale }: { data: CustomersData; locale: "e
   const accountPct = totalOrders > 0 ? Math.round((data.accountOrders / totalOrders) * 100) : 0;
   const maxOrders = Math.max(1, data.guestOrders, data.accountOrders);
 
+  const isAllTime = data.period === "all";
+  const totalCustomersPct = trendPercent(data.totalCustomers, data.previousTotalCustomers);
+  const newThisPeriodPct = trendPercent(data.newThisPeriod, data.previousNewThisPeriod);
+
+  function trendText(pct: number | null) {
+    if (pct === null) return t("noPreviousData");
+    return t(data.trendLabelKey, { sign: pct >= 0 ? "+" : "", pct });
+  }
+
   return (
     <>
       <div>
@@ -88,14 +100,24 @@ export function CustomersTab({ data, locale }: { data: CustomersData; locale: "e
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalCustomers")}</p>
           <p className="font-heading text-[30px] font-bold text-text-primary">{data.totalCustomers}</p>
-          <p className="text-[13px] font-medium text-text-secondary">{t("withSavedAccount")}</p>
+          {isAllTime ? (
+            <p className="text-[13px] font-medium text-text-secondary">{t("withSavedAccount")}</p>
+          ) : (
+            <p className={`text-[13px] font-medium ${totalCustomersPct === null ? "text-text-secondary" : totalCustomersPct >= 0 ? "text-status-completed" : "text-destructive"}`}>
+              {trendText(totalCustomersPct)}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("newThisPeriod")}</p>
           <p className="font-heading text-[30px] font-bold text-text-primary">{data.newThisPeriod}</p>
-          <p className="text-[13px] font-medium text-text-secondary">
-            {data.period === "all" ? t("signedUpAllTime") : t("signedUpInPeriod")}
-          </p>
+          {isAllTime ? (
+            <p className="text-[13px] font-medium text-text-secondary">{t("signedUpAllTime")}</p>
+          ) : (
+            <p className={`text-[13px] font-medium ${newThisPeriodPct === null ? "text-text-secondary" : newThisPeriodPct >= 0 ? "text-status-completed" : "text-destructive"}`}>
+              {trendText(newThisPeriodPct)}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
           <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("repeatRate")}</p>
