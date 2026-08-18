@@ -14,6 +14,10 @@ export type RevenueProfitData = {
   previousRevenue: number;
   previousExpenses: number;
   completedOrdersCount: number;
+  pendingRevenue: number;
+  pendingOrdersCount: number;
+  confirmedRevenue: number;
+  confirmedOrdersCount: number;
   last6Months: { label: string; amount: number }[];
   expensesByCategory: { name: Bilingual; amount: number }[];
   trendLabelKey: "vsYesterday" | "vsLastWeek" | "vsLastMonth" | "vsLastYear" | "vsPreviousPeriod";
@@ -26,6 +30,7 @@ export function RevenueProfitExportButton({ data }: { data: RevenueProfitData })
   const t = useTranslations("Admin.analytics");
 
   async function handleExport() {
+    const totalExpectedRevenue = data.totalRevenue + data.confirmedRevenue + data.pendingRevenue;
     await downloadExcel(
       "revenue-profit.xlsx",
       "Revenue & Profit",
@@ -34,7 +39,7 @@ export function RevenueProfitExportButton({ data }: { data: RevenueProfitData })
         { header: "Value", key: "value", width: 20 },
       ],
       [
-        { metric: "Total Revenue (EGP)", value: data.totalRevenue },
+        { metric: "Total Completed Revenue (EGP)", value: data.totalRevenue },
         { metric: "Total Expenses (EGP)", value: data.totalExpenses },
         { metric: "Net Profit (EGP)", value: data.totalRevenue - data.totalExpenses },
         { metric: "Completed Orders", value: data.completedOrdersCount },
@@ -42,6 +47,12 @@ export function RevenueProfitExportButton({ data }: { data: RevenueProfitData })
           metric: "Avg. Order Value (EGP)",
           value: data.completedOrdersCount > 0 ? Math.round(data.totalRevenue / data.completedOrdersCount) : 0,
         },
+        { metric: "Pending Orders Revenue (EGP)", value: data.pendingRevenue },
+        { metric: "Pending Orders", value: data.pendingOrdersCount },
+        { metric: "Confirmed Orders Revenue (EGP)", value: data.confirmedRevenue },
+        { metric: "Confirmed Orders", value: data.confirmedOrdersCount },
+        { metric: "Total Expected Revenue (EGP)", value: totalExpectedRevenue },
+        { metric: "Expected Net Profit (EGP)", value: totalExpectedRevenue - data.totalExpenses },
         ...data.expensesByCategory.map((row) => ({ metric: `Expenses — ${row.name.en}`, value: row.amount })),
       ],
     );
@@ -63,6 +74,10 @@ export function RevenueProfitTab({ data, locale }: { data: RevenueProfitData; lo
   const revenuePct = trendPercent(data.totalRevenue, data.previousRevenue);
   const expensesPct = trendPercent(data.totalExpenses, data.previousExpenses);
 
+  const totalExpectedRevenue = data.totalRevenue + data.confirmedRevenue + data.pendingRevenue;
+  const expectedNetProfit = totalExpectedRevenue - data.totalExpenses;
+  const expectedMargin = totalExpectedRevenue > 0 ? Math.round((expectedNetProfit / totalExpectedRevenue) * 1000) / 10 : 0;
+
   function trendText(pct: number | null) {
     if (pct === null) return t("noPreviousData");
     return t(data.trendLabelKey, { sign: pct >= 0 ? "+" : "", pct });
@@ -82,7 +97,7 @@ export function RevenueProfitTab({ data, locale }: { data: RevenueProfitData; lo
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
-          <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalRevenue")}</p>
+          <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalCompletedRevenue")}</p>
           <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
             {data.totalRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
           </p>
@@ -114,6 +129,41 @@ export function RevenueProfitTab({ data, locale }: { data: RevenueProfitData; lo
           <p className="text-[13px] font-medium text-text-secondary">
             {t("ordersInPeriod", { count: data.completedOrdersCount, periodWord: t(periodWordKey(data.period)) })}
           </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
+          <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("pendingRevenue")}</p>
+          <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
+            {data.pendingRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
+          </p>
+          <p className="text-[13px] font-medium text-text-secondary">
+            {t("ordersInPeriod", { count: data.pendingOrdersCount, periodWord: t(periodWordKey(data.period)) })}
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
+          <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("confirmedRevenue")}</p>
+          <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
+            {data.confirmedRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
+          </p>
+          <p className="text-[13px] font-medium text-text-secondary">
+            {t("ordersInPeriod", { count: data.confirmedOrdersCount, periodWord: t(periodWordKey(data.period)) })}
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
+          <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("expectedNetProfit")}</p>
+          <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
+            {expectedNetProfit.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
+          </p>
+          <p className="text-[13px] font-medium text-text-secondary">{t("marginLabel", { pct: expectedMargin })}</p>
+        </div>
+        <div className="flex flex-col gap-2 rounded-[24px] bg-bg-surface p-6">
+          <p className="text-[12px] font-semibold tracking-[0.48px] text-text-secondary uppercase">{t("totalExpectedRevenue")}</p>
+          <p className="font-heading text-[32px] font-bold text-text-primary" dir="ltr">
+            {totalExpectedRevenue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")} EGP
+          </p>
+          <p className="text-[13px] font-medium text-text-secondary">{t("expectedRevenueHint")}</p>
         </div>
       </div>
 

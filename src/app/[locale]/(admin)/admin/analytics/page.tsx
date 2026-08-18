@@ -42,6 +42,35 @@ async function sumFinalPrice(
   return { total: rows.reduce((sum, r) => sum + (r.final_price ?? 0), 0), count: rows.length };
 }
 
+/** Pending/confirmed orders often don't have final_price set yet (the admin
+ * hasn't priced/confirmed them over WhatsApp/phone) — same subtotal +
+ * delivery - discount fallback already used for a completed order's spend
+ * elsewhere on this page (see the Customers aggregate below). */
+async function sumOrderValueByStatus(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  status: "pending" | "confirmed",
+  from: Date | null,
+  to: Date,
+): Promise<{ total: number; count: number }> {
+  let query = supabase
+    .from("orders")
+    .select("final_price, subtotal_estimate, delivery_price, discount_amount")
+    .eq("status", status)
+    .lt("created_at", to.toISOString());
+  if (from) query = query.gte("created_at", from.toISOString());
+  const { data } = await query;
+  const rows = (data ?? []) as {
+    final_price: number | null;
+    subtotal_estimate: number;
+    delivery_price: number;
+    discount_amount: number;
+  }[];
+  return {
+    total: rows.reduce((sum, r) => sum + (r.final_price ?? r.subtotal_estimate + r.delivery_price - r.discount_amount), 0),
+    count: rows.length,
+  };
+}
+
 async function sumExpenses(
   supabase: Awaited<ReturnType<typeof createClient>>,
   from: Date | null,
@@ -76,11 +105,20 @@ export default async function AdminAnalyticsPage({
   let tabContent: React.ReactNode = null;
 
   if (tab === "revenue") {
-    const [{ total: totalRevenue, count: completedOrdersCount }, totalExpenses, prevRevenue, prevExpenses] = await Promise.all([
+    const [
+      { total: totalRevenue, count: completedOrdersCount },
+      totalExpenses,
+      prevRevenue,
+      prevExpenses,
+      pendingRevenue,
+      confirmedRevenue,
+    ] = await Promise.all([
       sumFinalPrice(supabase, resolved.from, resolved.to),
       sumExpenses(supabase, resolved.from, resolved.to),
       resolved.previousFrom ? sumFinalPrice(supabase, resolved.previousFrom, resolved.previousTo!) : Promise.resolve({ total: 0, count: 0 }),
       resolved.previousFrom ? sumExpenses(supabase, resolved.previousFrom, resolved.previousTo!) : Promise.resolve(0),
+      sumOrderValueByStatus(supabase, "pending", resolved.from, resolved.to),
+      sumOrderValueByStatus(supabase, "confirmed", resolved.from, resolved.to),
     ]);
 
     const sixMonthsAgo = new Date();
@@ -133,6 +171,10 @@ export default async function AdminAnalyticsPage({
       previousRevenue: prevRevenue.total,
       previousExpenses: prevExpenses,
       completedOrdersCount,
+      pendingRevenue: pendingRevenue.total,
+      pendingOrdersCount: pendingRevenue.count,
+      confirmedRevenue: confirmedRevenue.total,
+      confirmedOrdersCount: confirmedRevenue.count,
       last6Months: monthBuckets.map(({ label, amount }) => ({ label, amount })),
       expensesByCategory,
       trendLabelKey: resolved.trendLabelKey,
